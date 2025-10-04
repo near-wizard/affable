@@ -44,8 +44,8 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
       id: "oss",
       label: "OSS",
       items: [
-        { label: "GitHub Repo", action: "repo" },
-        { label: "Roadmap", action: "roadmap" },
+        { label: "GitHub Repo", url: "https://github.com/near-wizard/affable" },
+        { label: "Roadmap", url: "https://github.com/users/near-wizard/projects/1/views/1" },
       ],
     },
     {
@@ -62,9 +62,11 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
     setActiveMenu(activeMenu === menuId ? null : menuId)
   }
 
-  const handleItemClick = (action: string | null) => {
-    if (action && onWindowOpen) {
-      onWindowOpen(action)
+  const handleItemClick = (item: { action?: string | null; url?: string }) => {
+    if (item.url) {
+      window.open(item.url, "_blank", "noopener,noreferrer")
+    } else if (item.action && onWindowOpen) {
+      onWindowOpen(item.action)
     }
     setActiveMenu(null)
   }
@@ -93,9 +95,10 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
                 <button
                   key={index}
                   className="w-full text-left px-4 py-2 text-sm text-[oklch(0.30_0.04_45)] hover:bg-[oklch(0.48_0.10_30)] hover:text-[oklch(0.98_0.01_75)] transition-colors first:rounded-t-sm last:rounded-b-sm"
-                  onClick={() => handleItemClick(item.action)}
+                  onClick={() => handleItemClick(item)}
                 >
                   {item.label}
+                  {item.url && <span className="ml-1" aria-hidden="true">↗</span>}
                 </button>
               ))}
             </div>
