@@ -1,4 +1,4 @@
-# Affiliate Platform
+# Affable
 
 An open-source affiliate management + link tracking platform, built in the style of PostHog.
 Self-host in 1 minute. Integrate via SDKs. Attribute conversions via PostHog plugins.
@@ -8,8 +8,8 @@ Self-host in 1 minute. Integrate via SDKs. Attribute conversions via PostHog plu
 ## 🚀 Quickstart
 
 ```bash
-git clone https://github.com/affiliate-hq/affiliate-platform.git
-cd affiliate-platform
+git clone https://github.com/near-wizard/affable.git
+cd affable
 docker-compose up -d
 ```
 
@@ -17,20 +17,20 @@ Backend will be available at: `http://localhost:8000`
 
 ---
 
-## 📦 Install SDK
+## 📦 Install SDK (Coming soon, below reflects intended flow)
 
 ```bash
-npm install @affiliate/sdk
+npm install @affable/sdk
 ```
 
 Example:
 
 ```ts
-import { AffiliateSDK } from "@affiliate/sdk";
+import { AffableSDK } from "@affable/sdk";
 
-const sdk = new AffiliateSDK({
+const sdk = new AffableSDK({
   baseUrl: "http://localhost:8000",
-  apiKey: process.env.AFFILIATE_API_KEY!
+  apiKey: process.env.AFFABLE_API_KEY!
 });
 
 (async () => {
@@ -43,7 +43,7 @@ const sdk = new AffiliateSDK({
 
 ---
 
-## 🔌 PostHog Plugin
+## 🔌 PostHog Plugin (Coming Soon)
 
 Enable the plugin inside PostHog, configure:
 
