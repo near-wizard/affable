@@ -1,8 +1,5 @@
 import { Resend } from 'resend'
 
-console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY)
-console.log('Posthog_API_KEY:', process.env.NEXT_PUBLIC_POSTHOG_KEY)
-
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
 export async function sendConfirmationEmail(toEmail: string, name: string) {
@@ -17,6 +14,11 @@ export async function sendConfirmationEmail(toEmail: string, name: string) {
   const info = await resend.emails.send(message)
 
   // info.id exists if send is successful
-  console.log('Email sent, id:', info.id ?? 'no id returned')
+  if (!info.id) {
+    console.error("No email sent")
+  } else {
+    console.log('Email sent, id:', info.id ?? 'no id returned')
+  }
+
   return info
 }

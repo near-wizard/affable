@@ -12,6 +12,7 @@ export async function loadPostHog(): Promise<typeof posthogType> {
     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
     autocapture: true,
   })
+  console.log("loaded posthog")
   return posthog
 }
 
