@@ -19,7 +19,6 @@ export function GetStartedContent() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Form submitted:", formData)
     setSubmitted(true)
   }
 
