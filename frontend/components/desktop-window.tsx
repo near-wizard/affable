@@ -257,7 +257,7 @@ export function DesktopWindow({
       {/* Top */}
       <div
         className="absolute top-0 left-0 right-0 cursor-n-resize hover:bg-blue-500/20 active:bg-blue-500/30"
-        style={{ height: `${resizeHandleSize}px` }}
+        style={{ height: `${resizeHandleSize*.5}px` }}
         onMouseDown={(e) => handleMouseResizeStart(e, 'n')}
         onTouchStart={(e) => handleTouchResizeStart(e, 'n')}
       />
@@ -278,7 +278,7 @@ export function DesktopWindow({
       {/* Right */}
       <div
         className="absolute top-0 right-0 bottom-0 cursor-e-resize hover:bg-blue-500/20 active:bg-blue-500/30"
-        style={{ width: `${resizeHandleSize}px` }}
+        style={{ width: `${resizeHandleSize * 0.3}px` }}
         onMouseDown={(e) => handleMouseResizeStart(e, 'e')}
         onTouchStart={(e) => handleTouchResizeStart(e, 'e')}
       />
@@ -288,8 +288,8 @@ export function DesktopWindow({
       <div
         className="absolute top-0 left-0 cursor-nw-resize hover:bg-blue-500/30 active:bg-blue-500/40"
         style={{ 
-          width: `${resizeHandleSize * 2}px`, 
-          height: `${resizeHandleSize * 2}px` 
+          width: `${resizeHandleSize}px`, 
+          height: `${resizeHandleSize}px` 
         }}
         onMouseDown={(e) => handleMouseResizeStart(e, 'nw')}
         onTouchStart={(e) => handleTouchResizeStart(e, 'nw')}
@@ -298,8 +298,8 @@ export function DesktopWindow({
       <div
         className="absolute top-0 right-0 cursor-ne-resize hover:bg-blue-500/30 active:bg-blue-500/40"
         style={{ 
-          width: `${resizeHandleSize * 2}px`, 
-          height: `${resizeHandleSize * 2}px` 
+          width: `${resizeHandleSize}px`, 
+          height: `${resizeHandleSize}px` 
         }}
         onMouseDown={(e) => handleMouseResizeStart(e, 'ne')}
         onTouchStart={(e) => handleTouchResizeStart(e, 'ne')}
@@ -308,8 +308,8 @@ export function DesktopWindow({
       <div
         className="absolute bottom-0 left-0 cursor-sw-resize hover:bg-blue-500/30 active:bg-blue-500/40"
         style={{ 
-          width: `${resizeHandleSize * 2}px`, 
-          height: `${resizeHandleSize * 2}px` 
+          width: `${resizeHandleSize}px`, 
+          height: `${resizeHandleSize}px` 
         }}
         onMouseDown={(e) => handleMouseResizeStart(e, 'sw')}
         onTouchStart={(e) => handleTouchResizeStart(e, 'sw')}
@@ -318,8 +318,8 @@ export function DesktopWindow({
       <div
         className="absolute bottom-0 right-0 cursor-se-resize hover:bg-blue-500/30 active:bg-blue-500/40"
         style={{ 
-          width: `${resizeHandleSize * 2}px`, 
-          height: `${resizeHandleSize * 2}px`,
+          width: `${resizeHandleSize}px`, 
+          height: `${resizeHandleSize}px`,
           background: 'linear-gradient(135deg, transparent 50%, oklch(0.45 0.06 45) 50%)',
         }}
         onMouseDown={(e) => handleMouseResizeStart(e, 'se')}
