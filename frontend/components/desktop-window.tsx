@@ -34,6 +34,8 @@ export function DesktopWindow({
   })
   const [isDragging, setIsDragging] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
+  const [isMaximized, setIsMaximized] = useState(false)
+  const [preMaximizeState, setPreMaximizeState] = useState<{ position: { x: number; y: number }; size: { width: number; height: number } } | null>(null)
   const [resizeDirection, setResizeDirection] = useState<ResizeDirection>(null)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [resizeStart, setResizeStart] = useState({ 
@@ -65,10 +67,10 @@ export function DesktopWindow({
 
         // Handle horizontal resizing
         if (resizeDirection.includes('e')) {
-          newWidth = Math.max(300, resizeStart.width + deltaX)
+          newWidth = Math.max(200, resizeStart.width + deltaX)
         } else if (resizeDirection.includes('w')) {
           const potentialWidth = resizeStart.width - deltaX
-          if (potentialWidth >= 300) {
+          if (potentialWidth >= 200) {
             newWidth = potentialWidth
             newX = resizeStart.posX + deltaX
           }
@@ -76,10 +78,10 @@ export function DesktopWindow({
 
         // Handle vertical resizing
         if (resizeDirection.includes('s')) {
-          newHeight = Math.max(250, resizeStart.height + deltaY)
+          newHeight = Math.max(200, resizeStart.height + deltaY)
         } else if (resizeDirection.includes('n')) {
           const potentialHeight = resizeStart.height - deltaY
-          if (potentialHeight >= 250) {
+          if (potentialHeight >= 200) {
             newHeight = potentialHeight
             newY = resizeStart.posY + deltaY
           }
@@ -169,7 +171,34 @@ export function DesktopWindow({
     }
   }
 
-  const resizeHandleSize = 12 // Increased for better mobile UX
+  const handleMaximize = () => {
+    if (isMaximized) {
+      // Restore previous size and position
+      if (preMaximizeState) {
+        setPosition(preMaximizeState.position)
+        setSize(preMaximizeState.size)
+      }
+      setIsMaximized(false)
+    } else {
+      // Save current state and maximize
+      setPreMaximizeState({ position, size })
+      
+      // Get viewport dimensions (accounting for menu bar)
+      const menuBarHeight = 32 // 8 * 4 (h-8 class)
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      
+      setPosition({ x: 0, y: menuBarHeight })
+      setSize({ 
+        width: vw, 
+        height: vh - menuBarHeight 
+      })
+      setIsMaximized(true)
+    }
+    onFocus()
+  }
+
+  const resizeHandleSize = 16 // Increased for better mobile touch targets
 
   return (
     <div
@@ -193,25 +222,28 @@ export function DesktopWindow({
         <span className="font-semibold text-sm">{title}</span>
         <div className="flex items-center gap-2 window-controls">
           <button
-            className="w-5 h-5 bg-[oklch(0.80_0.04_60)] hover:bg-[oklch(0.75_0.05_55)] border border-[oklch(0.60_0.06_50)] flex items-center justify-center transition-colors touch-manipulation"
+            className="w-8 h-8 md:w-5 md:h-5 bg-[oklch(0.80_0.04_60)] hover:bg-[oklch(0.75_0.05_55)] border border-[oklch(0.60_0.06_50)] flex items-center justify-center transition-colors touch-manipulation"
             onClick={(e) => e.stopPropagation()}
           >
-            <Minus className="w-3 h-3 text-[oklch(0.30_0.04_45)]" />
+            <Minus className="w-4 h-4 md:w-3 md:h-3 text-[oklch(0.30_0.04_45)]" />
           </button>
           <button
-            className="w-5 h-5 bg-[oklch(0.80_0.04_60)] hover:bg-[oklch(0.75_0.05_55)] border border-[oklch(0.60_0.06_50)] flex items-center justify-center transition-colors touch-manipulation"
-            onClick={(e) => e.stopPropagation()}
+            className="w-8 h-8 md:w-5 md:h-5 bg-[oklch(0.80_0.04_60)] hover:bg-[oklch(0.75_0.05_55)] border border-[oklch(0.60_0.06_50)] flex items-center justify-center transition-colors touch-manipulation"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleMaximize()
+            }}
           >
-            <Square className="w-3 h-3 text-[oklch(0.30_0.04_45)]" />
+            <Square className="w-4 h-4 md:w-3 md:h-3 text-[oklch(0.30_0.04_45)]" />
           </button>
           <button
-            className="w-5 h-5 bg-[oklch(0.50_0.15_25)] hover:bg-[oklch(0.45_0.16_25)] border border-[oklch(0.40_0.12_25)] flex items-center justify-center transition-colors touch-manipulation"
+            className="w-8 h-8 md:w-5 md:h-5 bg-[oklch(0.50_0.15_25)] hover:bg-[oklch(0.45_0.16_25)] border border-[oklch(0.40_0.12_25)] flex items-center justify-center transition-colors touch-manipulation"
             onClick={(e) => {
               e.stopPropagation()
               onClose()
             }}
           >
-            <X className="w-3 h-3 text-[oklch(0.98_0.01_75)]" />
+            <X className="w-4 h-4 md:w-3 md:h-3 text-[oklch(0.98_0.01_75)]" />
           </button>
         </div>
       </div>
