@@ -3,3 +3,5 @@
 
 # Optional: ignore environment variable backups
 *.env.*
+
+!/.env.example
