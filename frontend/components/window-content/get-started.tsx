@@ -27,6 +27,7 @@ export function GetStartedContent() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log("Form submitted!")
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -35,14 +36,15 @@ export function GetStartedContent() {
       // 1️⃣ Track PostHog event
       const ph = await loadPostHog()
       ph.capture('clientInterestForm_submitted', { ...formData })
-
+      console.log("loaded posthog")
       // 2️⃣ Send to backend (DB + email)
       const res = await fetch('/api/clientInterest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
-      console.log(JSON.stringify(res))
+      const data = await res.json();
+      console.log(JSON.stringify(data))
       if (!res.ok) throw new Error('Failed to submit form')
 
       setSubmitted(true)

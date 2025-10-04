@@ -9,9 +9,9 @@ export async function sendConfirmationEmail(toEmail: string, name: string) {
   const message = {
     from: 'no-reply@affable.com',
     to: toEmail,
-    subject: 'Thanks for your interest!',
-    text: `Hi ${name},\n\nThanks for your interest in Affable! We'll be in touch shortly to set up a conversation.`,
-    html: `<p>Hi ${name},</p><p>Thanks for your interest in Affable! We'll be in touch shortly to set up a conversation.</p>`,
+    subject: 'Thanks for your interest in AffableLink!',
+    text: `Hi ${name},\n\nThanks for your interest in Affable Link! We'll be in touch shortly to set up a conversation.`,
+    html: `<p>Hi ${name},</p><p>Thanks for your interest in Affable Link! We'll be in touch shortly to set up a conversation.</p>`,
   }
 
   const info = await resend.emails.send(message)
