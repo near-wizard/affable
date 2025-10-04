@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { Timer } from "./timer"
 
 interface MenuBarProps {
   onWindowOpen?: (windowType: string) => void
@@ -23,8 +24,8 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
 
   const menus = [
     {
-      id: "file",
-      label: "File",
+      id: "affable",
+      label: "Affable",
       items: [
         { label: "About Affable", action: "about" },
         { label: "Get Started", action: "get-started" },
@@ -37,6 +38,14 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
       items: [
         { label: "Features", action: "features" },
         { label: "Pricing", action: "pricing" },
+      ],
+    },
+    {
+      id: "oss",
+      label: "OSS",
+      items: [
+        { label: "GitHub Repo", action: "repo" },
+        { label: "Roadmap", action: "roadmap" },
       ],
     },
     {
@@ -95,9 +104,7 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
       ))}
 
       <div className="ml-auto flex items-center gap-2 text-xs">
-        <span className="px-2 py-0.5 bg-[oklch(0.82_0.04_65)] border border-[oklch(0.60_0.06_50)] shadow-[inset_1px_1px_0_0_oklch(0.90_0.03_70)] text-[oklch(0.30_0.04_45)] rounded-sm">
-          {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </span>
+        <Timer />
       </div>
     </div>
   )
