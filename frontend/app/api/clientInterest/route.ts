@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 // Example DB + email helpers
 import { saveClientInterest } from '../../utils/db'
 import { sendConfirmationEmail } from '../../utils/email'
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
