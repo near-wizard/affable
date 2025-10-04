@@ -1,180 +1,298 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { DesktopIcon } from "./desktop-icon"
-import { DesktopWindow } from "./desktop-window"
-import { AboutContent } from "./window-content/about"
-import { FeaturesContent } from "./window-content/features"
-import { PricingContent } from "./window-content/pricing"
-import { GetStartedContent } from "./window-content/get-started"
-import { MenuBar } from "./menu-bar"
-import { WindowType } from "@/types/window"
-import { getCookie, setCookie } from "@/utils/cookies"
-import { CookieBanner } from "./cookiebanner"
-import { TutorialLightbox } from "./tutorial-lightbox"
+import { X, Minus, Square } from "lucide-react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
-export function Desktop() {
-  const [windows, setWindows] = useState<Array<{ id: string; type: string; title: string; zIndex: number; position: { x: number; y: number } }>>([])
-  const [nextZIndex, setNextZIndex] = useState(1000)
-  const [showCookieBanner, setShowCookieBanner] = useState(false)
-  const [showTutorial, setShowTutorial] = useState(false)
-  const [tutorialStep, setTutorialStep] = useState(0)
+type ResizeDirection = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | null
+
+export function DesktopWindow({ 
+  id, 
+  title, 
+  children, 
+  onClose, 
+  onFocus, 
+  zIndex,
+  initialPosition,
+}: { 
+  id: string
+  title: string
+  children: React.ReactNode
+  onClose: () => void
+  onFocus: () => void
+  zIndex: number
+  initialPosition: { x: number; y: number }
+}) {
+  const [position, setPosition] = useState(initialPosition)
+  const [size, setSize] = useState(() => {
+    // Responsive initial size based on viewport
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 700
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 500
+    return {
+      width: Math.min(700, vw * 0.9),
+      height: Math.min(500, vh * 0.7)
+    }
+  })
+  const [isDragging, setIsDragging] = useState(false)
+  const [isResizing, setIsResizing] = useState(false)
+  const [resizeDirection, setResizeDirection] = useState<ResizeDirection>(null)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const [resizeStart, setResizeStart] = useState({ 
+    x: 0, 
+    y: 0, 
+    width: 0, 
+    height: 0, 
+    posX: 0, 
+    posY: 0 
+  })
+  const windowRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const hasSeenTutorial = getCookie('affable_tutorial_completed')
-    const hasAcceptedCookies = getCookie('affable_cookies_accepted')
-    
-    if (!hasAcceptedCookies) {
-      setShowCookieBanner(true)
-    } else if (!hasSeenTutorial) {
-      setShowTutorial(true)
-    }
-  }, [])
+    const handleMove = (clientX: number, clientY: number) => {
+      if (isDragging) {
+        setPosition({
+          x: clientX - dragStart.x,
+          y: clientY - dragStart.y,
+        })
+      }
+      if (isResizing && resizeDirection) {
+        const deltaX = clientX - resizeStart.x
+        const deltaY = clientY - resizeStart.y
+        
+        let newWidth = resizeStart.width
+        let newHeight = resizeStart.height
+        let newX = resizeStart.posX
+        let newY = resizeStart.posY
 
-  const handleAcceptCookies = () => {
-    setCookie('affable_cookies_accepted', 'true', 365)
-    setShowCookieBanner(false)
-    
-    const hasSeenTutorial = getCookie('affable_tutorial_completed')
-    if (!hasSeenTutorial) {
-      setShowTutorial(true)
-    }
-  }
+        // Handle horizontal resizing
+        if (resizeDirection.includes('e')) {
+          newWidth = Math.max(300, resizeStart.width + deltaX)
+        } else if (resizeDirection.includes('w')) {
+          const potentialWidth = resizeStart.width - deltaX
+          if (potentialWidth >= 300) {
+            newWidth = potentialWidth
+            newX = resizeStart.posX + deltaX
+          }
+        }
 
-  const handleTutorialNext = () => {
-    setTutorialStep(prev => prev + 1)
-  }
+        // Handle vertical resizing
+        if (resizeDirection.includes('s')) {
+          newHeight = Math.max(250, resizeStart.height + deltaY)
+        } else if (resizeDirection.includes('n')) {
+          const potentialHeight = resizeStart.height - deltaY
+          if (potentialHeight >= 250) {
+            newHeight = potentialHeight
+            newY = resizeStart.posY + deltaY
+          }
+        }
 
-  const handleTutorialSkip = () => {
-    setCookie('affable_tutorial_completed', 'true', 365)
-    setShowTutorial(false)
-    setTutorialStep(0)
-  }
-
-  const openWindow = (type: string) => {
-    const existingWindow = windows.find(w => w.type === type)
-    if (existingWindow) {
-      focusWindow(existingWindow.id)
-      return
-    }
-
-    const titles: { [key: string]: string } = {
-      about: "About - Affable",
-      features: "Features - Affable",
-      pricing: "Pricing - Affable",
-      "get-started": "Get Started - Affable",
-    }
-
-    // Calculate position based on viewport size and existing windows
-    const isMobile = window.innerWidth < 768
-    const baseOffset = isMobile ? 10 : 30
-    const offset = windows.length * baseOffset
-    
-    // Center the window on mobile, cascade on desktop
-    const x = isMobile 
-      ? Math.max(10, (window.innerWidth - 700) / 2)
-      : 100 + offset
-    const y = isMobile 
-      ? Math.max(50, (window.innerHeight - 500) / 2)
-      : 100 + offset
-
-    const newWindow = {
-      id: `${type}-${Date.now()}`,
-      type,
-      title: titles[type] || "Window",
-      zIndex: nextZIndex,
-      position: { x, y },
+        setSize({ width: newWidth, height: newHeight })
+        setPosition({ x: newX, y: newY })
+      }
     }
 
-    setWindows([...windows, newWindow])
-    setNextZIndex(nextZIndex + 1)
+    const handleMouseMove = (e: MouseEvent) => {
+      handleMove(e.clientX, e.clientY)
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        e.preventDefault()
+        handleMove(e.touches[0].clientX, e.touches[0].clientY)
+      }
+    }
+
+    const handleEnd = () => {
+      setIsDragging(false)
+      setIsResizing(false)
+      setResizeDirection(null)
+    }
+
+    if (isDragging || isResizing) {
+      document.addEventListener("mousemove", handleMouseMove)
+      document.addEventListener("mouseup", handleEnd)
+      document.addEventListener("touchmove", handleTouchMove, { passive: false })
+      document.addEventListener("touchend", handleEnd)
+      
+      return () => {
+        document.removeEventListener("mousemove", handleMouseMove)
+        document.removeEventListener("mouseup", handleEnd)
+        document.removeEventListener("touchmove", handleTouchMove)
+        document.removeEventListener("touchend", handleEnd)
+      }
+    }
+  }, [isDragging, isResizing, dragStart, resizeStart, resizeDirection])
+
+  const handleDragStart = (clientX: number, clientY: number, target: EventTarget | null) => {
+    const element = target as HTMLElement
+    if (element?.closest('.window-controls') || element?.closest('button')) return
+    setIsDragging(true)
+    setDragStart({
+      x: clientX - position.x,
+      y: clientY - position.y,
+    })
+    onFocus()
   }
 
-  const closeWindow = (id: string) => {
-    setWindows(windows.filter(w => w.id !== id))
+  const handleMouseDragStart = (e: React.MouseEvent) => {
+    handleDragStart(e.clientX, e.clientY, e.target)
   }
 
-  const focusWindow = (id: string) => {
-    setWindows(windows.map(w => 
-      w.id === id ? { ...w, zIndex: nextZIndex } : w
-    ))
-    setNextZIndex(nextZIndex + 1)
-  }
-
-  const getWindowContent = (type: string) => {
-    switch (type) {
-      case "about": return <AboutContent />
-      case "features": return <FeaturesContent />
-      case "pricing": return <PricingContent />
-      case "get-started": return <GetStartedContent />
-      default: return <div>Content not found</div>
+  const handleTouchDragStart = (e: React.TouchEvent) => {
+    if (e.touches.length > 0) {
+      handleDragStart(e.touches[0].clientX, e.touches[0].clientY, e.target)
     }
   }
+
+  const handleResizeStart = (clientX: number, clientY: number, direction: ResizeDirection) => {
+    setIsResizing(true)
+    setResizeDirection(direction)
+    setResizeStart({
+      x: clientX,
+      y: clientY,
+      width: size.width,
+      height: size.height,
+      posX: position.x,
+      posY: position.y,
+    })
+    onFocus()
+  }
+
+  const handleMouseResizeStart = (e: React.MouseEvent, direction: ResizeDirection) => {
+    e.stopPropagation()
+    handleResizeStart(e.clientX, e.clientY, direction)
+  }
+
+  const handleTouchResizeStart = (e: React.TouchEvent, direction: ResizeDirection) => {
+    e.stopPropagation()
+    if (e.touches.length > 0) {
+      handleResizeStart(e.touches[0].clientX, e.touches[0].clientY, direction)
+    }
+  }
+
+  const resizeHandleSize = 12 // Increased for better mobile UX
 
   return (
-    <div className="min-h-screen desktop-texture relative overflow-hidden flex flex-col">
-      <MenuBar onWindowOpen={openWindow} />
-
-      <img
-        src="/stained-glass-nature-scene-lower-right.jpg"
-        alt=""
-        className="absolute bottom-0 right-0 w-[55%] h-[60%] opacity-45 pointer-events-none"
-        style={{
-          maskImage: "linear-gradient(to top left, black 60%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to top left, black 60%, transparent 100%)",
-        }}
-      />
-
-      {/* Desktop Icons - Left Side - Hidden on small mobile */}
-      <div className="hidden sm:flex absolute left-6 top-14 flex-col gap-8 z-10">
-        <DesktopIcon icon="📄" label="About.txt" onClick={() => openWindow("about")} />
-        <DesktopIcon icon="📊" label="Features" onClick={() => openWindow("features")} />
-        <DesktopIcon icon="💰" label="Pricing" onClick={() => openWindow("pricing")} />
-      </div>
-
-      {/* Desktop Icons - Right Side - Hidden on small mobile */}
-      <div className="hidden sm:flex absolute right-6 top-14 flex-col gap-8 z-10">
-        <DesktopIcon icon="🚀" label="Get Started" onClick={() => openWindow("get-started")} />
-        <DesktopIcon icon="🗑️" label="Trash" onClick={() => {}} disabled />
-      </div>
-
-      {/* Mobile Icon Grid - Shown only on small screens */}
-      <div className="sm:hidden absolute inset-x-4 top-14 grid grid-cols-3 gap-4 z-10">
-        <DesktopIcon icon="📄" label="About" onClick={() => openWindow("about")} />
-        <DesktopIcon icon="📊" label="Features" onClick={() => openWindow("features")} />
-        <DesktopIcon icon="💰" label="Pricing" onClick={() => openWindow("pricing")} />
-        <DesktopIcon icon="🚀" label="Start" onClick={() => openWindow("get-started")} />
-      </div>
-
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="text-center px-4">
-          <h1 className="text-4xl sm:text-6xl font-bold text-[oklch(0.48_0.10_30)] mb-4 drop-shadow-lg">Affable</h1>
-          <p className="text-lg sm:text-xl text-[oklch(0.40_0.06_45)]">Click an icon or menu to learn more</p>
+    <div
+      ref={windowRef}
+      className="absolute bg-[oklch(0.92_0.03_75)] border-4 border-[oklch(0.45_0.06_45)] shadow-[8px_8px_0_0_oklch(0.35_0.05_40)]"
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        width: `${size.width}px`,
+        height: `${size.height}px`,
+        zIndex,
+        touchAction: 'none',
+      }}
+      onClick={onFocus}
+    >
+      <div
+        className="bg-[oklch(0.55_0.12_35)] text-[oklch(0.98_0.01_75)] px-3 py-2 flex items-center justify-between border-b-2 border-[oklch(0.45_0.06_45)] cursor-move select-none"
+        onMouseDown={handleMouseDragStart}
+        onTouchStart={handleTouchDragStart}
+      >
+        <span className="font-semibold text-sm">{title}</span>
+        <div className="flex items-center gap-2 window-controls">
+          <button
+            className="w-5 h-5 bg-[oklch(0.80_0.04_60)] hover:bg-[oklch(0.75_0.05_55)] border border-[oklch(0.60_0.06_50)] flex items-center justify-center transition-colors touch-manipulation"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Minus className="w-3 h-3 text-[oklch(0.30_0.04_45)]" />
+          </button>
+          <button
+            className="w-5 h-5 bg-[oklch(0.80_0.04_60)] hover:bg-[oklch(0.75_0.05_55)] border border-[oklch(0.60_0.06_50)] flex items-center justify-center transition-colors touch-manipulation"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Square className="w-3 h-3 text-[oklch(0.30_0.04_45)]" />
+          </button>
+          <button
+            className="w-5 h-5 bg-[oklch(0.50_0.15_25)] hover:bg-[oklch(0.45_0.16_25)] border border-[oklch(0.40_0.12_25)] flex items-center justify-center transition-colors touch-manipulation"
+            onClick={(e) => {
+              e.stopPropagation()
+              onClose()
+            }}
+          >
+            <X className="w-3 h-3 text-[oklch(0.98_0.01_75)]" />
+          </button>
         </div>
       </div>
 
-      {windows.map((window) => (
-        <DesktopWindow
-          key={window.id}
-          id={window.id}
-          title={window.title}
-          onClose={() => closeWindow(window.id)}
-          onFocus={() => focusWindow(window.id)}
-          zIndex={window.zIndex}
-          initialPosition={window.position}
-        >
-          {getWindowContent(window.type)}
-        </DesktopWindow>
-      ))}
+      {/* Window Content */}
+      <div className="p-6 overflow-y-auto bg-[oklch(0.92_0.03_75)]" style={{ height: `calc(100% - 3rem)` }}>
+        {children}
+      </div>
 
-      {showCookieBanner && <CookieBanner onAccept={handleAcceptCookies} />}
-      {showTutorial && (
-        <TutorialLightbox
-          step={tutorialStep}
-          onNext={handleTutorialNext}
-          onSkip={handleTutorialSkip}
-        />
-      )}
+      {/* Resize Handles - Edges */}
+      {/* Top */}
+      <div
+        className="absolute top-0 left-0 right-0 cursor-n-resize hover:bg-blue-500/20 active:bg-blue-500/30"
+        style={{ height: `${resizeHandleSize}px` }}
+        onMouseDown={(e) => handleMouseResizeStart(e, 'n')}
+        onTouchStart={(e) => handleTouchResizeStart(e, 'n')}
+      />
+      {/* Bottom */}
+      <div
+        className="absolute bottom-0 left-0 right-0 cursor-s-resize hover:bg-blue-500/20 active:bg-blue-500/30"
+        style={{ height: `${resizeHandleSize}px` }}
+        onMouseDown={(e) => handleMouseResizeStart(e, 's')}
+        onTouchStart={(e) => handleTouchResizeStart(e, 's')}
+      />
+      {/* Left */}
+      <div
+        className="absolute top-0 left-0 bottom-0 cursor-w-resize hover:bg-blue-500/20 active:bg-blue-500/30"
+        style={{ width: `${resizeHandleSize}px` }}
+        onMouseDown={(e) => handleMouseResizeStart(e, 'w')}
+        onTouchStart={(e) => handleTouchResizeStart(e, 'w')}
+      />
+      {/* Right */}
+      <div
+        className="absolute top-0 right-0 bottom-0 cursor-e-resize hover:bg-blue-500/20 active:bg-blue-500/30"
+        style={{ width: `${resizeHandleSize}px` }}
+        onMouseDown={(e) => handleMouseResizeStart(e, 'e')}
+        onTouchStart={(e) => handleTouchResizeStart(e, 'e')}
+      />
+
+      {/* Resize Handles - Corners */}
+      {/* Top Left */}
+      <div
+        className="absolute top-0 left-0 cursor-nw-resize hover:bg-blue-500/30 active:bg-blue-500/40"
+        style={{ 
+          width: `${resizeHandleSize * 2}px`, 
+          height: `${resizeHandleSize * 2}px` 
+        }}
+        onMouseDown={(e) => handleMouseResizeStart(e, 'nw')}
+        onTouchStart={(e) => handleTouchResizeStart(e, 'nw')}
+      />
+      {/* Top Right */}
+      <div
+        className="absolute top-0 right-0 cursor-ne-resize hover:bg-blue-500/30 active:bg-blue-500/40"
+        style={{ 
+          width: `${resizeHandleSize * 2}px`, 
+          height: `${resizeHandleSize * 2}px` 
+        }}
+        onMouseDown={(e) => handleMouseResizeStart(e, 'ne')}
+        onTouchStart={(e) => handleTouchResizeStart(e, 'ne')}
+      />
+      {/* Bottom Left */}
+      <div
+        className="absolute bottom-0 left-0 cursor-sw-resize hover:bg-blue-500/30 active:bg-blue-500/40"
+        style={{ 
+          width: `${resizeHandleSize * 2}px`, 
+          height: `${resizeHandleSize * 2}px` 
+        }}
+        onMouseDown={(e) => handleMouseResizeStart(e, 'sw')}
+        onTouchStart={(e) => handleTouchResizeStart(e, 'sw')}
+      />
+      {/* Bottom Right */}
+      <div
+        className="absolute bottom-0 right-0 cursor-se-resize hover:bg-blue-500/30 active:bg-blue-500/40"
+        style={{ 
+          width: `${resizeHandleSize * 2}px`, 
+          height: `${resizeHandleSize * 2}px`,
+          background: 'linear-gradient(135deg, transparent 50%, oklch(0.45 0.06 45) 50%)',
+        }}
+        onMouseDown={(e) => handleMouseResizeStart(e, 'se')}
+        onTouchStart={(e) => handleTouchResizeStart(e, 'se')}
+      />
     </div>
   )
 }

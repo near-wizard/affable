@@ -65,13 +65,25 @@ export function Desktop() {
       "get-started": "Get Started - Affable",
     }
 
-    const offset = windows.length * 30
+    // Calculate position based on viewport size and existing windows
+    const isMobile = window.innerWidth < 768
+    const baseOffset = isMobile ? 10 : 30
+    const offset = windows.length * baseOffset
+    
+    // Center the window on mobile, cascade on desktop
+    const x = isMobile 
+      ? Math.max(10, (window.innerWidth - 700) / 2)
+      : 100 + offset
+    const y = isMobile 
+      ? Math.max(50, (window.innerHeight - 500) / 2)
+      : 100 + offset
+
     const newWindow = {
       id: `${type}-${Date.now()}`,
       type,
       title: titles[type] || "Window",
       zIndex: nextZIndex,
-      position: { x: 100 + offset, y: 100 + offset },
+      position: { x, y },
     }
 
     setWindows([...windows, newWindow])
@@ -99,18 +111,6 @@ export function Desktop() {
     }
   }
 
-  const handleIconClick = (windowType: WindowType) => {
-    setOpenWindow(windowType)
-  }
-
-  const handleCloseWindow = () => {
-    setOpenWindow(null)
-  }
-
-  const handleMenuWindowOpen = (windowType: string) => {
-    setOpenWindow(windowType as WindowType)
-  }
-
   return (
     <div className="min-h-screen desktop-texture relative overflow-hidden flex flex-col">
       <MenuBar onWindowOpen={openWindow} />
@@ -125,25 +125,34 @@ export function Desktop() {
         }}
       />
 
-      {/* Desktop Icons - Left Side */}
-      <div className="absolute left-6 top-14 flex flex-col gap-8 z-10">
+      {/* Desktop Icons - Left Side - Hidden on small mobile */}
+      <div className="hidden sm:flex absolute left-6 top-14 flex-col gap-8 z-10">
         <DesktopIcon icon="📄" label="About.txt" onClick={() => openWindow("about")} />
-        <DesktopIcon icon="📁" label="Features" onClick={() => openWindow("features")} />
+        <DesktopIcon icon="📊" label="Features" onClick={() => openWindow("features")} />
         <DesktopIcon icon="💰" label="Pricing" onClick={() => openWindow("pricing")} />
       </div>
 
-      {/* Desktop Icons - Right Side */}
-      <div className="absolute right-6 top-14 flex flex-col gap-8 z-10">
+      {/* Desktop Icons - Right Side - Hidden on small mobile */}
+      <div className="hidden sm:flex absolute right-6 top-14 flex-col gap-8 z-10">
         <DesktopIcon icon="🚀" label="Get Started" onClick={() => openWindow("get-started")} />
         <DesktopIcon icon="🗑️" label="Trash" onClick={() => {}} disabled />
       </div>
 
+      {/* Mobile Icon Grid - Shown only on small screens */}
+      <div className="sm:hidden absolute inset-x-4 top-14 grid grid-cols-3 gap-4 z-10">
+        <DesktopIcon icon="📄" label="About" onClick={() => openWindow("about")} />
+        <DesktopIcon icon="📊" label="Features" onClick={() => openWindow("features")} />
+        <DesktopIcon icon="💰" label="Pricing" onClick={() => openWindow("pricing")} />
+        <DesktopIcon icon="🚀" label="Start" onClick={() => openWindow("get-started")} />
+      </div>
+
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="text-center">
-          <h1 className="text-6xl font-bold text-[oklch(0.48_0.10_30)] mb-4 drop-shadow-lg">Affable</h1>
-          <p className="text-xl text-[oklch(0.40_0.06_45)]">Click an icon or menu to learn more</p>
+        <div className="text-center px-4">
+          <h1 className="text-4xl sm:text-6xl font-bold text-[oklch(0.48_0.10_30)] mb-4 drop-shadow-lg">Affable</h1>
+          <p className="text-lg sm:text-xl text-[oklch(0.40_0.06_45)]">Click an icon or menu to learn more</p>
         </div>
       </div>
+
       {windows.map((window) => (
         <DesktopWindow
           key={window.id}
