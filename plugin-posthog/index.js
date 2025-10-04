@@ -1,0 +1,1 @@
+module.exports = { onEvent: async (event) => { console.log('event', event) } }

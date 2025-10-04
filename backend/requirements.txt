@@ -1,0 +1,5 @@
+fastapi==0.111.1
+uvicorn[standard]==0.23.2
+redis==6.4.0         # supports asyncio
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.24
