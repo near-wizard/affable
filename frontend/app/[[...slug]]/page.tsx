@@ -17,17 +17,6 @@ export default function Home(params: { slug?: string[] }) {
   const [mainSlug, subSlug] = params.slug || []
   console.log(mainSlug,subSlug)
 
-  // Handle RFD metadata
-  if (mainSlug === 'rfd' && subSlug) {
-    const rfd = getRFDByNumber(parseInt(subSlug))
-    if (rfd) {
-      return {
-        title: `${rfd.title} - Affable`,
-        description: `RFD ${rfd.number} - State: ${rfd.state}`
-      }
-    }
-  }
-
   return (
     <main className="min-h-screen">
         <Desktop initialSlug={mainSlug} initialSubSlug={subSlug} />
