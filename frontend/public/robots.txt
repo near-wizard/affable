@@ -1,0 +1,19 @@
+# robots.txt for https://affablelink.com
+
+# Allow all bots to crawl the main landing page
+User-agent: *
+Disallow:
+
+# Prevent indexing of development and preview environments
+# These lines ensure only the production domain is indexed
+User-agent: *
+Disallow: /
+
+Host: https://affablelink.com
+
+# Notes:
+# - All bots (including GPTBot, AhrefsBot, etc.) are allowed on production
+#   because you don’t mind scraping or aggregation.
+# - No sitemap specified yet; can add later:
+#   Sitemap: https://affablelink.com/sitemap.xml
+# - No crawl delay; Vercel handles default traffic fine.
