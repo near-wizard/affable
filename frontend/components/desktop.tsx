@@ -105,7 +105,7 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
       if (remaining.length > 0) {
         // find window with highest zIndex (top-most)
         const top = remaining.reduce((a, b) => (a.zIndex > b.zIndex ? a : b))
-        router.push(`/${top.type}`)
+        router.push(`/${top.type}` || '/')
       } else {
         // if no windows remain, reset URL to root
         router.push('/')
