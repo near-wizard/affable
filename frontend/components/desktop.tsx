@@ -12,7 +12,7 @@ import { WindowType } from "@/types/window"
 import { getCookie, setCookie } from "@/utils/cookies"
 import { CookieBanner } from "./cookiebanner"
 import { TutorialLightbox } from "./tutorial-lightbox"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 
 export function Desktop() {
   const [windows, setWindows] = useState<Array<{ id: string; type: string; title: string; zIndex: number; position: { x: number; y: number } }>>([])
