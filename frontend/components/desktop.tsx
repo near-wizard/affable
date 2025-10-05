@@ -12,6 +12,7 @@ import { WindowType } from "@/types/window"
 import { getCookie, setCookie } from "@/utils/cookies"
 import { CookieBanner } from "./cookiebanner"
 import { TutorialLightbox } from "./tutorial-lightbox"
+import { useRouter } from "next/router"
 
 export function Desktop() {
   const [windows, setWindows] = useState<Array<{ id: string; type: string; title: string; zIndex: number; position: { x: number; y: number } }>>([])
@@ -19,6 +20,7 @@ export function Desktop() {
   const [showCookieBanner, setShowCookieBanner] = useState(false)
   const [showTutorial, setShowTutorial] = useState(false)
   const [tutorialStep, setTutorialStep] = useState(0)
+  const router = useRouter()
 
   useEffect(() => {
     const hasSeenTutorial = getCookie('affable_tutorial_completed')
@@ -91,13 +93,34 @@ export function Desktop() {
   }
 
   const closeWindow = (id: string) => {
-    setWindows(windows.filter(w => w.id !== id))
+    setWindows(prev => {
+      const remaining = prev.filter(w => w.id !== id)
+  
+      if (remaining.length > 0) {
+        // find window with highest zIndex (top-most)
+        const top = remaining.reduce((a, b) => (a.zIndex > b.zIndex ? a : b))
+        router.push(`/${top.type}`, undefined, { shallow: true })
+      } else {
+        // if no windows remain, reset URL to root
+        router.push('/', undefined, { shallow: true })
+      }
+  
+      return remaining
+    })
   }
 
   const focusWindow = (id: string) => {
-    setWindows(windows.map(w => 
-      w.id === id ? { ...w, zIndex: nextZIndex } : w
-    ))
+    setWindows(prev => {
+      const updated = prev.map(w =>
+        w.id === id ? { ...w, zIndex: nextZIndex } : w
+      )
+      const focused = updated.find(w => w.id === id)
+      if (focused) {
+        // update URL to the focused window's type
+        router.push(`/${focused.type}`, undefined, { shallow: true })
+      }
+      return updated
+    })
     setNextZIndex(nextZIndex + 1)
   }
 
