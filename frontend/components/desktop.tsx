@@ -34,6 +34,18 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
     }
   }, []) // Empty dependency array - only run once on mount
 
+  // Update document title when windows change (for better UX, not SEO)
+  useEffect(() => {
+    if (windows.length === 0) {
+      document.title = "Affable - Your Desktop Experience"
+      return
+    }
+    
+    // Find the top-most window
+    const topWindow = windows.reduce((a, b) => (a.zIndex > b.zIndex ? a : b))
+    document.title = topWindow.title
+  }, [windows])
+
   useEffect(() => {
     const hasSeenTutorial = getCookie('affable_tutorial_completed')
     const hasAcceptedCookies = getCookie('affable_cookies_accepted')
@@ -100,11 +112,11 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
       position: { x, y },
     }
 
-    setWindows([...windows, newWindow])
-    setNextZIndex(nextZIndex + 1)
+    setWindows(prev => [...prev, newWindow])
+    setNextZIndex(prev => prev + 1)
     
-    // Update URL when opening a new window
-    router.push(`/${type}`, { shallow: true })
+    // Update URL immediately without navigation
+    window.history.replaceState({}, '', `/${type}`)
   }
 
   const closeWindow = (id: string) => {
@@ -114,10 +126,10 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
       if (remaining.length > 0) {
         // find window with highest zIndex (top-most)
         const top = remaining.reduce((a, b) => (a.zIndex > b.zIndex ? a : b))
-        router.push(`/${top.type}`, { shallow: true })
+        window.history.replaceState({}, '', `/${top.type}`)
       } else {
         // if no windows remain, reset URL to root
-        router.push('/', { shallow: true })
+        window.history.replaceState({}, '', '/')
       }
   
       return remaining
@@ -129,14 +141,16 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
       const updated = prev.map(w =>
         w.id === id ? { ...w, zIndex: nextZIndex } : w
       )
+      
       const focused = updated.find(w => w.id === id)
       if (focused) {
-        // update URL to the focused window's type with shallow routing
-        router.push(`/${focused.type}`, { shallow: true })
+        // update URL to the focused window's type
+        window.history.replaceState({}, '', `/${focused.type}`)
       }
+      
       return updated
     })
-    setNextZIndex(nextZIndex + 1)
+    setNextZIndex(prev => prev + 1)
   }
 
   const getWindowContent = (type: string) => {
