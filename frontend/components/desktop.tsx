@@ -31,7 +31,7 @@ export function Desktop({
   const hasInitialized = useRef(false)
 
   useEffect(() => {
-    if (!initialSlug || hasInitialized.current) return
+    if (!initialSlug) return
     
     const valid = ["about", "features", "pricing", "get-started", "rfd"]
     if (valid.includes(initialSlug)) {
