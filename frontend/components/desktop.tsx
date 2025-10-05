@@ -14,13 +14,19 @@ import { CookieBanner } from "./cookiebanner"
 import { TutorialLightbox } from "./tutorial-lightbox"
 import { useRouter } from "next/navigation"
 
-export function Desktop() {
+export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
   const [windows, setWindows] = useState<Array<{ id: string; type: string; title: string; zIndex: number; position: { x: number; y: number } }>>([])
   const [nextZIndex, setNextZIndex] = useState(1000)
   const [showCookieBanner, setShowCookieBanner] = useState(false)
   const [showTutorial, setShowTutorial] = useState(false)
   const [tutorialStep, setTutorialStep] = useState(0)
   const router = useRouter()
+
+  useEffect(() => {
+    if (!initialSlug) return
+    const valid = ["about", "features", "pricing", "get-started"]
+    if (valid.includes(initialSlug)) openWindow(initialSlug)
+  }, [initialSlug])
 
   useEffect(() => {
     const hasSeenTutorial = getCookie('affable_tutorial_completed')
