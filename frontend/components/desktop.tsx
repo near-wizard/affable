@@ -13,9 +13,16 @@ import { getCookie, setCookie } from "@/utils/cookies"
 import { CookieBanner } from "./cookiebanner"
 import { TutorialLightbox } from "./tutorial-lightbox"
 import { useRouter } from "next/navigation"
+import { RFDContent } from "./window-content/rfd"
 
-export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
-  const [windows, setWindows] = useState<Array<{ id: string; type: string; title: string; zIndex: number; position: { x: number; y: number } }>>([])
+export function Desktop({ 
+  initialSlug, 
+  initialSubSlug 
+}: { 
+  initialSlug?: string | null
+  initialSubSlug?: string | null 
+}) {
+  const [windows, setWindows] = useState<Array<{ id: string; type: string; title: string; zIndex: number; position: { x: number; y: number }, subRoute?: string  }>>([])
   const [nextZIndex, setNextZIndex] = useState(1000)
   const [showCookieBanner, setShowCookieBanner] = useState(false)
   const [showTutorial, setShowTutorial] = useState(false)
@@ -24,13 +31,12 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
   const hasInitialized = useRef(false)
 
   useEffect(() => {
-    // Only open window from URL on initial mount
     if (!initialSlug || hasInitialized.current) return
     
-    const valid = ["about", "features", "pricing", "get-started"]
+    const valid = ["about", "features", "pricing", "get-started", "rfd"]
     if (valid.includes(initialSlug)) {
       hasInitialized.current = true
-      openWindow(initialSlug)
+      openWindow(initialSlug, initialSubSlug || undefined)
     }
   }, []) // Empty dependency array - only run once on mount
 
@@ -77,10 +83,10 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
     setTutorialStep(0)
   }
 
-  const openWindow = (type: string) => {
+  const openWindow = (type: string, subRoute?: string) => {
     const existingWindow = windows.find(w => w.type === type)
     if (existingWindow) {
-      focusWindow(existingWindow.id)
+      focusWindow(existingWindow.id, subRoute)
       return
     }
 
@@ -89,6 +95,7 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
       features: "Features - Affable",
       pricing: "Pricing - Affable",
       "get-started": "Get Started - Affable",
+      rfd: "RFDs - Affable"
     }
 
     // Calculate position based on viewport size and existing windows
@@ -116,7 +123,8 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
     setNextZIndex(prev => prev + 1)
     
     // Update URL immediately without navigation
-    window.history.replaceState({}, '', `/${type}`)
+    const url = subRoute ? `/${type}/${subRoute}` : `/${type}`
+    window.history.replaceState({}, '', url)
   }
 
   const closeWindow = (id: string) => {
@@ -126,7 +134,8 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
       if (remaining.length > 0) {
         // find window with highest zIndex (top-most)
         const top = remaining.reduce((a, b) => (a.zIndex > b.zIndex ? a : b))
-        window.history.replaceState({}, '', `/${top.type}`)
+        const url = top.subRoute ? `/${top.type}/${top.subRoute}` : `/${top.type}`
+        window.history.replaceState({}, '', url)
       } else {
         // if no windows remain, reset URL to root
         window.history.replaceState({}, '', '/')
@@ -136,16 +145,17 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
     })
   }
 
-  const focusWindow = (id: string) => {
+  const focusWindow = (id: string, newSubRoute?: string) => {
     setWindows(prev => {
       const updated = prev.map(w =>
-        w.id === id ? { ...w, zIndex: nextZIndex } : w
+        w.id === id 
+          ? { ...w, zIndex: nextZIndex, subRoute: newSubRoute ?? w.subRoute } 
+          : w
       )
-      
       const focused = updated.find(w => w.id === id)
       if (focused) {
-        // update URL to the focused window's type
-        window.history.replaceState({}, '', `/${focused.type}`)
+        const url = focused.subRoute ? `/${focused.type}/${focused.subRoute}` : `/${focused.type}`
+        window.history.replaceState({}, '', url)
       }
       
       return updated
@@ -153,12 +163,24 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
     setNextZIndex(prev => prev + 1)
   }
 
-  const getWindowContent = (type: string) => {
-    switch (type) {
+  const getWindowContent = (window: { type: string; subRoute?: string }) => {
+    switch (window.type) {
       case "about": return <AboutContent />
       case "features": return <FeaturesContent />
       case "pricing": return <PricingContent />
       case "get-started": return <GetStartedContent />
+      case "rfd": return (
+        <RFDContent 
+          initialNumber={window.subRoute ? parseInt(window.subRoute) : undefined}
+          onNavigate={(number) => {
+            // Update the current window's subRoute
+            const currentWindow = windows.find(w => w.type === 'rfd')
+            if (currentWindow) {
+              focusWindow(currentWindow.id, number?.toString())
+            }
+          }}
+        />
+      )
       default: return <div>Content not found</div>
     }
   }
@@ -187,6 +209,7 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
       {/* Desktop Icons - Right Side - Hidden on small mobile */}
       <div className="hidden sm:flex absolute right-6 top-14 flex-col gap-8 z-10">
         <DesktopIcon icon="🚀" label="Get Started" onClick={() => openWindow("get-started")} />
+        <DesktopIcon icon="📋" label="RFDs" onClick={() => openWindow("rfd")} />
         <DesktopIcon icon="🗑️" label="Trash" onClick={() => {}} disabled />
       </div>
 
@@ -215,7 +238,7 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
           zIndex={window.zIndex}
           initialPosition={window.position}
         >
-          {getWindowContent(window.type)}
+          {getWindowContent(window)}
         </DesktopWindow>
       ))}
 

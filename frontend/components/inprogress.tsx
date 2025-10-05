@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { X, Minus, Square, ArrowRight } from "lucide-react"
+import { RFDContent } from "./window-content/rfd"
 
 // Cookie utilities
 const getCookie = (name: string): string | null => {
@@ -517,12 +518,21 @@ export default function Desktop() {
     setNextZIndex(nextZIndex + 1)
   }
 
-  const getWindowContent = (type: string) => {
+  const getWindowContent = (type: string, subRoute?: string) => {
     switch (type) {
       case "about": return <AboutContent />
       case "features": return <FeaturesContent />
       case "pricing": return <PricingContent />
       case "get-started": return <GetStartedContent />
+      case "rfd": return (
+        <RFDContent 
+          initialNumber={subRoute ? parseInt(subRoute) : undefined}
+          onNavigate={(number) => {
+            const url = number ? `/rfd/${number}` : '/rfd'
+            window.history.replaceState({}, '', url)
+          }}
+        />
+      )
       default: return <div>Content not found</div>
     }
   }
