@@ -15,6 +15,7 @@ export default function Home(params: { slug?: string[] }) {
   }, [])
 
   const [mainSlug, subSlug] = params.slug || []
+  console.log(mainSlug,subSlug)
 
   // Handle RFD metadata
   if (mainSlug === 'rfd' && subSlug) {
