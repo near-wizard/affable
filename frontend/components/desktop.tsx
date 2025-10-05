@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { DesktopIcon } from "./desktop-icon"
 import { DesktopWindow } from "./desktop-window"
 import { AboutContent } from "./window-content/about"
@@ -21,12 +21,18 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
   const [showTutorial, setShowTutorial] = useState(false)
   const [tutorialStep, setTutorialStep] = useState(0)
   const router = useRouter()
+  const hasInitialized = useRef(false)
 
   useEffect(() => {
-    if (!initialSlug) return
+    // Only open window from URL on initial mount
+    if (!initialSlug || hasInitialized.current) return
+    
     const valid = ["about", "features", "pricing", "get-started"]
-    if (valid.includes(initialSlug)) openWindow(initialSlug)
-  }, [initialSlug])
+    if (valid.includes(initialSlug)) {
+      hasInitialized.current = true
+      openWindow(initialSlug)
+    }
+  }, []) // Empty dependency array - only run once on mount
 
   useEffect(() => {
     const hasSeenTutorial = getCookie('affable_tutorial_completed')
@@ -96,6 +102,9 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
 
     setWindows([...windows, newWindow])
     setNextZIndex(nextZIndex + 1)
+    
+    // Update URL when opening a new window
+    router.push(`/${type}`, { shallow: true })
   }
 
   const closeWindow = (id: string) => {
@@ -105,10 +114,10 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
       if (remaining.length > 0) {
         // find window with highest zIndex (top-most)
         const top = remaining.reduce((a, b) => (a.zIndex > b.zIndex ? a : b))
-        router.push(`/${top.type}` || '/')
+        router.push(`/${top.type}`, { shallow: true })
       } else {
         // if no windows remain, reset URL to root
-        router.push('/')
+        router.push('/', { shallow: true })
       }
   
       return remaining
@@ -122,8 +131,8 @@ export function Desktop({ initialSlug }: { initialSlug?: string | null }) {
       )
       const focused = updated.find(w => w.id === id)
       if (focused) {
-        // update URL to the focused window's type
-        router.push(`/${focused.type}`)
+        // update URL to the focused window's type with shallow routing
+        router.push(`/${focused.type}`, { shallow: true })
       }
       return updated
     })
