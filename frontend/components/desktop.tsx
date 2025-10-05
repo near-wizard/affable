@@ -99,10 +99,10 @@ export function Desktop() {
       if (remaining.length > 0) {
         // find window with highest zIndex (top-most)
         const top = remaining.reduce((a, b) => (a.zIndex > b.zIndex ? a : b))
-        router.push(`/${top.type}`, undefined, { shallow: true })
+        router.push(`/${top.type}`)
       } else {
         // if no windows remain, reset URL to root
-        router.push('/', undefined, { shallow: true })
+        router.push('/')
       }
   
       return remaining
@@ -117,7 +117,7 @@ export function Desktop() {
       const focused = updated.find(w => w.id === id)
       if (focused) {
         // update URL to the focused window's type
-        router.push(`/${focused.type}`, undefined, { shallow: true })
+        router.push(`/${focused.type}`)
       }
       return updated
     })
