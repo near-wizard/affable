@@ -29,7 +29,7 @@ export default function Home(params: { slug?: string[] }) {
 
   return (
     <main className="min-h-screen">
-        return <Desktop initialSlug={mainSlug} initialSubSlug={subSlug} />
+        <Desktop initialSlug={mainSlug} initialSubSlug={subSlug} />
 
     </main>
   )

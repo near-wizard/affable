@@ -152,50 +152,56 @@ This works perfectly for our use case. We're building an SPA-like experience whe
     content: `# RFD 3: Market Segmentation Through UI Design
 
 ## Hypothesis
-
 The Windows 95 desktop UI isn't just aesthetic—it's a deliberate filter for our target market in the early stages.
+
+---
 
 ## Target Early Users
 
-Who we WANT:
-- PostHog users (familiar with their retro UI)
-- Technical founders who appreciate nostalgia
-- Developers who value "building in public" transparency
-- People who get excited by unconventional design
+### Who we **want**:
+- PostHog users (familiar with their retro UI)  
+- Technical founders who appreciate nostalgia  
+- Developers who value "building in public" transparency  
+- People who get excited by unconventional design  
 
-Who we DON'T want (yet):
-- Enterprise buyers expecting "professional" SaaS
-- Non-technical users who need hand-holding
-- People who judge tools by visual polish alone
+### Who we **don't want** (yet):
+- Enterprise buyers expecting "professional" SaaS  
+- Non-technical users who need hand-holding  
+- People who judge tools by visual polish alone  
+
+---
 
 ## The Reasoning
-
 By launching with a polarizing UI, we:
 
-1. **Self-select for early adopters** who value substance over conventional UX
-2. **Create a memorable brand** in a sea of identical SaaS tools
-3. **Buy time** to nail the core product before scaling to mainstream
-4. **Build a community** of people who "get it"
+- Self-select for early adopters who value substance over conventional UX  
+- Create a memorable brand in a sea of identical SaaS tools  
+- Buy time to nail the core product before scaling to mainstream  
+- Build a community of people who "get it"  
+
+---
 
 ## Risks
+- Might alienate potential advocates  
+- Could be seen as unprofessional  
+- Accessibility concerns (we need to address this)  
+- Might paint us into a corner UI-wise  
 
-- Might alienate potential advocates
-- Could be seen as unprofessional
-- Accessibility concerns (we need to address this)
-- Might paint us into a corner UI-wise
+---
 
 ## Open Questions
+- When do we know it's time to "professionalize"?  
+- How do we balance nostalgia with accessibility?  
+- Can we A/B test to validate this hypothesis?  
+- What metrics indicate this strategy is working/failing?  
 
-1. When do we know it's time to "professionalize"?
-2. How do we balance nostalgia with accessibility?
-3. Can we A/B test to validate this hypothesis?
-4. What metrics indicate this strategy is working/failing?
+---
 
 ## Discussion Needed
-
 I'm putting this out there because it's a bet. Maybe I'm rationalizing a fun design choice with post-hoc product thinking. Or maybe this is actually smart positioning.
 
-What do you think?`
+**What do you think?**
+`
   }
 ]
 
