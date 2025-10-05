@@ -45,7 +45,7 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
       label: "OSS",
       items: [
         { label: "GitHub Repo", url: "https://github.com/near-wizard/affable" },
-        { label: "Roadmap", url: "https://github.com/users/near-wizard/projects/1/views/1" },
+        { label: "Roadmap", url: "https://trello.com/invite/b/68e24bf4fd5a898d0c25c4a6/ATTI3e3b72407bc0a350edbda3bc3faf0889656221A5/affable-link" },
       ],
     },
     {
