@@ -1,11 +1,12 @@
 import { Desktop } from "@/components/desktop"
 
-export default function Home(params: { slug?: string[] }) {
-  const [mainSlug, subSlug] = params.slug || []
+export default function Home({slug}: { slug?: string[] }) {
+  const [mainSlug, subSlug] = slug || []
   console.log(mainSlug,subSlug)
 
   return (
     <main className="min-h-screen">
+      <p>Slug: {slug?.join('/') ?? 'No Slug'}</p>
         <Desktop initialSlug={mainSlug} initialSubSlug={subSlug} />
 
     </main>
