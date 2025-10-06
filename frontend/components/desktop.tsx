@@ -12,17 +12,11 @@ import { WindowType } from "@/types/window"
 import { getCookie, setCookie } from "@/utils/cookies"
 import { CookieBanner } from "./cookiebanner"
 import { TutorialLightbox } from "./tutorial-lightbox"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { RFDContent } from "./window-content/rfd"
 import { loadPostHog } from "@/utils/posthogLazyLoader"
 
-export function Desktop({ 
-  initialSlug, 
-  initialSubSlug 
-}: { 
-  initialSlug?: string | null
-  initialSubSlug?: string | null 
-}) {
+export function Desktop() {
   const [windows, setWindows] = useState<Array<{ id: string; type: string; title: string; zIndex: number; position: { x: number; y: number }, subRoute?: string  }>>([])
   const [nextZIndex, setNextZIndex] = useState(1000)
   const [showCookieBanner, setShowCookieBanner] = useState(false)
@@ -30,6 +24,9 @@ export function Desktop({
   const [tutorialStep, setTutorialStep] = useState(0)
   const router = useRouter()
   const hasInitialized = useRef(false)
+
+  const params = useParams();
+  const [initialSlug, initialSubSlug] = params.slug || []
 
   console.log(initialSlug,initialSubSlug)
 
