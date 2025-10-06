@@ -1,19 +1,6 @@
-'use client'
 import { Desktop } from "@/components/desktop"
-import { useEffect } from 'react'
-import { getRFDByNumber } from "@/content/rfd/rfds"
-import { loadPostHog } from "@/utils/posthogLazyLoader"
 
 export default function Home(params: { slug?: string[] }) {
-
-  useEffect(() => {
-    loadPostHog().then((ph) => {
-      if (ph) {
-        ph.capture('landing_page_view')
-      }
-    })
-  }, [])
-
   const [mainSlug, subSlug] = params.slug || []
   console.log(mainSlug,subSlug)
 

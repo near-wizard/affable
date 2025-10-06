@@ -14,6 +14,7 @@ import { CookieBanner } from "./cookiebanner"
 import { TutorialLightbox } from "./tutorial-lightbox"
 import { useRouter } from "next/navigation"
 import { RFDContent } from "./window-content/rfd"
+import { loadPostHog } from "@/utils/posthogLazyLoader"
 
 export function Desktop({ 
   initialSlug, 
@@ -29,6 +30,15 @@ export function Desktop({
   const [tutorialStep, setTutorialStep] = useState(0)
   const router = useRouter()
   const hasInitialized = useRef(false)
+
+  useEffect(() => {
+    loadPostHog().then((ph) => {
+      if (ph) {
+        ph.capture('landing_page_view')
+      }
+    })
+  }, [])
+
 
   useEffect(() => {
     if (!initialSlug) return
