@@ -32,9 +32,11 @@ export function Desktop({
 
   useEffect(() => {
     if (!initialSlug) return
-    
+    console.log('initialSlug:', initialSlug);
+
     const valid = ["about", "features", "pricing", "get-started", "rfd"]
     if (valid.includes(initialSlug)) {
+      console.log('Valid slug detected, opening window...');
       hasInitialized.current = true
       openWindow(initialSlug, initialSubSlug || undefined)
     }
