@@ -31,6 +31,8 @@ export function Desktop({
   const router = useRouter()
   const hasInitialized = useRef(false)
 
+  console.log(initialSlug,initialSubSlug)
+
   useEffect(() => {
     loadPostHog().then((ph) => {
       if (ph) {
@@ -231,6 +233,7 @@ export function Desktop({
         <DesktopIcon icon="📊" label="Features" onClick={() => openWindow("features")} />
         <DesktopIcon icon="💰" label="Pricing" onClick={() => openWindow("pricing")} />
         <DesktopIcon icon="🚀" label="Start" onClick={() => openWindow("get-started")} />
+        <DesktopIcon icon="📋" label="RFDs" onClick={() => openWindow("rfd")} />
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
