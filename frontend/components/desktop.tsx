@@ -128,6 +128,7 @@ export function Desktop() {
       title: titles[type] || "Window",
       zIndex: nextZIndex,
       position: { x, y },
+      subRoute: initialSubSlug
     }
 
     setWindows(prev => [...prev, newWindow])

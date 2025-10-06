@@ -21,13 +21,14 @@ const stateColors: Record<RFDState, string> = {
 export function RFDContent({ initialNumber, onNavigate }: RFDContentProps) {
   const [view, setView] = useState<'list' | 'document'>(initialNumber ? 'document' : 'list')
   const [currentRFD, setCurrentRFD] = useState<RFD | null>(
-    initialNumber ? getRFDByNumber(initialNumber) && setView('document') || null : null
+    initialNumber ? getRFDByNumber(initialNumber) || null : null
   )
   const [searchQuery, setSearchQuery] = useState("")
   const [showAutocomplete, setShowAutocomplete] = useState(false)
   const [filteredRFDs, setFilteredRFDs] = useState<RFD[]>(rfds)
   const [filterState, setFilterState] = useState<RFDState | 'all'>('all')
   const searchRef = useRef<HTMLDivElement>(null)
+  console.log("initial number", initialNumber, view)
 
   useEffect(() => {
     let results = rfds
