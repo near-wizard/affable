@@ -2,6 +2,11 @@ import { Desktop } from "@/components/desktop"
 
 export default function Home() {
 
+  const staticFiles = ["favicon.ico", "robots.txt", "sitemap.xml"]
+  if (staticFiles.includes(path)) {
+    return null // Let Next.js static server handle it
+  }
+
   return (
     <main className="min-h-screen">
         <Desktop />
