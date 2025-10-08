@@ -8,7 +8,10 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Affable',
-  description: '',
+  description: 'The founder friendly affiliate platform',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({
