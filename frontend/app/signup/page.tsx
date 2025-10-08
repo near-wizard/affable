@@ -26,7 +26,7 @@ export default function SignupPage() {
             onChange={e => setRole(e.target.value)}
             className="w-full border border-gray-300 rounded-lg p-2"
           >
-            <option value="founder">I’m a Founder</option>
+            <option value="founder">I’m a Founder / Vendor</option>
             <option value="affiliate">I’m an Affiliate / Partner</option>
           </select>
           <input
