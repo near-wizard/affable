@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { TrendingUp, Users, MousePointerClick, DollarSign, Activity } from 'lucide-react';
+import Link from 'next/link';
+import VendorLayout from '@/app/vendor/layout';
 
 type PerformanceData = {
   date: string;
@@ -116,7 +118,8 @@ export default function VendorDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2"> <TrendingUp size={32} className="text-blue-600" /> Dashboard</h1>
+            <p className="text-gray-600 mt-1">Manage your partner campaigns</p>
               <p className="text-gray-600 mt-1">Overview of your partner program performance</p>
             </div>
             <div className="flex items-center gap-4">
@@ -136,7 +139,7 @@ export default function VendorDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             icon={<Activity className="text-blue-600" />}
-            label="Total Campaigns"
+            label={<Link href="/vendor/campaigns" className="text-blue-500 hover:underline">Total Campaigns</Link>}
             value={stats.totalCampaigns}
             change="+2"
             bgColor="bg-blue-50"

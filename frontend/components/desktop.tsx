@@ -15,6 +15,7 @@ import { TutorialLightbox } from "./tutorial-lightbox"
 import { useParams, useRouter } from "next/navigation"
 import { RFDContent } from "./window-content/rfd"
 import { loadPostHog } from "@/utils/posthogLazyLoader"
+import FounderStory from "./window-content/founder-story"
 
 export function Desktop() {
   const [windows, setWindows] = useState<Array<{ id: string; type: string; title: string; zIndex: number; position: { x: number; y: number }, subRoute?: string  }>>([])
@@ -160,25 +161,37 @@ export function Desktop() {
   const focusWindow = (id: string, newSubRoute?: string) => {
     setWindows(prev => {
       const updated = prev.map(w =>
-        w.id === id 
-          ? { ...w, zIndex: nextZIndex, subRoute: newSubRoute ?? w.subRoute } 
+        w.id === id
+          ? { ...w, zIndex: nextZIndex, subRoute: newSubRoute ?? w.subRoute }
           : w
-      )
-      const focused = updated.find(w => w.id === id)
-      if (focused) {
-        const url = focused.subRoute ? `/${focused.type}/${focused.subRoute}` : `/${focused.type}`
-        window.history.replaceState({}, '', url)
-      }
-      
-      return updated
-    })
-    setNextZIndex(prev => prev + 1)
-  }
+      );
+      return updated;
+    });
 
+    setNextZIndex(prev => prev + 1);
+  };
+
+   // ✅ compute focused window at top level
+   const focused = windows.find(w => w.zIndex === Math.max(...windows.map(x => x.zIndex)));
+
+   // ✅ handle URL updates in an effect
+   useEffect(() => {
+     if (focused) {
+       const url = focused.subRoute
+         ? `/${focused.type}/${focused.subRoute}`
+         : `/${focused.type}`;
+       window.history.replaceState({}, '', url);
+     } else {
+       window.history.replaceState({}, '', '/');
+     }
+   }, [focused]);
+
+ 
   const getWindowContent = (window: { type: string; subRoute?: string }) => {
     switch (window.type) {
       case "about": return <AboutContent />
       case "features": return <FeaturesContent />
+      case "founder-story": return <FounderStory />
       case "pricing": return <PricingContent />
       case "get-started": return <GetStartedContent />
       case "rfd": return (
@@ -204,7 +217,7 @@ export function Desktop() {
       <img
         src="/stained-glass-nature-scene-lower-right.jpg"
         alt=""
-        className="absolute bottom-0 right-0 w-[55%] h-[60%] opacity-45 pointer-events-none"
+        className="absolute bottom-0 right-0 w-[55%] h-[60%] opacity-45 pointer-events-none select-none"
         style={{
           maskImage: "linear-gradient(to top left, black 60%, transparent 100%)",
           WebkitMaskImage: "linear-gradient(to top left, black 60%, transparent 100%)",
@@ -234,7 +247,7 @@ export function Desktop() {
         <DesktopIcon icon="📋" label="RFDs" onClick={() => openWindow("rfd")} />
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
         <div className="text-center px-4">
           <h1 className="text-4xl sm:text-6xl font-bold text-[oklch(0.48_0.10_30)] mb-4 drop-shadow-lg">Affable</h1>
           <p className="text-lg sm:text-xl text-[oklch(0.40_0.06_45)]">Click an icon or menu to learn more</p>

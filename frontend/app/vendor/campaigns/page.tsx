@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { Plus, Search, MoreVertical, Users, MousePointerClick, TrendingUp, DollarSign, Eye, Edit, Pause, Play } from 'lucide-react';
+import { Plus, Search, MoreVertical, Users, MousePointerClick, TrendingUp, DollarSign, Eye, Edit, Pause, Play, Megaphone } from 'lucide-react';
 
 export type CampaignStatus = 'active' | 'paused' | 'draft' | 'archived';
 
@@ -108,7 +108,7 @@ export default function VendorCampaigns() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Campaigns</h1>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2"> <Megaphone size={32} className="text-blue-600" /> Campaigns</h1>
               <p className="text-gray-600 mt-1">Manage your partner campaigns</p>
             </div>
             <button
@@ -303,7 +303,7 @@ function StatBox({ icon, label, value, badge }: StatBoxProps) {
   );
 }
 
-function CreateCampaignModal({ onClose }) {
+function CreateCampaignModal({ onClose }: { onClose: () => void }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -315,7 +315,7 @@ function CreateCampaignModal({ onClose }) {
     isPublic: true,
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     // In production, submit to API
     console.log('Creating campaign:', formData);

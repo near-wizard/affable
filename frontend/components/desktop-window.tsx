@@ -28,8 +28,8 @@ export function DesktopWindow({
     const vw = typeof window !== 'undefined' ? window.innerWidth : 700
     const vh = typeof window !== 'undefined' ? window.innerHeight : 500
     return {
-      width: Math.min(700, vw * 0.9),
-      height: Math.min(500, vh * 0.7)
+      width: Math.min(800, vw * 0.9),
+      height: Math.min(600, vh * 0.7)
     }
   })
   const [isDragging, setIsDragging] = useState(false)

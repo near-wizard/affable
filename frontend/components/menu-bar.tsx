@@ -27,15 +27,17 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
       id: "affable",
       label: "Affable",
       items: [
+        { label: "Founder Story", action: "founder-story" },
         { label: "About Affable", action: "about" },
-        { label: "Get Started", action: "get-started" },
+        
         { label: "Exit", action: null },
       ],
     },
     {
-      id: "view",
-      label: "View",
+      id: "vendor",
+      label: "Vendor",
       items: [
+        { label: "Get Started", action: "get-started" },
         { label: "Features", action: "features" },
         { label: "Pricing", action: "pricing" },
       ],
@@ -46,6 +48,7 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
       items: [
         { label: "GitHub Repo", url: "https://github.com/near-wizard/affable" },
         { label: "Roadmap", url: "https://trello.com/invite/b/68e24bf4fd5a898d0c25c4a6/ATTI3e3b72407bc0a350edbda3bc3faf0889656221A5/affable-link" },
+        { label: "Request For Discussion", action: "rfd" },
       ],
     },
     {
@@ -74,7 +77,7 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
   return (
     <div
       ref={menuRef}
-      className="h-8 border-b-2 border-[oklch(0.60_0.06_50)] flex items-center px-2 gap-1 shadow-[inset_0_1px_0_0_oklch(0.85_0.04_65)] bg-[oklch(0.72_0.05_55)] relative z-50"
+      className="h-8 border-b-2 border-[oklch(0.60_0.06_50)] flex items-center px-2 gap-1 shadow-[inset_0_1px_0_0_oklch(0.85_0.04_65)] bg-[oklch(0.72_0.05_55)] relative z-50 select-none"
     >
       {menus.map((menu) => (
         <div key={menu.id} className="relative">
