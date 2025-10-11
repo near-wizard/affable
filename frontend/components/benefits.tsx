@@ -16,7 +16,7 @@ export function Benefits() {
             Built for teams that move fast
           </h2>
           <p className="mt-4 text-lg text-muted-foreground text-pretty">
-            Join forward-thinking companies already scaling their affiliate programs with confidence.
+            Join forward-thinking companies already scaling their partner programs with confidence.
           </p>
         </div>
 

@@ -1,3 +1,4 @@
+"use client"
 import { useState, useEffect } from 'react';
 import { Plus, Search, MoreVertical, Users, MousePointerClick, TrendingUp, DollarSign, Eye, Edit, Pause, Play } from 'lucide-react';
 
@@ -194,7 +195,7 @@ export default function VendorCampaigns() {
                     icon={<Users size={16} className="text-blue-600" />}
                     label="Active Partners"
                     value={campaign.activePartners}
-                    badge={campaign.pendingPartners > 0 ? `${campaign.pendingPartners} pending` : null}
+                    badge={campaign.pendingPartners > 0 ? `${campaign.pendingPartners} pending` : undefined}
                   />
                   <StatBox
                     icon={<MousePointerClick size={16} className="text-purple-600" />}
@@ -318,6 +319,7 @@ function CreateCampaignModal({ onClose }) {
     e.preventDefault();
     // In production, submit to API
     console.log('Creating campaign:', formData);
+
     onClose();
   };
 

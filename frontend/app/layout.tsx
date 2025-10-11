@@ -24,7 +24,7 @@ export default function RootLayout({
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-        <meta name="description" content="Affable - Affiliate Management for PostHog" />
+        <meta name="description" content="Affable - Partner Management Platform" />
         <title>Affable</title>
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <Script id="posthog-init" strategy="afterInteractive">

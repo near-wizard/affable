@@ -5,22 +5,17 @@ const features = [
   {
     icon: TrendingUp,
     title: "Real-Time Tracking",
-    description: "Monitor affiliate performance with live conversion tracking and attribution modeling.",
+    description: "Monitor partner performance with live conversion tracking and attribution modeling.",
   },
   {
     icon: Users,
-    title: "Affiliate Management",
-    description: "Onboard, manage, and communicate with your affiliate partners from one dashboard.",
+    title: "Partner Management",
+    description: "Onboard, manage, and communicate with your partners from one dashboard.",
   },
   {
     icon: DollarSign,
     title: "Commission Automation",
     description: "Automatically calculate and process commissions based on your custom rules.",
-  },
-  {
-    icon: Zap,
-    title: "PostHog Native",
-    description: "Built directly into PostHog—no data silos, no integration headaches.",
   },
   {
     icon: Shield,
@@ -30,7 +25,7 @@ const features = [
   {
     icon: BarChart,
     title: "Advanced Analytics",
-    description: "Deep insights into affiliate performance, ROI, and customer lifetime value.",
+    description: "Deep insights into partner performance, ROI, and customer lifetime value.",
   },
 ]
 
@@ -40,7 +35,7 @@ export function Features() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl text-balance">
-            Everything you need to run a successful affiliate program
+            Everything you need to run a successful partner program
           </h2>
           <p className="mt-4 text-lg text-muted-foreground text-pretty">
             Powerful features designed for growth teams who demand precision and scale.

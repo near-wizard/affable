@@ -18,8 +18,8 @@ export function Hero() {
           </h1>
 
           <p className="mb-10 text-lg leading-relaxed text-muted-foreground sm:text-xl text-pretty">
-            The complete affiliate management solution built for PostHog. Monitor conversions, track commissions, and
-            scale your affiliate program with real-time analytics.
+            The complete partner management solution built for PostHog. Monitor conversions, track commissions, and
+            scale your partner program with real-time analytics.
           </p>
 
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">

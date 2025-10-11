@@ -3,7 +3,7 @@ function AboutContent() {
   return (
     <div className="prose prose-sm max-w-none">
       <h2 className="text-2xl font-bold mb-4">About Affable</h2>
-      <p className="mb-4">Affable is a comprehensive affiliate management solution built specifically for PostHog users. Track conversions, manage commissions, and scale your affiliate program with real-time analytics.</p>
+      <p className="mb-4">Affable is a comprehensive partner management solution built specifically for PostHog users. Track conversions, manage commissions, and scale your affiliate program with real-time analytics.</p>
       <h3 className="text-xl font-semibold mb-2">Key Benefits</h3>
       <ul className="list-disc pl-5 space-y-1">
         <li>Seamless PostHog integration</li>

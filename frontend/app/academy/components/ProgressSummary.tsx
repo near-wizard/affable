@@ -43,7 +43,7 @@ export function ProgressSummary() {
           <Users className="text-green-600" />
           <div>
             <CardTitle>Community</CardTitle>
-            <CardDescription>Connect with affiliates</CardDescription>
+            <CardDescription>Connect with partners</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
