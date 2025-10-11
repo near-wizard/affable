@@ -34,10 +34,17 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
       ],
     },
     {
+      id: "partner",
+      label: "Partner",
+      items: [
+        { label: "Waiting List", action: "interestForm-partner" },
+      ],
+    },
+    {
       id: "vendor",
       label: "Vendor",
       items: [
-        { label: "Get Started", action: "get-started" },
+        { label: "Wating List", action: "interestForm-vendor" },
         { label: "Features", action: "features" },
         { label: "Pricing", action: "pricing" },
       ],

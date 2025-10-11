@@ -74,6 +74,12 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
+/* Parent of front/back faces */
+.transform-3d-parent {
+  transform-style: preserve-3d; /* <-- needed */
+}
+
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

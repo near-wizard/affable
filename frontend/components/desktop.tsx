@@ -6,7 +6,6 @@ import { DesktopWindow } from "./desktop-window"
 import { AboutContent } from "./window-content/about"
 import { FeaturesContent } from "./window-content/features"
 import { PricingContent } from "./window-content/pricing"
-import { GetStartedContent } from "./window-content/get-started"
 import { MenuBar } from "./menu-bar"
 import { WindowType } from "@/types/window"
 import { getCookie, setCookie } from "@/utils/cookies"
@@ -16,6 +15,9 @@ import { useParams, useRouter } from "next/navigation"
 import { RFDContent } from "./window-content/rfd"
 import { loadPostHog } from "@/utils/posthogLazyLoader"
 import FounderStory from "./window-content/founder-story"
+import VendorInterestForm from "./window-content/interestForm-vendor"
+import PartnerInterestForm from "./window-content/interestForm-partner"
+import CoinFlipGame from "./window-content/coinflip"
 
 export function Desktop() {
   const [windows, setWindows] = useState<Array<{ id: string; type: string; title: string; zIndex: number; position: { x: number; y: number }, subRoute?: string  }>>([])
@@ -44,7 +46,7 @@ export function Desktop() {
     if (!initialSlug) return
     console.log('initialSlug:', initialSlug);
 
-    const valid = ["about", "features", "pricing", "get-started", "rfd"]
+    const valid = ["about", "features", "pricing", "interestForm-vendor", "interestForm-partner", "rfd", "founder-story"]
     if (valid.includes(initialSlug)) {
       console.log('Valid slug detected, opening window...');
       hasInitialized.current = true
@@ -106,7 +108,8 @@ export function Desktop() {
       about: "About - Affable",
       features: "Features - Affable",
       pricing: "Pricing - Affable",
-      "get-started": "Get Started - Affable",
+      "interestForm-Vendor": "Vendor Interest Form - Affable",
+      "interestForm-Partner": "Partner Interest Form - Affable",
       rfd: "RFDs - Affable"
     }
 
@@ -134,29 +137,23 @@ export function Desktop() {
 
     setWindows(prev => [...prev, newWindow])
     setNextZIndex(prev => prev + 1)
-    
-    // Update URL immediately without navigation
-    const url = subRoute ? `/${type}/${subRoute}` : `/${type}`
-    window.history.replaceState({}, '', url)
   }
 
   const closeWindow = (id: string) => {
     setWindows(prev => {
-      const remaining = prev.filter(w => w.id !== id)
-  
-      if (remaining.length > 0) {
-        // find window with highest zIndex (top-most)
-        const top = remaining.reduce((a, b) => (a.zIndex > b.zIndex ? a : b))
-        const url = top.subRoute ? `/${top.type}/${top.subRoute}` : `/${top.type}`
-        window.history.replaceState({}, '', url)
-      } else {
-        // if no windows remain, reset URL to root
-        window.history.replaceState({}, '', '/')
-      }
-  
-      return remaining
+      return prev.filter(w => w.id !== id)
     })
   }
+  // After windows changes, update URL
+  useEffect(() => {
+    if (windows.length > 0) {
+      const top = windows.reduce((a, b) => (a.zIndex > b.zIndex ? a : b))
+      const url = top.subRoute ? `/${top.type}/${top.subRoute}` : `/${top.type}`
+      window.history.replaceState({}, '', url)
+    } else {
+      window.history.replaceState({}, '', '/')
+    }
+  }, [windows])
 
   const focusWindow = (id: string, newSubRoute?: string) => {
     setWindows(prev => {
@@ -193,7 +190,9 @@ export function Desktop() {
       case "features": return <FeaturesContent />
       case "founder-story": return <FounderStory />
       case "pricing": return <PricingContent />
-      case "get-started": return <GetStartedContent />
+      case "interestForm-partner": return <PartnerInterestForm />
+      case "interestForm-vendor": return <VendorInterestForm />
+      case "coinFlip": return <CoinFlipGame />
       case "rfd": return (
         <RFDContent 
           initialNumber={window.subRoute ? parseInt(window.subRoute) : undefined}
@@ -226,24 +225,49 @@ export function Desktop() {
 
       {/* Desktop Icons - Left Side - Hidden on small mobile */}
       <div className="hidden sm:flex absolute left-6 top-14 flex-col gap-8 z-10">
+        <DesktopIcon icon="🌱" label="Founder.story" onClick={() => openWindow("founder-story")} />
         <DesktopIcon icon="📄" label="About.txt" onClick={() => openWindow("about")} />
-        <DesktopIcon icon="📊" label="Features" onClick={() => openWindow("features")} />
-        <DesktopIcon icon="💰" label="Pricing" onClick={() => openWindow("pricing")} />
+        <DesktopIcon 
+          icon="🖥️" 
+          label="VendorView.wip 🌐" 
+          onClick={() => window.open("https://affablelink.com/vendor", "_blank")} 
+        />
+        <DesktopIcon 
+          icon="🤝" 
+          label="PartnerView.wip 🌐" 
+          onClick={() => window.open("https://affablelink.com/partner", "_blank")} 
+        />
+        <DesktopIcon 
+          icon="🪙" 
+          label="Coin.flip" 
+          onClick={() => openWindow("coinFlip")} 
+        />
       </div>
 
       {/* Desktop Icons - Right Side - Hidden on small mobile */}
       <div className="hidden sm:flex absolute right-6 top-14 flex-col gap-8 z-10">
-        <DesktopIcon icon="🚀" label="Get Started" onClick={() => openWindow("get-started")} />
+        <DesktopIcon icon="📊" label="Features.feat" onClick={() => openWindow("features")} />
+        <DesktopIcon icon="💰" label="Pricing.cash" onClick={() => openWindow("pricing")} />
         <DesktopIcon icon="📋" label="RFDs" onClick={() => openWindow("rfd")} />
         <DesktopIcon icon="🗑️" label="Trash" onClick={() => {}} disabled />
       </div>
 
       {/* Mobile Icon Grid - Shown only on small screens */}
       <div className="sm:hidden absolute inset-x-4 top-14 grid grid-cols-3 gap-4 z-10">
+        <DesktopIcon icon="🌱" label="Founder Story" onClick={() => openWindow("founder-story")} />
         <DesktopIcon icon="📄" label="About" onClick={() => openWindow("about")} />
+        <DesktopIcon 
+          icon="🖥️" 
+          label="VendorView.wip 🌐" 
+          onClick={() => window.open("https://affablelink.com/vendor", "_blank")} 
+        />
+        <DesktopIcon 
+          icon="🤝" 
+          label="PartnerView.wip 🌐" 
+          onClick={() => window.open("https://affablelink.com/partner", "_blank")} 
+        />
         <DesktopIcon icon="📊" label="Features" onClick={() => openWindow("features")} />
         <DesktopIcon icon="💰" label="Pricing" onClick={() => openWindow("pricing")} />
-        <DesktopIcon icon="🚀" label="Start" onClick={() => openWindow("get-started")} />
         <DesktopIcon icon="📋" label="RFDs" onClick={() => openWindow("rfd")} />
       </div>
 
