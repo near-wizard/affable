@@ -18,6 +18,9 @@ import FounderStory from "./window-content/founder-story"
 import VendorInterestForm from "./window-content/interestForm-vendor"
 import PartnerInterestForm from "./window-content/interestForm-partner"
 import CoinFlipGame from "./window-content/coinflip"
+import { ProductHuntPage } from "./window-content/producthuntpage"
+import { YCPage } from "./window-content/ycpage"
+import TinySeedPage from "./window-content/tinyseedpage"
 
 export function Desktop() {
   const [windows, setWindows] = useState<Array<{ id: string; type: string; title: string; zIndex: number; position: { x: number; y: number }, subRoute?: string  }>>([])
@@ -46,7 +49,7 @@ export function Desktop() {
     if (!initialSlug) return
     console.log('initialSlug:', initialSlug);
 
-    const valid = ["about", "features", "pricing", "interestForm-vendor", "interestForm-partner", "rfd", "founder-story"]
+    const valid = ["about", "features", "pricing", "interestForm-vendor", "interestForm-partner", "rfd", "founder-story", "yc", "producthunt", "tinyseed"]
     if (valid.includes(initialSlug)) {
       console.log('Valid slug detected, opening window...');
       hasInitialized.current = true
@@ -192,6 +195,9 @@ export function Desktop() {
       case "pricing": return <PricingContent />
       case "interestForm-partner": return <PartnerInterestForm />
       case "interestForm-vendor": return <VendorInterestForm />
+      case "tinyseed": return <TinySeedPage />
+      case "yc": return <YCPage />
+      case "producthunt": return <ProductHuntPage />
       case "coinFlip": return <CoinFlipGame />
       case "rfd": return (
         <RFDContent 
