@@ -84,9 +84,9 @@ export function PricingContent() {
 		{
 			name: "Beta",
 			type: "flat",
-			price: 20,
+			price: 25,
 			performanceFee: "20% of GMV",
-			breakevenMRR: 1980,
+			breakevenMRR: 4000,
 			targetAudience: [
 				"Launching your first product or planning your first launch",
 				"Testing your product with minimal recurring costs",
@@ -97,10 +97,10 @@ export function PricingContent() {
 		{
 			name: "Bootstrap",
 			type: "recurring",
-			monthly: 99,
-			annual: 99 * 11,
+			monthly: 200,
+			annual: 200 * 11,
 			performanceFee: "15% of GMV",
-			breakevenMRR: 18000,
+			breakevenMRR: 36000,
 			targetAudience: [
 				"Small teams with a few partners, ready to start scaling",
 				"Businesses that want an affordable monthly subscription with moderate GMV",
@@ -109,8 +109,8 @@ export function PricingContent() {
 		{
 			name: "Accelerator",
 			type: "recurring",
-			monthly: 999,
-			annual: 999 * 11,
+			monthly: 2000,
+			annual: 2000 * 11,
 			performanceFee: "10% of GMV",
 			targetAudience: [
 				"Large and growing companies, scaling partner programs",
