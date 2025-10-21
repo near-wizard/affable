@@ -1,11 +1,13 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 
 export function PricingContent() {
-  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly")
+	const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
+		"monthly"
+	);
 
-  const plans = [
+	/* const plans = [
     {
       name: "Beta",
       type: "recurring",
@@ -76,111 +78,192 @@ export function PricingContent() {
         "You need custom integrations",
       ],
     },
-  ]
+  ] */
 
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-foreground">Pricing Plans</h2>
+	const plans = [
+		{
+			name: "Beta",
+			type: "flat",
+			price: 20,
+			performanceFee: "20% of GMV",
+			breakevenMRR: 1980,
+			targetAudience: [
+				"Launching your first product or planning your first launch",
+				"Testing your product with minimal recurring costs",
+				"Making a small (one-time) $20 commitment to show you’re serious (credited toward your first payout)",
+			],
+			popular: true,
+		},
+		{
+			name: "Bootstrap",
+			type: "recurring",
+			monthly: 99,
+			annual: 99 * 11,
+			performanceFee: "15% of GMV",
+			breakevenMRR: 18000,
+			targetAudience: [
+				"Small teams with a few partners, ready to start scaling",
+				"Businesses that want an affordable monthly subscription with moderate GMV",
+			],
+		},
+		{
+			name: "Accelerator",
+			type: "recurring",
+			monthly: 999,
+			annual: 999 * 11,
+			performanceFee: "10% of GMV",
+			targetAudience: [
+				"Large and growing companies, scaling partner programs",
+				"Pay a predictable monthly fee and retain a larger share of your partner-generated revenue.",
+			],
+		},
+		{
+			name: "Enterprise",
+			type: "custom",
+			price: "Custom",
+			performanceFee: "Negotiated",
+			targetAudience: [
+				"Large organizations with mature partner ecosystems and complex needs.",
+				"Companies that require a dedicated support team",
+				"Businesses needing custom integrations to be prioritized on our roadmap",
+			],
+		},
+	];
 
-      <div className="text-2xl text-foreground mb-6">
-        At AffableLink
-        <ul className="list-disc ml-5 mt-2">
-          <li>Your plan determines how much you pay as a consistent fee versus a performance-based fee on partner payouts.</li>
-          <li>No features are locked behind tiers.</li>
-          <li>Buying an annual plan gets you one month free.</li>
-        </ul>
-      </div>
+	return (
+		<div className="space-y-6">
+			<h2 className="text-2xl font-bold text-foreground">Pricing Plans</h2>
 
-      {/* Billing Toggle */}
-      <div className="flex gap-4 mb-6">
-        <button
-          className={`px-4 py-2 rounded ${
-            billingPeriod === "monthly" ? "bg-primary text-primary-foreground" : "bg-muted"
-          }`}
-          onClick={() => setBillingPeriod("monthly")}
-        >
-          Monthly
-        </button>
-        <button
-          className={`px-4 py-2 rounded ${
-            billingPeriod === "annual" ? "bg-primary text-primary-foreground" : "bg-muted"
-          }`}
-          onClick={() => setBillingPeriod("annual")}
-        >
-          Annual
-        </button>
-      </div>
+			<div className="text-2xl text-foreground mb-6">
+				At AffableLink
+				<ul className="list-disc ml-5 mt-2">
+					<li>
+						Your plan determines how much you pay as a consistent fee versus a
+						performance-based fee. Check the tooltips for breakeven MMR ranges.
+					</li>
+					<li>No features are locked behind tiers.</li>
+					<li>Buying an annual plan gets you one month free.</li>
+				</ul>
+			</div>
 
-      <div className="grid md:grid-cols-4 gap-4">
-        {plans.map((plan, index) => (
-          <div
-            key={index}
-            className={`bg-muted p-5 rounded border-2 ${
-              plan.popular ? "border-primary" : "border-border"
-            } relative`}
-          >
-            {plan.popular && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold rounded">
-                POPULAR
-              </div>
-            )}
+			{/* Billing Toggle */}
+			<div className="flex gap-4 mb-6">
+				<button
+					className={`px-4 py-2 rounded ${
+						billingPeriod === "monthly"
+							? "bg-primary text-primary-foreground"
+							: "bg-muted"
+					}`}
+					onClick={() => setBillingPeriod("monthly")}
+				>
+					Monthly
+				</button>
+				<button
+					className={`px-4 py-2 rounded ${
+						billingPeriod === "annual"
+							? "bg-primary text-primary-foreground"
+							: "bg-muted"
+					}`}
+					onClick={() => setBillingPeriod("annual")}
+				>
+					Annual
+				</button>
+			</div>
 
-            <h3 className="font-bold text-lg text-foreground mb-2">{plan.name}</h3>
+			<div className="grid md:grid-cols-4 gap-4">
+				{plans.map((plan, index) => (
+					<div
+						key={index}
+						className={`bg-muted p-5 rounded border-2 ${
+							plan.popular ? "border-primary" : "border-border"
+						} relative`}
+					>
+						{plan.popular && (
+							<div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold rounded">
+								POPULAR
+							</div>
+						)}
 
-            <div className="mb-4 flex items-center gap-2">
-              {plan.type === "recurring" && (
-                <>
-                  <span className="text-3xl font-bold text-foreground">
-                    ${billingPeriod === "monthly" ? new Intl.NumberFormat('en-US').format(plan.monthly ?? 0) : new Intl.NumberFormat('en-US').format(plan.annual ?? 0)}
-                  </span>
-                  <span className="text-sm text-foreground/60">
-                    {billingPeriod === "monthly" ? "/mo" : "/yr"}
-                  </span>
-                </>
-              )}
+						<h3 className="font-bold text-lg text-foreground mb-2">
+							{plan.name}
+						</h3>
 
-              {plan.type === "flat" && (
-                <span className="text-3xl font-bold text-foreground">${new Intl.NumberFormat('en-US').format(plan.price ?? 0)}</span>
-              )}
+						<div className="mb-4 flex items-center gap-2">
+							{plan.type === "recurring" && (
+								<>
+									<span className="text-3xl font-bold text-foreground">
+										$
+										{billingPeriod === "monthly"
+											? new Intl.NumberFormat("en-US").format(plan.monthly ?? 0)
+											: new Intl.NumberFormat("en-US").format(plan.annual ?? 0)}
+									</span>
+									<span className="text-sm text-foreground/60">
+										{billingPeriod === "monthly" ? "/mo" : "/yr"}
+									</span>
+								</>
+							)}
 
-              {plan.type === "custom" && <span className="text-3xl font-bold text-foreground">{plan.price}</span>}
+							{plan.type === "flat" && (
+								<>
+									<span className="text-3xl font-bold text-foreground">
+										${new Intl.NumberFormat("en-US").format(plan.price ?? 0)}
+									</span>
+									<span className="text-sm text-foreground/60">flat</span>
+								</>
+							)}
 
-              {plan.performanceFee && (
-                <div className="text-xs text-foreground/70 mt-1">{plan.performanceFee}</div>
-              )}
+							{plan.type === "custom" && (
+								<span className="text-3xl font-bold text-foreground">
+									{plan.price}
+								</span>
+							)}
 
-              {/* Breakeven tooltip */}
-              {plan.breakevenMRR && plan.breakevenPartnerPayouts && (
-                <div className="ml-1 relative group cursor-pointer">
-                  <span className="text-xs font-semibold text-primary">ⓘ</span>
-                  <div className="absolute bottom-full mb-2 w-64 p-2 bg-foreground text-background text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-[9999]">
-                    <strong>Breakeven Example:</strong> Upgrading becomes cost-effective if your monthly partner payouts exceed <strong>${new Intl.NumberFormat('en-US').format(plan.breakevenPartnerPayouts ?? 0)}</strong> 
-                    (which corresponds to <strong>${new Intl.NumberFormat('en-US').format(plan.breakevenMRR ?? 0)}</strong> in MRR generated through partner sales).<br />
-                    <em>Assumes partner payouts = 20% of partner-driven MRR and performance fees as listed.</em>
-                  </div>
-                </div>
-              )}
+							{plan.performanceFee && (
+								<div className="text-xs text-foreground/70 mt-1">
+									{plan.performanceFee}
+								</div>
+							)}
 
-              {plan.breakevenTime && (
-                <div className="ml-1 relative group cursor-pointer">
-                  <span className="text-xs font-semibold text-primary">ⓘ</span>
-                  <div className="absolute bottom-full mb-2 w-64 p-2 bg-foreground text-background text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-[9999]">
-                    <strong>Breakeven Time:</strong> Lifetime Access becomes cost-effective if you plan to stay on Accelerator for <strong>{plan.breakevenTime}</strong>.<br />
-                    <em>Assumes partner payouts = 20% of partner-driven MRR and performance fees as listed.</em>
-                  </div>
-                </div>
-              )}
-            </div>
+							{/* Breakeven tooltip */}
+							{plan.breakevenMRR && (
+								<div className="ml-1 relative group cursor-pointer">
+									<span className="text-xs font-semibold text-primary">ⓘ</span>
+									<div className="absolute bottom-full mb-2 w-64 p-2 bg-foreground text-background text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-[9999]">
+										<strong>Breakeven Example:</strong> Upgrading to the next
+										plan becomes cost-effective if your platform revenue hits{" "}
+										<strong>
+											$
+											{new Intl.NumberFormat("en-US").format(
+												plan.breakevenMRR ?? 0
+											)}
+										</strong>
+										{"/mo "}
+									</div>
+								</div>
+							)}
 
-            <strong className="text-foreground">Perfect For</strong>
-            <ul className="space-y-2 text-sm text-foreground/80 mt-1">
-              {plan.targetAudience.map((feature, i) => (
-                <li key={i}>✓ {feature}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
+							{plan.breakevenTime && (
+								<div className="ml-1 relative group cursor-pointer">
+									<span className="text-xs font-semibold text-primary">ⓘ</span>
+									<div className="absolute bottom-full mb-2 w-64 p-2 bg-foreground text-background text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-[9999]">
+										<strong>Breakeven Time:</strong> Lifetime Access becomes
+										cost-effective after <strong>{plan.breakevenTime}</strong>{" "}
+										on Accelerator.
+										<br />
+									</div>
+								</div>
+							)}
+						</div>
+
+						<strong className="text-foreground">Perfect For</strong>
+						<ul className="space-y-2 text-sm text-foreground/80 mt-1">
+							{plan.targetAudience.map((feature, i) => (
+								<li key={i}>✓ {feature}</li>
+							))}
+						</ul>
+					</div>
+				))}
+			</div>
+		</div>
+	);
 }
