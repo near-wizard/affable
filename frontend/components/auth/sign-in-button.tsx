@@ -1,11 +1,8 @@
 // components/auth/sign-in-button.tsx
-'use client';
+"use client";
 
-import { ClerkProvider, SignInButton as ClerkSignInButton } from '@clerk/nextjs';
+import { Button } from "../ui/button";
 
 export function SignInButton() {
-  // Wrapper around Clerk component
-  return (<ClerkProvider>
-    <ClerkSignInButton mode="modal" />
-  </ClerkProvider>);
+	<Button>Signup</Button>;
 }
