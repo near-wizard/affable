@@ -5,7 +5,7 @@
 -- CREATE DATABASE affiliate_platform;
 
 -- Connect to database
-\c affiliate_platform;
+\c affable_postgres_prod;
 
 -- Set timezone
 SET timezone = 'UTC';

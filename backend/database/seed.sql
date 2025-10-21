@@ -606,7 +606,7 @@ INSERT INTO audit_logs (entity_type, entity_id, action, actor_type, actor_id, ch
 -- COMPLETION MESSAGE
 -- =====================================================
 
-DO $
+DO $$
 BEGIN
     RAISE NOTICE '==============================================';
     RAISE NOTICE 'Database seeded successfully!';
@@ -625,4 +625,4 @@ BEGIN
     RAISE NOTICE 'Vendor: admin@techsaas.com';
     RAISE NOTICE 'Partner: contact@techreviewerpro.com';
     RAISE NOTICE '==============================================';
-END $;
+END $$;

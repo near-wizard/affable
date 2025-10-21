@@ -1,10 +1,8 @@
-version: "3.8"
-
 services:
   # PostgreSQL Database - Production
   postgres:
     image: postgres:15-alpine
-    container_name: affiliate_postgres_prod
+    container_name: affable_postgres_prod
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -137,21 +135,21 @@ services:
     command: celery -A app.workers.celery_app beat --loglevel=warning
 
   # Nginx Reverse Proxy - Production
-  nginx:
-    image: nginx:alpine
-    container_name: affiliate_nginx_prod
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - ./nginx/logs:/var/log/nginx
-    restart: unless-stopped
-    depends_on:
-      - api
-    networks:
-      - affiliate_network
+  #nginx:
+  #  image: nginx:alpine
+  #  container_name: affiliate_nginx_prod
+  #  ports:
+  #    - "80:80"
+  #    - "443:443"
+  #  volumes:
+  #    - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #    - ./nginx/ssl:/etc/nginx/ssl:ro
+  #    - ./nginx/logs:/var/log/nginx
+  #  restart: unless-stopped
+  #  depends_on:
+  #    - api
+  #  networks:
+  #    - affiliate_network
 
 networks:
   affiliate_network:
