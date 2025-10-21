@@ -1,0 +1,84 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.dev
+.env.prod
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite3
+database/backups/*.sql
+
+# Docker
+*.pid
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Node (for TypeScript SDK)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# Build artifacts
+*.tar.gz
+*.zip
+sdk/python/dist/
+sdk/typescript/dist/
