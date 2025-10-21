@@ -117,9 +117,9 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
         </div>
       ))}
 
-      <SignInButton />
 
       <div className="ml-auto flex items-center gap-2 text-xs">
+        <SignInButton />
         <Timer />
       </div>
     </div>

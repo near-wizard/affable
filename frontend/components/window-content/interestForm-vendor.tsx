@@ -24,6 +24,14 @@ export default function VendorInterestForm() {
     crmOther: '',
     eventTracking: [] as string[],
     eventTrackingOther: '',
+
+    // New Fields
+    partnershipType: [] as string[],
+    existingAffiliateProgram: '',
+    affiliatePlatform: '',
+    contactPreference: '',
+    decisionTimeline: '',
+    heardAbout: '',
   })
 
   const [submitted, setSubmitted] = useState(false)
@@ -34,8 +42,10 @@ export default function VendorInterestForm() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type, checked } = e.target as HTMLInputElement
+
+    // Handle grouped checkboxes (e.g., paymentProcessing__Stripe)
     if (type === 'checkbox') {
-      const [field, _] = name.split('__') // e.g., "paymentProcessing__Stripe"
+      const [field, _] = name.split('__')
       setFormData((prev) => {
         const prevArr = prev[field as keyof typeof prev] as string[]
         if (checked) {
@@ -87,9 +97,9 @@ export default function VendorInterestForm() {
 
   const renderCheckboxGroup = (
     label: string,
-    field: 'paymentProcessing' | 'crm' | 'eventTracking',
+    field: 'paymentProcessing' | 'crm' | 'eventTracking' | 'partnershipType',
     options: string[],
-    otherField: 'paymentProcessingOther' | 'crmOther' | 'eventTrackingOther'
+    otherField?: 'paymentProcessingOther' | 'crmOther' | 'eventTrackingOther'
   ) => (
     <div className="space-y-2">
       <Label>{label} (optional)</Label>
@@ -107,27 +117,29 @@ export default function VendorInterestForm() {
             <span className="text-gray-700">{option}</span>
           </label>
         ))}
-        {/* Other write-in */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            name={`${otherField}__Other`}
-            value="Other"
-            checked={!!formData[otherField]}
-            onChange={(e) => {
-              if (!formData[otherField]) setFormData({ ...formData, [otherField]: '' })
-            }}
-            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-          />
-          <input
-            type="text"
-            placeholder="Other (write in)"
-            name={otherField}
-            value={formData[otherField]}
-            onChange={handleChange}
-            className="flex-1 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
-          />
-        </div>
+
+        {otherField && (
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name={`${otherField}__Other`}
+              value="Other"
+              checked={!!formData[otherField]}
+              onChange={(e) => {
+                if (!formData[otherField]) setFormData({ ...formData, [otherField]: '' })
+              }}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <input
+              type="text"
+              placeholder="Other (write in)"
+              name={otherField}
+              value={formData[otherField]}
+              onChange={handleChange}
+              className="flex-1 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
+            />
+          </div>
+        )}
       </div>
     </div>
   )
@@ -264,11 +276,18 @@ export default function VendorInterestForm() {
             />
           </div>
 
+          {/* New Section: Partnership Interests */}
+          {renderCheckboxGroup(
+            'Partnership Interests',
+            'partnershipType',
+            ['Affiliate Program', 'Referral Program', 'Reseller / White-Label']
+          )}
+
           {/* Optional Tech Stack Checkboxes */}
           {renderCheckboxGroup(
             'Payment Processing',
             'paymentProcessing',
-            ['Stripe', 'PayPal', 'Square'],
+            ['Stripe', 'PayPal', 'Paddle'],
             'paymentProcessingOther'
           )}
           {renderCheckboxGroup(
@@ -280,9 +299,84 @@ export default function VendorInterestForm() {
           {renderCheckboxGroup(
             'Event Tracking / Analytics',
             'eventTracking',
-            ['Google Analytics', 'Mixpanel', 'Segment'],
+            ['Google Analytics', 'Mixpanel', 'PostHog'],
             'eventTrackingOther'
           )}
+
+          {/* Program Management Context */}
+          <div className="space-y-2">
+            <Label htmlFor="existingAffiliateProgram">
+              Do you already have an affiliate or referral program?
+            </Label>
+            <select
+              id="existingAffiliateProgram"
+              name="existingAffiliateProgram"
+              value={formData.existingAffiliateProgram}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
+            >
+              <option value="">Select an option</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+              <option value="planning">Planning to launch soon</option>
+            </select>
+          </div>
+
+          {formData.existingAffiliateProgram === 'yes' && (
+            <div className="space-y-2">
+              <Label htmlFor="affiliatePlatform">What platform do you use?</Label>
+              <Input
+                id="affiliatePlatform"
+                name="affiliatePlatform"
+                type="text"
+                value={formData.affiliatePlatform}
+                onChange={handleChange}
+                placeholder="e.g., PartnerStack, Impact, Rewardful..."
+                className="bg-background"
+              />
+            </div>
+          )}
+
+          {/* Timeline */}
+          <div className="space-y-2">
+            <Label htmlFor="decisionTimeline">
+              When are you looking to launch or join a partner program?
+            </Label>
+            <select
+              id="decisionTimeline"
+              name="decisionTimeline"
+              value={formData.decisionTimeline}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
+            >
+              <option value="">Select a timeframe</option>
+              <option value="immediately">Immediately</option>
+              <option value="this-quarter">This quarter</option>
+              <option value="this-year">Later this year</option>
+              <option value="exploring">Just exploring</option>
+            </select>
+          </div>
+
+          {/* Marketing Angle */}
+          <div className="space-y-2">
+            <Label htmlFor="heardAbout">How did you hear about Affable?</Label>
+            <select
+              id="heardAbout"
+              name="heardAbout"
+              value={formData.heardAbout}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
+            >
+              <option value="">Select an option</option>
+              <option value="referral">Referral</option>
+              <option value="podcast">Podcast</option>
+              <option value="social">Social Media</option>
+              <option value="event">Event / Conference</option>
+              <option value="search">Search Engine</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Submitting...' : 'Submit Request'}
