@@ -6,12 +6,10 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const links = [
-  { name: "Dashboard", path: "/partner/dashboard" },
-  { name: "Links", path: "/partner/links" },
-  { name: "Earnings", path: "/partner/earnings" },
+  { name: "Dashboard", path: "/admin/dashboard" },
 ]
 
-export default function PartnerLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(true) // default open
   const pathname = usePathname()
 
@@ -35,7 +33,7 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
         `}
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-200">
-          <h2 className="font-bold text-lg">Partner Menu</h2>
+          <h2 className="font-bold text-lg">Admin Menu</h2>
           <button
             className="text-gray-600 hover:text-gray-900"
             onClick={() => setIsOpen(false)}
@@ -77,7 +75,7 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
           >
             <Menu size={24} />
           </button>
-          <h1 className="text-xl font-bold">Partner Page</h1>
+          <h1 className="text-xl font-bold">Admin Page</h1>
         </header>
 
         <main className="flex-1 overflow-auto">{children}</main>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Timer } from "./timer"
+import { SignInButton } from "./auth/sign-in-button"
 
 interface MenuBarProps {
   onWindowOpen?: (windowType: string) => void
@@ -115,6 +116,8 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
           )}
         </div>
       ))}
+
+      <SignInButton />
 
       <div className="ml-auto flex items-center gap-2 text-xs">
         <Timer />

@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { rfds, getRFDByNumber, searchRFDs, getRFDsByState, RFD, RFDState } from "@/content/rfd/rfds"
+import { RFD, RFDState } from "@/content/rfd/rfds"
 import ReactMarkdown from "react-markdown"
 
 interface RFDContentProps {
+  rfds: RFD[]  // Now passed from server component
   initialNumber?: number
   onNavigate?: (number?: number) => void
 }
@@ -18,30 +19,33 @@ const stateColors: Record<RFDState, string> = {
   abandoned: "bg-red-200 text-red-800"
 }
 
-export function RFDContent({ initialNumber, onNavigate }: RFDContentProps) {
+export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps) {
   const [view, setView] = useState<'list' | 'document'>(initialNumber ? 'document' : 'list')
   const [currentRFD, setCurrentRFD] = useState<RFD | null>(
-    initialNumber ? getRFDByNumber(initialNumber) || null : null
+    initialNumber ? rfds.find(rfd => rfd.number === initialNumber) || null : null
   )
   const [searchQuery, setSearchQuery] = useState("")
   const [showAutocomplete, setShowAutocomplete] = useState(false)
   const [filteredRFDs, setFilteredRFDs] = useState<RFD[]>(rfds)
   const [filterState, setFilterState] = useState<RFDState | 'all'>('all')
   const searchRef = useRef<HTMLDivElement>(null)
-  console.log("initial number", initialNumber, view)
 
   useEffect(() => {
     let results = rfds
     
     // Apply state filter
     if (filterState !== 'all') {
-      results = getRFDsByState(filterState)
+      results = rfds.filter(rfd => rfd.state === filterState)
     }
     
     // Apply search query
     if (searchQuery) {
-      results = searchRFDs(searchQuery).filter(rfd => 
-        filterState === 'all' || rfd.state === filterState
+      const lowerQuery = searchQuery.toLowerCase()
+      results = results.filter(rfd => 
+        rfd.title.toLowerCase().includes(lowerQuery) ||
+        rfd.content.toLowerCase().includes(lowerQuery) ||
+        rfd.labels.some(label => label.toLowerCase().includes(lowerQuery)) ||
+        rfd.authors.some(author => author.toLowerCase().includes(lowerQuery))
       )
       setShowAutocomplete(true)
     } else {
@@ -49,7 +53,7 @@ export function RFDContent({ initialNumber, onNavigate }: RFDContentProps) {
     }
     
     setFilteredRFDs(results)
-  }, [searchQuery, filterState])
+  }, [searchQuery, filterState, rfds])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -159,7 +163,7 @@ export function RFDContent({ initialNumber, onNavigate }: RFDContentProps) {
             {/* Autocomplete Dropdown */}
             {showAutocomplete && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-64 overflow-y-auto z-10">
-                {filteredRFDs.length > 0 ? (
+                {filteredRFDs?.length > 0 ? (
                   filteredRFDs.map(rfd => (
                     <button
                       key={rfd.number}
@@ -207,7 +211,7 @@ export function RFDContent({ initialNumber, onNavigate }: RFDContentProps) {
 
       {/* RFD List */}
       <div className="flex-1 overflow-y-auto">
-        {filteredRFDs.length > 0 ? (
+        {filteredRFDs?.length > 0 ? (
           filteredRFDs.map(rfd => (
             <button
               key={rfd.number}

@@ -1,23 +1,44 @@
+// content/rfd/rfds.ts
+// This file now acts as a client-side interface
+// In production, you'd populate this from a server component or API route
+
+import { RFD } from "@/lib/rfd-loader"
 
 export type RFDState = 'prediscussion' | 'ideation' | 'discussion' | 'published' | 'committed' | 'abandoned'
 
-export interface RFD {
-  number: number
-  title: string
-  state: RFDState
-  discussion: string // GitHub discussion URL
-  authors: string[]
-  date: string
-  labels: string[]
-  content: string
+// This will be populated by your server component
+export let rfds: RFD[] = []
+
+export function getRFDByNumber(number: number): RFD | undefined {
+  return rfds.find(rfd => rfd.number === number)
 }
 
+export function searchRFDs(query: string): RFD[] {
+  const lowerQuery = query.toLowerCase()
+  return rfds.filter(rfd => 
+    rfd.title.toLowerCase().includes(lowerQuery) ||
+    rfd.content.toLowerCase().includes(lowerQuery) ||
+    rfd.labels.some(label => label.toLowerCase().includes(lowerQuery)) ||
+    rfd.authors.some(author => author.toLowerCase().includes(lowerQuery))
+  )
+}
+
+export function getRFDsByState(state: RFDState): RFD[] {
+  return rfds.filter(rfd => rfd.state === state)
+}
+
+// Initialize with RFDs loaded from markdown files
+export function initializeRFDs(loadedRFDs: RFD[]) {
+  rfds = loadedRFDs
+}
+
+/*
 export const rfds: RFD[] = [
   {
     number: 1,
     title: "RFD 1: Requests for Discussion",
     state: "committed",
-    discussion: "https://github.com/near-wizard/affable/discussions/1",
+    discussion: "https://github.com/near-wizard/affable/discussions/17",
     authors: ["Jared Butler"],
     date: "2025-10-05",
     labels: ["meta"],
@@ -205,20 +226,4 @@ I'm putting this out there because it's a bet. Maybe I'm rationalizing a fun des
   }
 ]
 
-export function getRFDByNumber(number: number): RFD | undefined {
-  return rfds.find(rfd => rfd.number === number)
-}
-
-export function searchRFDs(query: string): RFD[] {
-  const lowerQuery = query.toLowerCase()
-  return rfds.filter(rfd => 
-    rfd.title.toLowerCase().includes(lowerQuery) ||
-    rfd.content.toLowerCase().includes(lowerQuery) ||
-    rfd.labels.some(label => label.toLowerCase().includes(lowerQuery)) ||
-    rfd.authors.some(author => author.toLowerCase().includes(lowerQuery))
-  )
-}
-
-export function getRFDsByState(state: RFDState): RFD[] {
-  return rfds.filter(rfd => rfd.state === state)
-}
+*/

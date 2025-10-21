@@ -303,34 +303,69 @@ function StatBox({ icon, label, value, badge }: StatBoxProps) {
   );
 }
 
-function CreateCampaignModal({ onClose }: { onClose: () => void }) {
+type CommissionType = 'flat' | 'percentage' | 'tiered'
+
+type Tier = {
+  id: number
+  min: number
+  max?: number
+  rewardType: 'flat' | 'percentage'
+  rewardValue: number
+}
+
+export function CreateCampaignModal({ onClose }: { onClose: () => void }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     destinationUrl: '',
-    commissionType: 'percentage',
+    commissionType: 'percentage' as CommissionType,
     commissionValue: '',
     cookieDuration: 30,
     approvalRequired: false,
     isPublic: true,
-  });
+    tiers: [] as Tier[],
+  })
 
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
-    // In production, submit to API
-    console.log('Creating campaign:', formData);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('Creating campaign:', formData)
+    // Here you would send formData to your API
+    onClose()
+  }
 
-    onClose();
-  };
+  const addTier = () => {
+    setFormData((prev) => ({
+      ...prev,
+      tiers: [
+        ...prev.tiers,
+        { id: Date.now(), min: 0, max: undefined, rewardType: 'percentage', rewardValue: 0 },
+      ],
+    }))
+  }
+
+  const updateTier = (id: number, key: keyof Tier, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      tiers: prev.tiers.map((t) => (t.id === id ? { ...t, [key]: value } : t)),
+    }))
+  }
+
+  const removeTier = (id: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      tiers: prev.tiers.filter((t) => t.id !== id),
+    }))
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">Create New Campaign</h2>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Basic fields */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Campaign Name *
@@ -339,9 +374,8 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
               type="text"
               required
               value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., Spring Launch 2025"
             />
           </div>
 
@@ -351,10 +385,9 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Describe your campaign and what partners should promote"
             />
           </div>
 
@@ -366,7 +399,7 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
               type="url"
               required
               value={formData.destinationUrl}
-              onChange={(e) => setFormData({...formData, destinationUrl: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, destinationUrl: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="https://yoursite.com/signup"
             />
@@ -375,22 +408,32 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Commission Type *
-              </label>
-              <select
-                value={formData.commissionType}
-                onChange={(e) => setFormData({...formData, commissionType: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="percentage">Percentage</option>
-                <option value="flat">Flat Amount</option>
-              </select>
-            </div>
+          {/* Commission Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Commission Type *
+            </label>
+            <select
+              value={formData.commissionType}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  commissionType: e.target.value as CommissionType,
+                  commissionValue: '',
+                  tiers: [],
+                })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="percentage">Percentage</option>
+              <option value="flat">Flat Amount</option>
+              <option value="tiered">Tiered</option>
+            </select>
+          </div>
 
-            <div>
+          {/* Single Commission Value */}
+          {formData.commissionType !== 'tiered' && (
+            <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Commission Value *
               </label>
@@ -407,16 +450,81 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
                   min="0"
                   step="0.01"
                   value={formData.commissionValue}
-                  onChange={(e) => setFormData({...formData, commissionValue: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, commissionValue: e.target.value })}
                   className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     formData.commissionType === 'flat' ? 'pl-8' : 'pr-8'
                   }`}
-                  placeholder={formData.commissionType === 'percentage' ? '20' : '50.00'}
                 />
               </div>
             </div>
-          </div>
+          )}
 
+          {/* Tiered Commission */}
+          {formData.commissionType === 'tiered' && (
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Tiers</h3>
+              <div className="space-y-3">
+                {formData.tiers.map((tier) => (
+                  <div key={tier.id} className="grid grid-cols-5 gap-2 items-center">
+                    <input
+                      type="number"
+                      title='Minimum number of conversions to qualify for tier'
+                      min={0}
+                      value={tier.min}
+                      onChange={(e) => updateTier(tier.id, 'min', parseFloat(e.target.value))}
+                      className="w-full px-2 py-1 border border-gray-300 rounded"
+                      placeholder="Min"
+                    />
+                    <input
+                      title='Maximum number of conversions covered in the tier'
+                      type="number"
+                      min={0}
+                      value={tier.max ?? ''}
+                      onChange={(e) =>
+                        updateTier(tier.id, 'max', e.target.value === '' ? undefined : parseFloat(e.target.value))
+                      }
+                      className="w-full px-2 py-1 border border-gray-300 rounded"
+                      placeholder="Max"
+                    />
+                    <input
+                      type="number"
+                      title='Reward Value'
+                      min={0}
+                      step={0.01}
+                      value={tier.rewardValue}
+                      onChange={(e) => updateTier(tier.id, 'rewardValue', parseFloat(e.target.value))}
+                      className="w-full px-2 py-1 border border-gray-300 rounded"
+                      placeholder="Reward"
+                    />
+                    <select
+                      value={tier.rewardType}
+                      onChange={(e) => updateTier(tier.id, 'rewardType', e.target.value)}
+                      className="w-full px-2 py-1 border border-gray-300 rounded"
+                    >
+                      <option value="percentage">%</option>
+                      <option value="flat">$</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => removeTier(tier.id)}
+                      className="text-red-500 px-2 py-1 border border-red-500 rounded hover:bg-red-50"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addTier}
+                  className="mt-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Add Tier
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Other fields */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Cookie Duration (days)
@@ -426,7 +534,7 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
               min="1"
               max="365"
               value={formData.cookieDuration}
-              onChange={(e) => setFormData({...formData, cookieDuration: parseInt(e.target.value)})}
+              onChange={(e) => setFormData({ ...formData, cookieDuration: parseInt(e.target.value) })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -436,7 +544,7 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
               <input
                 type="checkbox"
                 checked={formData.approvalRequired}
-                onChange={(e) => setFormData({...formData, approvalRequired: e.target.checked})}
+                onChange={(e) => setFormData({ ...formData, approvalRequired: e.target.checked })}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className="text-sm text-gray-700">
@@ -448,7 +556,7 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
               <input
                 type="checkbox"
                 checked={formData.isPublic}
-                onChange={(e) => setFormData({...formData, isPublic: e.target.checked})}
+                onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className="text-sm text-gray-700">
@@ -457,6 +565,7 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
             </label>
           </div>
 
+          {/* Buttons */}
           <div className="flex items-center gap-3 pt-6 border-t border-gray-200">
             <button
               type="submit"
@@ -475,5 +584,5 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
         </form>
       </div>
     </div>
-  );
+  )
 }

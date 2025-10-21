@@ -1,3 +1,5 @@
+import { DemoNetwork } from "../networkgraph";
+
 export function AboutContent() {
   return (
     <div className="space-y-4">
@@ -26,6 +28,7 @@ export function AboutContent() {
           <li>✓ Lightning-fast, self-serve onboarding</li>
         </ul>
       </div>
+      <DemoNetwork />
     </div>
   )
 }
