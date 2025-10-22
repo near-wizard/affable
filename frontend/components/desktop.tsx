@@ -335,10 +335,15 @@ export function Desktop() {
 					}
 				/>
 				<DesktopIcon icon="📋" label="RFDs" onClick={() => openWindow("rfd")} />
-				<DesktopIcon icon="📚" label="Blog" onClick={() => openWindow("blog")} />
+				<DesktopIcon
+					icon="📚"
+					label="Blog (coming soon)"
+					disabled
+					onClick={() => openWindow("blog")}
+				/>
 				<DesktopIcon
 					icon="🎓"
-					label="Academy 🌐"
+					label="Academy.learn 🌐"
 					onClick={() =>
 						window.open("https://affablelink.com/academy", "_blank")
 					}
@@ -383,7 +388,11 @@ export function Desktop() {
 					onClick={() => openWindow("pricing")}
 				/>
 				<DesktopIcon icon="📋" label="RFDs" onClick={() => openWindow("rfd")} />
-				<DesktopIcon icon="📚" label="Blog" onClick={() => openWindow("blog")} />
+				<DesktopIcon
+					icon="📚"
+					label="Blog"
+					onClick={() => openWindow("blog")}
+				/>
 				<DesktopIcon
 					icon="🎓"
 					label="Academy 🌐"
