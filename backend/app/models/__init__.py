@@ -4,7 +4,7 @@ Database models for the Affiliate Tracking Platform.
 This module exports all SQLAlchemy ORM models.
 """
 
-from app.models.base import BaseModel, TimestampMixin, SoftDeleteMixin
+from app.models.base import BaseModel, TimestampMixin, SoftDeleteMixin, GUID
 from app.models.vendor import Vendor, VendorUser
 from app.models.partner import Partner, PartnerType
 from app.models.campaign import (
@@ -43,6 +43,7 @@ __all__ = [
     "BaseModel",
     "TimestampMixin",
     "SoftDeleteMixin",
+    "GUID",
     
     # Vendor
     "Vendor",

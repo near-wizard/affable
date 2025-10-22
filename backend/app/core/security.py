@@ -7,8 +7,12 @@ import secrets
 
 from app.config import settings
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password hashing - use pbkdf2_sha256 for Windows compatibility (no C bindings needed)
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256"],
+    deprecated="auto",
+    pbkdf2_sha256__default_rounds=29000
+)
 
 # Token types
 TOKEN_TYPE_ACCESS = "access"
@@ -26,32 +30,32 @@ def get_password_hash(password: str) -> str:
 
 
 def create_access_token(
-    data: dict, 
+    data: dict,
     expires_delta: Optional[timedelta] = None
 ) -> str:
     """
     Create a JWT access token.
-    
+
     Args:
         data: Dictionary containing user info (subject, user_type, etc.)
         expires_delta: Optional custom expiration time
-        
+
     Returns:
         Encoded JWT token string
     """
     to_encode = data.copy()
-    
+
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    
+
     to_encode.update({
         "exp": expire,
         "iat": datetime.utcnow(),
-        "type": TOKEN_TYPE_ACCESS
+        "token_type": TOKEN_TYPE_ACCESS  # Use 'token_type' instead of 'type' to avoid conflict
     })
-    
+
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
@@ -59,22 +63,22 @@ def create_access_token(
 def create_refresh_token(data: dict) -> str:
     """
     Create a JWT refresh token.
-    
+
     Args:
         data: Dictionary containing user info
-        
+
     Returns:
         Encoded JWT refresh token string
     """
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-    
+
     to_encode.update({
         "exp": expire,
         "iat": datetime.utcnow(),
-        "type": TOKEN_TYPE_REFRESH
+        "token_type": TOKEN_TYPE_REFRESH  # Use 'token_type' instead of 'type' to avoid conflict
     })
-    
+
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
@@ -106,43 +110,43 @@ def decode_token(token: str) -> dict:
 def verify_access_token(token: str) -> dict:
     """
     Verify an access token and return payload.
-    
+
     Args:
         token: JWT access token
-        
+
     Returns:
         Token payload
-        
+
     Raises:
         HTTPException: If token is invalid or not an access token
     """
     payload = decode_token(token)
-    
-    if payload.get("type") != TOKEN_TYPE_ACCESS:
+
+    if payload.get("token_type") != TOKEN_TYPE_ACCESS:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token type"
         )
-    
+
     return payload
 
 
 def verify_refresh_token(token: str) -> dict:
     """
     Verify a refresh token and return payload.
-    
+
     Args:
         token: JWT refresh token
-        
+
     Returns:
         Token payload
-        
+
     Raises:
         HTTPException: If token is invalid or not a refresh token
     """
     payload = decode_token(token)
-    
-    if payload.get("type") != TOKEN_TYPE_REFRESH:
+
+    if payload.get("token_type") != TOKEN_TYPE_REFRESH:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token type"

@@ -14,7 +14,7 @@ security = HTTPBearer()
 
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Security(security),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ) -> Union[Partner, VendorUser]:
     """
@@ -157,7 +157,7 @@ def verify_vendor_access(vendor_id: int):
 
 
 def get_optional_current_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Security(security, auto_error=False),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db)
 ) -> Optional[Union[Partner, VendorUser]]:
     """

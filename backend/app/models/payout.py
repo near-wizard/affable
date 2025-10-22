@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, BigInteger, Numeric, Table
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, BigInteger, Numeric, Table, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -16,7 +15,7 @@ class PaymentProvider(BaseModel):
     name = Column(String(50), unique=True, nullable=False)
     display_name = Column(String(100), nullable=False)
     is_active = Column(Boolean, default=True)
-    config = Column(JSONB)
+    config = Column(JSON)
     
     # Relationships
     partner_payment_methods = relationship("PartnerPaymentMethod", back_populates="payment_provider")
@@ -35,7 +34,7 @@ class PartnerPaymentMethod(BaseModel):
     partner_id = Column(Integer, ForeignKey("partners.partner_id", ondelete="CASCADE"), nullable=False, index=True)
     payment_provider_id = Column(Integer, ForeignKey("payment_providers.payment_provider_id"), nullable=False)
     provider_account_id = Column(String(255))
-    account_details = Column(JSONB)
+    account_details = Column(JSON)
     is_default = Column(Boolean, default=False)
     is_verified = Column(Boolean, default=False)
     verified_at = Column(DateTime)
@@ -66,7 +65,7 @@ class Payout(BaseModel):
     currency = Column(String(3), default='USD')
     payment_provider_id = Column(Integer, ForeignKey("payment_providers.payment_provider_id"), nullable=False)
     provider_transaction_id = Column(String(255))
-    provider_response = Column(JSONB)
+    provider_response = Column(JSON)
     status = Column(String(50), default='pending', index=True)  # pending, processing, completed, failed
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=False)
@@ -132,7 +131,7 @@ class AuditLog(BaseModel):
     action = Column(String(50), nullable=False)  # create, update, delete, approve, reject
     actor_type = Column(String(50))  # vendor_user, partner, system
     actor_id = Column(Integer)
-    changes = Column(JSONB)
+    changes = Column(JSON)
     reason = Column(Text)
     ip_address = Column(String(45))  # Support IPv6
     

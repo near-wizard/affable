@@ -1,10 +1,9 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, BigInteger
-from sqlalchemy.dialects.postgresql import UUID, INET, JSONB
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, BigInteger, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
 
-from app.models.base import BaseModel
+from app.models.base import BaseModel, GUID
 
 
 class PartnerLink(BaseModel):
@@ -16,8 +15,8 @@ class PartnerLink(BaseModel):
     campaign_partner_id = Column(Integer, ForeignKey("campaign_partners.campaign_partner_id", ondelete="CASCADE"), nullable=False, index=True)
     short_code = Column(String(50), unique=True, nullable=False, index=True)
     full_url = Column(Text, nullable=False)
-    custom_params = Column(JSONB)
-    utm_params = Column(JSONB)
+    custom_params = Column(JSON)
+    utm_params = Column(JSON)
     link_label = Column(String(255))
     content_piece_id = Column(Integer, ForeignKey("content_pieces.content_piece_id"))
     
@@ -44,7 +43,7 @@ class Cookie(BaseModel):
     
     __tablename__ = "cookies"
     
-    cookie_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    cookie_id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     first_click_id = Column(BigInteger, ForeignKey("clicks.click_id"))
     last_click_id = Column(BigInteger, ForeignKey("clicks.click_id"))
     first_partner_id = Column(Integer, ForeignKey("partners.partner_id"))
@@ -80,10 +79,10 @@ class Click(BaseModel):
     
     __tablename__ = "clicks"
     
-    click_id = Column(BigInteger, primary_key=True, index=True)
+    click_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
     partner_link_id = Column(Integer, ForeignKey("partner_links.partner_link_id", ondelete="CASCADE"), nullable=False, index=True)
-    cookie_id = Column(UUID(as_uuid=True), ForeignKey("cookies.cookie_id"), index=True)
-    ip_address = Column(INET)
+    cookie_id = Column(GUID(), ForeignKey("cookies.cookie_id"), index=True)
+    ip_address = Column(String(45))  # IPv4 or IPv6
     user_agent = Column(Text)
     referrer_url = Column(Text)
     source_url = Column(Text)
@@ -117,7 +116,7 @@ class ContentPiece(BaseModel):
     partner_id = Column(Integer, ForeignKey("partners.partner_id"))
     external_reference = Column(Text)
     description = Column(Text)
-    metadata = Column(JSONB)
+    content_metadata = Column(JSON)
     
     # Relationships
     partner = relationship("Partner")

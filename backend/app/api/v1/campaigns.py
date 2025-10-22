@@ -55,11 +55,14 @@ def list_campaigns(
     # Apply filters based on user type
     if isinstance(current_user, Partner):
         # Partners see public campaigns or campaigns they're enrolled in
-        query = query.join(CampaignVersion).filter(
+        query = query.join(
+            CampaignVersion,
+            Campaign.current_campaign_version_id == CampaignVersion.campaign_version_id
+        ).filter(
             (CampaignVersion.is_public == True) |
             (Campaign.campaign_id.in_(
                 db.query(Campaign.campaign_id)
-                .join(CampaignVersion)
+                .join(CampaignVersion, Campaign.current_campaign_version_id == CampaignVersion.campaign_version_id)
                 .join(CampaignPartner)
                 .filter(CampaignPartner.partner_id == current_user.partner_id)
             ))
@@ -67,16 +70,24 @@ def list_campaigns(
     elif isinstance(current_user, VendorUser):
         # Vendors see only their campaigns
         query = query.filter(Campaign.vendor_id == current_user.vendor_id)
-    
+
     # Apply additional filters
     if status:
         query = query.filter(Campaign.status == status)
-    
+
     if is_public is not None:
-        query = query.join(CampaignVersion).filter(CampaignVersion.is_public == is_public)
-    
+        query = query.join(
+            CampaignVersion,
+            Campaign.current_campaign_version_id == CampaignVersion.campaign_version_id,
+            isouter=True
+        ).filter(CampaignVersion.is_public == is_public)
+
     if search:
-        query = query.join(CampaignVersion).filter(
+        query = query.join(
+            CampaignVersion,
+            Campaign.current_campaign_version_id == CampaignVersion.campaign_version_id,
+            isouter=True
+        ).filter(
             CampaignVersion.name.ilike(f"%{search}%")
         )
     
@@ -193,11 +204,11 @@ def get_campaign(
                 raise HTTPException(status_code=403, detail="Access denied")
     
     # Calculate stats
-    from sqlalchemy import func
+    from sqlalchemy import func, Integer
     stats = db.query(
         func.count(CampaignPartner.campaign_partner_id).label('total_partners'),
-        func.sum(func.cast(CampaignPartner.status == 'approved', db.Integer)).label('approved_partners'),
-        func.sum(func.cast(CampaignPartner.status == 'pending', db.Integer)).label('pending_partners'),
+        func.sum(func.cast(CampaignPartner.status == 'approved', Integer)).label('approved_partners'),
+        func.sum(func.cast(CampaignPartner.status == 'pending', Integer)).label('pending_partners'),
         func.sum(CampaignPartner.total_clicks).label('total_clicks'),
         func.sum(CampaignPartner.total_conversions).label('total_conversions'),
         func.sum(CampaignPartner.total_revenue).label('total_revenue'),

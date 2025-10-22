@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from decimal import Decimal
+import json
 import time
 import logging
 
@@ -24,6 +26,13 @@ if settings.SENTRY_DSN:
         traces_sample_rate=1.0 if settings.ENV == "development" else 0.1,
     )
 
+# Custom JSON encoder to handle Decimal serialization
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super().default(obj)
+
 # Create FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
@@ -31,6 +40,9 @@ app = FastAPI(
     docs_url="/docs" if settings.ENV == "development" else None,
     redoc_url="/redoc" if settings.ENV == "development" else None,
 )
+
+# Override JSON encoder to handle Decimals
+app.json_encoder = DecimalEncoder
 
 # CORS middleware
 app.add_middleware(

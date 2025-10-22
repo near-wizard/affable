@@ -1,8 +1,39 @@
 from datetime import datetime
 from sqlalchemy import Column, DateTime, Boolean
+from sqlalchemy.types import TypeDecorator, CHAR
+from sqlalchemy.dialects.postgresql import UUID as pgUUID
 from sqlalchemy.ext.declarative import declared_attr
+import uuid
 
 from app.core.database import Base
+
+
+class GUID(TypeDecorator):
+    """Platform-independent GUID type for SQLite and PostgreSQL.
+
+    Stores UUIDs as CHAR(36) in SQLite and native UUID type in PostgreSQL.
+    """
+
+    impl = CHAR
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == 'postgresql':
+            return dialect.type_descriptor(pgUUID(as_uuid=True))
+        else:
+            return dialect.type_descriptor(CHAR(36))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        if dialect.name == 'postgresql':
+            return value
+        return str(value)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        return uuid.UUID(value)
 
 
 class TimestampMixin:

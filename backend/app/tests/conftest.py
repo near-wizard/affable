@@ -97,7 +97,7 @@ def vendor_user(db_session, vendor):
         email="admin@test.com",
         password_hash=get_password_hash("testpass123"),
         name="Admin User",
-        role="admin",
+        role="owner",
         status="active"
     )
     db_session.add(user)
@@ -287,26 +287,26 @@ def reward(db_session):
 @pytest.fixture
 def partner_token(partner):
     """Create JWT token for partner."""
-    return create_access_token(
-        data={
-            "sub": str(partner.partner_id),
-            "type": "partner",
-            "email": partner.email
-        }
-    )
+    token_data = {
+        "sub": str(partner.partner_id),
+        "user_type": "partner",  # Fixed: was "type", should be "user_type"
+        "email": partner.email
+    }
+    print(f"DEBUG: Creating partner token with data: {token_data}")
+    return create_access_token(data=token_data)
 
 
 @pytest.fixture
 def vendor_token(vendor_user):
     """Create JWT token for vendor user."""
-    return create_access_token(
-        data={
-            "sub": str(vendor_user.vendor_user_id),
-            "type": "vendor_user",
-            "email": vendor_user.email,
-            "vendor_id": vendor_user.vendor_id
-        }
-    )
+    token_data = {
+        "sub": str(vendor_user.vendor_user_id),
+        "user_type": "vendor_user",  # Fixed: was "type", should be "user_type"
+        "email": vendor_user.email,
+        "vendor_id": vendor_user.vendor_id
+    }
+    print(f"DEBUG: Creating vendor token for vendor_user_id={vendor_user.vendor_user_id}, role={vendor_user.role}, data: {token_data}")
+    return create_access_token(data=token_data)
 
 
 @pytest.fixture
@@ -459,6 +459,10 @@ def mock_redis():
 def cleanup_celery_tasks():
     """Clean up Celery tasks after each test."""
     yield
-    # Clear any pending tasks
-    from celery import current_app
-    current_app.control.purge()
+    # Clear any pending tasks (gracefully handle no broker connection)
+    try:
+        from celery import current_app
+        current_app.control.purge()
+    except Exception:
+        # Celery broker not available, skip cleanup
+        pass

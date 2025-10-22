@@ -1,0 +1,33 @@
+#!/bin/bash
+# Git pre-commit hook for Affable backend
+#
+# Install this hook:
+# 1. Copy to: .git/hooks/pre-commit
+# 2. Make executable: chmod +x .git/hooks/pre-commit
+# 3. Tests will run automatically before each commit
+#
+# To bypass hook for emergency commits:
+# git commit --no-verify
+
+set -e
+
+cd "$(git rev-parse --git-dir)/.."
+
+echo "🔍 Running pre-commit validation..."
+echo ""
+
+# Run validation
+if bash backend/scripts/validate.sh; then
+    echo ""
+    echo "✅ Pre-commit validation passed!"
+    echo "   Your commit is ready to go."
+    exit 0
+else
+    echo ""
+    echo "❌ Pre-commit validation failed!"
+    echo "   Please fix the issues above and try again."
+    echo ""
+    echo "   To bypass this check (not recommended):"
+    echo "   git commit --no-verify"
+    exit 1
+fi

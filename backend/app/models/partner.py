@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Table
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Table, and_
 from sqlalchemy.orm import relationship
 
 from app.models.base import BaseModel
@@ -34,7 +34,7 @@ class Partner(BaseModel):
     # Relationships
     types = relationship("PartnerType", secondary=partner_partner_types, back_populates="partners")
     campaign_partners = relationship("CampaignPartner", back_populates="partner")
-    partner_links = relationship("PartnerLink", back_populates="partner", viewonly=True)
+    # partner_links - defined via campaign_partners relationship
     payment_methods = relationship("PartnerPaymentMethod", back_populates="partner")
     conversion_events = relationship("ConversionEvent", back_populates="partner")
     payouts = relationship("Payout", back_populates="partner")

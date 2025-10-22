@@ -1,9 +1,9 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, BigInteger, Numeric
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, BigInteger, Numeric, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
+import uuid
 
-from app.models.base import BaseModel
+from app.models.base import BaseModel, GUID
 
 
 class ConversionEventType(BaseModel):
@@ -32,11 +32,11 @@ class ConversionEvent(BaseModel):
     
     __tablename__ = "conversion_events"
     
-    conversion_event_id = Column(BigInteger, primary_key=True, index=True)
+    conversion_event_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
     lead_id = Column(BigInteger, ForeignKey("leads.lead_id"))
     conversion_event_type_id = Column(Integer, ForeignKey("conversion_event_types.conversion_event_type_id"), nullable=False)
     click_id = Column(BigInteger, ForeignKey("clicks.click_id"), index=True)
-    cookie_id = Column(UUID(as_uuid=True), ForeignKey("cookies.cookie_id"), index=True)
+    cookie_id = Column(GUID(), ForeignKey("cookies.cookie_id"), index=True)
     partner_id = Column(Integer, ForeignKey("partners.partner_id"), nullable=False, index=True)
     campaign_version_id = Column(Integer, ForeignKey("campaign_versions.campaign_version_id"), nullable=False, index=True)
     reward_id = Column(Integer, ForeignKey("rewards.reward_id"))
@@ -55,7 +55,7 @@ class ConversionEvent(BaseModel):
     approved_at = Column(DateTime)
     rejected_at = Column(DateTime)
     rejection_reason = Column(Text)
-    metadata = Column(JSONB)
+    event_metadata = Column(JSON)
     funnel_journey_id = Column(Integer, ForeignKey("funnel_journeys.funnel_journey_id"))
     applied_commission_rule_id = Column(Integer, ForeignKey("commission_rules.commission_rule_id"))
     
@@ -101,14 +101,14 @@ class Touch(BaseModel):
     conversion_event_id = Column(BigInteger, ForeignKey("conversion_events.conversion_event_id"), index=True)
     lead_id = Column(BigInteger, ForeignKey("leads.lead_id"))
     click_id = Column(BigInteger, ForeignKey("clicks.click_id"))
-    cookie_id = Column(UUID(as_uuid=True), ForeignKey("cookies.cookie_id"))
+    cookie_id = Column(GUID(), ForeignKey("cookies.cookie_id"))
     partner_id = Column(Integer, ForeignKey("partners.partner_id"), nullable=False, index=True)
     campaign_version_id = Column(Integer, ForeignKey("campaign_versions.campaign_version_id"), nullable=False, index=True)
     touch_type = Column(String(50), nullable=False)  # first, middle, last, only
     touch_value = Column(Numeric(10, 2))
     attribution_type = Column(String(50), nullable=False)
     attribution_confidence = Column(String(50), default='high')
-    metadata = Column(JSONB, default={})
+    event_metadata = Column(JSON, default={})
     occurred_at = Column(DateTime, default=datetime.utcnow, index=True)
     recorded_at = Column(DateTime, default=datetime.utcnow)
     
@@ -154,12 +154,12 @@ class FunnelJourney(BaseModel):
     __tablename__ = "funnel_journeys"
     
     funnel_journey_id = Column(Integer, primary_key=True, index=True)
-    cookie_id = Column(UUID(as_uuid=True), ForeignKey("cookies.cookie_id"), unique=True, nullable=False)
+    cookie_id = Column(GUID(), ForeignKey("cookies.cookie_id"), unique=True, nullable=False)
     partner_id = Column(Integer, ForeignKey("partners.partner_id"), nullable=False, index=True)
     campaign_version_id = Column(Integer, ForeignKey("campaign_versions.campaign_version_id"), nullable=False)
     customer_id = Column(String(255))
     customer_email = Column(String(255))
-    session_id = Column(UUID(as_uuid=True))
+    session_id = Column(String(36))
     journey_started_at = Column(DateTime, nullable=False)
     journey_completed_at = Column(DateTime)
     last_event_at = Column(DateTime, nullable=False)
@@ -167,8 +167,8 @@ class FunnelJourney(BaseModel):
     total_commission = Column(Numeric(10, 2), default=0)
     furthest_stage_id = Column(Integer, ForeignKey("conversion_event_types.conversion_event_type_id"))
     is_converted = Column(Boolean, default=False, index=True)
-    events_sequence = Column(JSONB, default=[])
-    attribution_map = Column(JSONB, default={})
+    events_sequence = Column(JSON, default=[])
+    attribution_map = Column(JSON, default={})
     
     # Relationships
     cookie = relationship("Cookie", back_populates="funnel_journey")
@@ -207,8 +207,8 @@ class CommissionRule(BaseModel):
     name = Column(String(255), nullable=False)
     description = Column(Text)
     active = Column(Boolean, default=True)
-    conditions = Column(JSONB, nullable=False)
-    actions = Column(JSONB, nullable=False)
+    conditions = Column(JSON, nullable=False)
+    actions = Column(JSON, nullable=False)
     valid_from = Column(DateTime, default=datetime.utcnow)
     valid_until = Column(DateTime)
     

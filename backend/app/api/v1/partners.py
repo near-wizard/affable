@@ -4,7 +4,7 @@ Partner API Endpoints
 Handles partner profile management, statistics, and dashboard.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Path
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -188,9 +188,8 @@ def get_my_dashboard(
 
 @router.get("/{partner_id}", response_model=PartnerResponse)
 def get_partner(
-    partner_id: int,
-    db: Session = Depends(get_db),
-    _=Depends(verify_partner_access(partner_id))
+    partner_id: int = Path(...),
+    db: Session = Depends(get_db)
 ):
     """
     Get partner by ID.

@@ -1,0 +1,11 @@
+# Minimal requirements for testing (Windows-friendly)
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic
+pydantic-settings
+pytest
+pytest-asyncio
+black
+flake8
+isort

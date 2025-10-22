@@ -11,13 +11,13 @@ class Settings(BaseSettings):
     API_VERSION: str = "v1"
     
     # Database
-    DATABASE_URL: str
+    DATABASE_URL: str = "sqlite:///:memory:"
     
     # Redis
-    REDIS_URL: str
+    REDIS_URL: str = "redis://localhost:6379/0"
     
     # Security
-    SECRET_KEY: str
+    SECRET_KEY: str = "dev-secret-key-not-for-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -69,6 +69,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"  # Ignore extra environment variables
 
 
 @lru_cache()
