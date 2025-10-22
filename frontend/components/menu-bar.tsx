@@ -30,7 +30,7 @@ export function MenuBar({ onWindowOpen }: MenuBarProps) {
       items: [
         { label: "Founder Story", action: "founder-story" },
         { label: "About Affable", action: "about" },
-        
+        { label: "Blog", action: "blog" },
         { label: "Exit", action: null },
       ],
     },

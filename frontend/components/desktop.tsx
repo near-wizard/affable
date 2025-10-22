@@ -14,6 +14,7 @@ import { TutorialLightbox } from "./tutorial-lightbox";
 import { useParams, useRouter } from "next/navigation";
 import { RFDContent } from "./window-content/rfd";
 import { rfds } from "@/content/rfd/rfds";
+import { blogPosts } from "@/content/blog/blogs";
 //import { loadPostHog } from "@/utils/posthogLazyLoader"
 import FounderStory from "./window-content/founder-story";
 import VendorInterestForm from "./window-content/interestForm-vendor";
@@ -22,6 +23,7 @@ import CoinFlipGame from "./window-content/coinflip";
 import { ProductHuntPage } from "./window-content/producthuntpage";
 import { YCPage } from "./window-content/ycpage";
 import TinySeedPage from "./window-content/tinyseedpage";
+import { BlogContent } from "./window-content/blog";
 
 export function Desktop() {
 	const [windows, setWindows] = useState<
@@ -71,6 +73,8 @@ export function Desktop() {
 			"yc",
 			"producthunt",
 			"tinyseed",
+			"blog",
+			"academy",
 		];
 		if (valid.includes(initialSlug)) {
 			console.log("Valid slug detected, opening window...");
@@ -136,6 +140,7 @@ export function Desktop() {
 			"interestForm-Vendor": "Vendor Interest Form - Affable",
 			"interestForm-Partner": "Partner Interest Form - Affable",
 			rfd: "RFDs - Affable",
+			blog: "Blog - Affable",
 		};
 
 		// Calculate position based on viewport size and existing windows
@@ -250,6 +255,19 @@ export function Desktop() {
 						}}
 					/>
 				);
+			case "blog":
+				return (
+					<BlogContent
+						initialSlug={window.subRoute}
+						onNavigate={(slug) => {
+							// Update the current window's subRoute
+							const currentWindow = windows.find((w) => w.type === "blog");
+							if (currentWindow) {
+								focusWindow(currentWindow.id, slug);
+							}
+						}}
+					/>
+				);
 			default:
 				return <div>Content not found</div>;
 		}
@@ -284,6 +302,25 @@ export function Desktop() {
 					onClick={() => openWindow("about")}
 				/>
 				<DesktopIcon
+					icon="📊"
+					label="Features.feat"
+					onClick={() => openWindow("features")}
+				/>
+				<DesktopIcon
+					icon="💰"
+					label="Pricing.cash"
+					onClick={() => openWindow("pricing")}
+				/>
+				<DesktopIcon
+					icon="🪙"
+					label="Coin.flip"
+					onClick={() => openWindow("coinFlip")}
+				/>
+			</div>
+
+			{/* Desktop Icons - Right Side - Hidden on small mobile */}
+			<div className="hidden sm:flex absolute right-6 top-14 flex-col gap-8 z-10">
+				<DesktopIcon
 					icon="🖥️"
 					label="VendorView.wip 🌐"
 					onClick={() =>
@@ -297,26 +334,15 @@ export function Desktop() {
 						window.open("https://affablelink.com/partner", "_blank")
 					}
 				/>
-				<DesktopIcon
-					icon="🪙"
-					label="Coin.flip"
-					onClick={() => openWindow("coinFlip")}
-				/>
-			</div>
-
-			{/* Desktop Icons - Right Side - Hidden on small mobile */}
-			<div className="hidden sm:flex absolute right-6 top-14 flex-col gap-8 z-10">
-				<DesktopIcon
-					icon="📊"
-					label="Features.feat"
-					onClick={() => openWindow("features")}
-				/>
-				<DesktopIcon
-					icon="💰"
-					label="Pricing.cash"
-					onClick={() => openWindow("pricing")}
-				/>
 				<DesktopIcon icon="📋" label="RFDs" onClick={() => openWindow("rfd")} />
+				<DesktopIcon icon="📚" label="Blog" onClick={() => openWindow("blog")} />
+				<DesktopIcon
+					icon="🎓"
+					label="Academy 🌐"
+					onClick={() =>
+						window.open("https://affablelink.com/academy", "_blank")
+					}
+				/>
 				<DesktopIcon icon="🗑️" label="Trash" onClick={() => {}} disabled />
 			</div>
 
@@ -357,6 +383,14 @@ export function Desktop() {
 					onClick={() => openWindow("pricing")}
 				/>
 				<DesktopIcon icon="📋" label="RFDs" onClick={() => openWindow("rfd")} />
+				<DesktopIcon icon="📚" label="Blog" onClick={() => openWindow("blog")} />
+				<DesktopIcon
+					icon="🎓"
+					label="Academy 🌐"
+					onClick={() =>
+						window.open("https://affablelink.com/academy", "_blank")
+					}
+				/>
 			</div>
 
 			<div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
