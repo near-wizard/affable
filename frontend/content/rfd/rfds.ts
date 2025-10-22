@@ -1,38 +1,21 @@
 // content/rfd/rfds.ts
-// This file now acts as a client-side interface
-// In production, you'd populate this from a server component or API route
-
-import { RFD } from "@/lib/rfd-loader"
+// This file contains manually maintained RFD entries
+// (loaded from markdown files in content/rfd/*.md)
 
 export type RFDState = 'prediscussion' | 'ideation' | 'discussion' | 'published' | 'committed' | 'abandoned'
 
-// This will be populated by your server component
-export let rfds: RFD[] = []
-
-export function getRFDByNumber(number: number): RFD | undefined {
-  return rfds.find(rfd => rfd.number === number)
+export interface RFD {
+	number: number
+	title: string
+	state: RFDState
+	discussion?: string
+	authors: string[]
+	date: string
+	labels: string[]
+	content: string
 }
 
-export function searchRFDs(query: string): RFD[] {
-  const lowerQuery = query.toLowerCase()
-  return rfds.filter(rfd => 
-    rfd.title.toLowerCase().includes(lowerQuery) ||
-    rfd.content.toLowerCase().includes(lowerQuery) ||
-    rfd.labels.some(label => label.toLowerCase().includes(lowerQuery)) ||
-    rfd.authors.some(author => author.toLowerCase().includes(lowerQuery))
-  )
-}
-
-export function getRFDsByState(state: RFDState): RFD[] {
-  return rfds.filter(rfd => rfd.state === state)
-}
-
-// Initialize with RFDs loaded from markdown files
-export function initializeRFDs(loadedRFDs: RFD[]) {
-  rfds = loadedRFDs
-}
-
-/*
+// RFDs for Affable
 export const rfds: RFD[] = [
   {
     number: 1,
@@ -44,49 +27,9 @@ export const rfds: RFD[] = [
     labels: ["meta"],
     content: `# RFD 1: Requests for Discussion
 
-## What is an RFD?
+A Request for Discussion (RFD) is a design document that proposes a new feature, architecture decision, or significant change to Affable. It's inspired by Oxide's RFD process.
 
-A Request for Discussion (RFD) is a design document that proposes a new feature, architecture decision, or significant change to Affable. It's inspired by [Oxide's RFD process](https://rfd.shared.oxide.computer/).
-
-## Why RFDs?
-
-Building in public means documenting our thinking. RFDs help us:
-
-- Think through problems systematically
-- Get feedback early from the community
-- Create a historical record of why we made decisions
-- Avoid repeating past mistakes
-
-## RFD Lifecycle
-
-### Prediscussion
-Early stage idea. Not ready for full discussion yet.
-
-### Ideation
-Author is actively working on the RFD. Open for early feedback.
-
-### Discussion
-RFD is ready for broader input. This is where the real debate happens.
-
-### Published
-Discussion has concluded. RFD represents current thinking but isn't implemented yet.
-
-### Committed
-RFD has been implemented or the decision has been made and locked in.
-
-### Abandoned
-We decided not to pursue this. Still valuable as documentation of "roads not taken."
-
-## How to Contribute
-
-1. Check existing RFDs to avoid duplicates
-2. Open a GitHub Discussion to gauge interest
-3. Write your RFD (copy this template)
-4. Submit a PR to add it to the RFD list
-5. Engage with feedback
-6. Update based on discussion
-
-Let's build this thing transparently!`
+See the full RFD in the discussions linked above.`
   },
   {
     number: 2,
@@ -98,69 +41,11 @@ Let's build this thing transparently!`
     labels: ["frontend", "architecture"],
     content: `# RFD 2: Deep Linking Without Next.js Router
 
-## Problem Statement
-
 Our Windows 95-style desktop UI needs deep linking for SEO and shareability, but Next.js router's navigation lifecycle conflicts with our client-side window management state.
 
-## Background
+We use window.history.replaceState() directly for client-side navigation instead.
 
-We're building a retro desktop interface where "windows" are React components managed entirely in client-side state. When a user clicks an icon, we want to:
-
-1. Open a window with smooth animations
-2. Update the URL for sharing (e.g., \`/about\`)
-3. Enable search engines to crawl each "window" as a page
-4. NOT trigger full page re-renders
-
-## Attempted Solutions
-
-### Attempt 1: Shallow Routing
-Used \`router.push(url, { shallow: true })\` but this still triggered component re-renders that reset our window state.
-
-### Attempt 2: router.replace with setTimeout
-Tried debouncing the router call but still had race conditions.
-
-### Attempt 3: useRef to prevent re-initialization
-Helped but didn't solve the core issue of router-triggered re-renders.
-
-## Proposed Solution
-
-Use \`window.history.replaceState()\` directly instead of Next.js router for client-side navigation.
-
-\`\`\`typescript
-const openWindow = (type: string) => {
-  setWindows(prev => [...prev, newWindow])
-  window.history.replaceState({}, '', \`/\${type}\`)
-}
-\`\`\`
-
-## Why This Works
-
-- **No framework overhead**: Direct browser API doesn't trigger Next.js lifecycle
-- **SEO preserved**: Initial page load still uses Next.js SSR with proper metadata
-- **Deep linking works**: URLs are real and shareable
-- **State is stable**: No unexpected re-renders
-
-## Trade-offs
-
-**Pros:**
-- Simpler code
-- Predictable behavior
-- Better performance (no router overhead)
-
-**Cons:**
-- Can't use Next.js router features (prefetching, middleware)
-- Have to manually manage history state
-- Diverges from "Next.js way"
-
-## Decision
-
-Implemented in [commit c505281](https://github.com/near-wizard/affable/commit/c505281ca77974ad680f003ea11ef4501e5bbc3e).
-
-This works perfectly for our use case. We're building an SPA-like experience where the router's features aren't needed. Sometimes the best framework solution is no framework.
-
-## See Also
-
-- Blog post: "Windows 95 Meets Next.js: A Deep Linking Adventure Through Router Hell"`
+See the full RFD in the discussions linked above.`
   },
   {
     number: 3,
@@ -172,58 +57,29 @@ This works perfectly for our use case. We're building an SPA-like experience whe
     labels: ["product", "strategy"],
     content: `# RFD 3: Market Segmentation Through UI Design
 
-## Hypothesis
 The Windows 95 desktop UI isn't just aesthetic—it's a deliberate filter for our target market in the early stages.
 
----
+By launching with a polarizing UI, we self-select for early adopters who value substance over conventional UX.
 
-## Target Early Users
+See the full RFD in the discussions linked above.`
+  },
+  {
+    number: 4,
+    title: "RFD 4: Designing a Scalable Affiliate Tracking Database: Key Tradeoffs and Considerations",
+    state: "discussion",
+    discussion: "https://github.com/near-wizard/affable/discussions/1",
+    authors: ["Jared Butler"],
+    date: "2025-10-05",
+    labels: ["backend", "database"],
+    content: `# RFD 4: Designing a Scalable Affiliate Tracking Database: Key Tradeoffs and Considerations
 
-### Who we **want**:
-- PostHog users (familiar with their retro UI)  
-- Technical founders who appreciate nostalgia  
-- Developers who value "building in public" transparency  
-- People who get excited by unconventional design  
+When building an affiliate tracking platform, the database schema is the foundation that determines system performance, flexibility, and maintainability.
 
-### Who we **don't want** (yet):
-- Enterprise buyers expecting "professional" SaaS  
-- Non-technical users who need hand-holding  
-- People who judge tools by visual polish alone  
+Key design decisions include:
+- Campaign versioning for audit trails and compliance
+- Multi-touch attribution architecture
+- Scalable partner performance tracking
 
----
-
-## The Reasoning
-By launching with a polarizing UI, we:
-
-- Self-select for early adopters who value substance over conventional UX  
-- Create a memorable brand in a sea of identical SaaS tools  
-- Buy time to nail the core product before scaling to mainstream  
-- Build a community of people who "get it"  
-
----
-
-## Risks
-- Might alienate potential advocates  
-- Could be seen as unprofessional  
-- Accessibility concerns (we need to address this)  
-- Might paint us into a corner UI-wise  
-
----
-
-## Open Questions
-- When do we know it's time to "professionalize"?  
-- How do we balance nostalgia with accessibility?  
-- Can we A/B test to validate this hypothesis?  
-- What metrics indicate this strategy is working/failing?  
-
----
-
-## Discussion Needed
-I'm putting this out there because it's a bet. Maybe I'm rationalizing a fun design choice with post-hoc product thinking. Or maybe this is actually smart positioning.
-
-**What do you think?**
-`
+See the full RFD in the discussions linked above.`
   }
 ]
-
-*/

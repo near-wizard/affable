@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PricingCalculator } from "./pricing-calculator";
 
 export function PricingContent() {
 	const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
@@ -85,7 +86,7 @@ export function PricingContent() {
 			name: "Beta",
 			type: "flat",
 			price: 25,
-			performanceFee: "20% of GMV",
+			performanceFee: "10% of GMV",
 			breakevenMRR: 4000,
 			targetAudience: [
 				"Launching your first product or planning your first launch",
@@ -99,7 +100,7 @@ export function PricingContent() {
 			type: "recurring",
 			monthly: 200,
 			annual: 200 * 11,
-			performanceFee: "15% of GMV",
+			performanceFee: "8% of GMV",
 			breakevenMRR: 36000,
 			targetAudience: [
 				"Small teams with a few partners, ready to start scaling",
@@ -111,7 +112,7 @@ export function PricingContent() {
 			type: "recurring",
 			monthly: 2000,
 			annual: 2000 * 11,
-			performanceFee: "10% of GMV",
+			performanceFee: "5% of GMV",
 			targetAudience: [
 				"Large and growing companies, scaling partner programs",
 				"Pay a predictable monthly fee and retain a larger share of your partner-generated revenue.",
@@ -131,138 +132,214 @@ export function PricingContent() {
 	];
 
 	return (
-		<div className="space-y-6">
-			<h2 className="text-2xl font-bold text-foreground">Pricing Plans</h2>
+		<div className="space-y-12">
+			{/* Header Section */}
+			<div className="space-y-4">
+				<div>
+					<h1 className="text-4xl font-bold text-foreground mb-2">
+						Simple, Transparent Pricing
+					</h1>
+					<p className="text-lg text-foreground/70">
+						Choose the plan that grows with your partner program
+					</p>
+				</div>
 
-			<div className="text-2xl text-foreground mb-6">
-				At AffableLink
-				<ul className="list-disc ml-5 mt-2">
-					<li>
-						Your plan determines how much you pay as a consistent fee versus a
-						performance-based fee. Check the tooltips for breakeven MMR ranges.
-					</li>
-					<li>No features are locked behind tiers.</li>
-					<li>Buying an annual plan gets you one month free.</li>
-				</ul>
+				<div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6 space-y-3">
+					<h3 className="font-semibold text-foreground">
+						How AffableLink Pricing Works
+					</h3>
+					<ul className="space-y-2 text-sm text-foreground/80">
+						<li className="flex items-start gap-2">
+							<span className="text-primary font-bold">•</span>
+							<span>
+								Pay a base fee plus a performance fee on your partner-generated
+								revenue
+							</span>
+						</li>
+						<li className="flex items-start gap-2">
+							<span className="text-primary font-bold">•</span>
+							<span>
+								No features locked behind tiers — all plans include full
+								platform access
+							</span>
+						</li>
+						<li className="flex items-start gap-2">
+							<span className="text-primary font-bold">•</span>
+							<span>
+								Annual plans save 1 month's cost — lock in savings with a yearly
+								commitment
+							</span>
+						</li>
+					</ul>
+				</div>
 			</div>
 
 			{/* Billing Toggle */}
-			<div className="flex gap-4 mb-6">
+			<div className="flex items-center justify-center gap-4">
 				<button
-					className={`px-4 py-2 rounded ${
+					className={`px-6 py-3 rounded-lg font-medium transition-all ${
 						billingPeriod === "monthly"
-							? "bg-primary text-primary-foreground"
-							: "bg-muted"
+							? "bg-primary text-primary-foreground shadow-lg"
+							: "bg-muted text-foreground hover:bg-muted/80"
 					}`}
 					onClick={() => setBillingPeriod("monthly")}
 				>
-					Monthly
+					Monthly Billing
 				</button>
+				<div className="text-sm font-medium text-foreground/60">or</div>
 				<button
-					className={`px-4 py-2 rounded ${
+					className={`px-6 py-3 rounded-lg font-medium transition-all ${
 						billingPeriod === "annual"
-							? "bg-primary text-primary-foreground"
-							: "bg-muted"
+							? "bg-primary text-primary-foreground shadow-lg"
+							: "bg-muted text-foreground hover:bg-muted/80"
 					}`}
 					onClick={() => setBillingPeriod("annual")}
 				>
-					Annual
+					Annual Billing
+					<span className="ml-2 text-xs font-bold text-primary-foreground/90">
+						Save 1 month
+					</span>
 				</button>
 			</div>
 
-			<div className="grid md:grid-cols-4 gap-4">
+			{/* Plans Grid */}
+			<div className="grid md:grid-cols-4 gap-6">
 				{plans.map((plan, index) => (
 					<div
 						key={index}
-						className={`bg-muted p-5 rounded border-2 ${
-							plan.popular ? "border-primary" : "border-border"
-						} relative`}
+						className={`relative rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl ${
+							plan.popular
+								? "md:scale-105 bg-gradient-to-br from-primary/5 to-primary/0 border-2 border-primary shadow-lg"
+								: "bg-muted border-2 border-border hover:border-primary/30 shadow-sm"
+						}`}
 					>
+						{/* Popular Badge */}
 						{plan.popular && (
-							<div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold rounded">
-								POPULAR
+							<div className="absolute top-0 right-0 bg-primary text-primary-foreground px-4 py-2 text-xs font-bold rounded-bl-lg">
+								MOST POPULAR
 							</div>
 						)}
 
-						<h3 className="font-bold text-lg text-foreground mb-2">
-							{plan.name}
-						</h3>
+						{/* Content Container */}
+						<div className="p-8 space-y-6">
+							{/* Plan Name */}
+							<div>
+								<h3 className="text-2xl font-bold text-foreground mb-1">
+									{plan.name}
+								</h3>
+								{plan.popular && (
+									<p className="text-xs font-medium text-primary">
+										Best for scaling teams
+									</p>
+								)}
+							</div>
 
-						<div className="mb-4 flex items-center gap-2">
-							{plan.type === "recurring" && (
-								<>
-									<span className="text-3xl font-bold text-foreground">
-										$
-										{billingPeriod === "monthly"
-											? new Intl.NumberFormat("en-US").format(plan.monthly ?? 0)
-											: new Intl.NumberFormat("en-US").format(plan.annual ?? 0)}
-									</span>
-									<span className="text-sm text-foreground/60">
-										{billingPeriod === "monthly" ? "/mo" : "/yr"}
-									</span>
-								</>
-							)}
+							{/* Pricing */}
+							<div className="space-y-2">
+								<div className="flex items-baseline gap-1">
+									{plan.type === "recurring" && (
+										<>
+											<span className="text-4xl font-bold text-foreground">
+												$
+												{billingPeriod === "monthly"
+													? new Intl.NumberFormat("en-US").format(
+															plan.monthly ?? 0
+													  )
+													: new Intl.NumberFormat("en-US").format(
+															plan.annual ?? 0
+													  )}
+											</span>
+											<span className="text-sm text-foreground/60">
+												{billingPeriod === "monthly" ? "/month" : "/year"}
+											</span>
+										</>
+									)}
 
-							{plan.type === "flat" && (
-								<>
-									<span className="text-3xl font-bold text-foreground">
-										${new Intl.NumberFormat("en-US").format(plan.price ?? 0)}
-									</span>
-									<span className="text-sm text-foreground/60">flat</span>
-								</>
-							)}
+									{plan.type === "flat" && (
+										<>
+											<span className="text-4xl font-bold text-foreground">
+												$
+												{new Intl.NumberFormat("en-US").format(plan.price ?? 0)}
+											</span>
+											<span className="text-sm text-foreground/60">
+												one-time
+											</span>
+										</>
+									)}
 
-							{plan.type === "custom" && (
-								<span className="text-3xl font-bold text-foreground">
-									{plan.price}
-								</span>
-							)}
-
-							{plan.performanceFee && (
-								<div className="text-xs text-foreground/70 mt-1">
-									{plan.performanceFee}
+									{plan.type === "custom" && (
+										<span className="text-4xl font-bold text-foreground">
+											{plan.price}
+										</span>
+									)}
 								</div>
-							)}
 
-							{/* Breakeven tooltip */}
-							{plan.breakevenMRR && (
-								<div className="ml-1 relative group cursor-pointer">
-									<span className="text-xs font-semibold text-primary">ⓘ</span>
-									<div className="absolute bottom-full mb-2 w-64 p-2 bg-foreground text-background text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-[9999]">
-										<strong>Breakeven Example:</strong> Upgrading to the next
-										plan becomes cost-effective if your platform revenue hits{" "}
-										<strong>
-											$
-											{new Intl.NumberFormat("en-US").format(
-												plan.breakevenMRR ?? 0
-											)}
-										</strong>
-										{"/mo "}
+								{/* Performance Fee */}
+								{plan.performanceFee && (
+									<div className="text-sm text-foreground/70 font-medium flex items-center gap-2">
+										<span className="inline-block w-1.5 h-1.5 bg-primary rounded-full"></span>
+										{plan.performanceFee}
 									</div>
-								</div>
-							)}
+								)}
+							</div>
 
-							{plan.breakevenTime && (
-								<div className="ml-1 relative group cursor-pointer">
-									<span className="text-xs font-semibold text-primary">ⓘ</span>
-									<div className="absolute bottom-full mb-2 w-64 p-2 bg-foreground text-background text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-[9999]">
-										<strong>Breakeven Time:</strong> Lifetime Access becomes
-										cost-effective after <strong>{plan.breakevenTime}</strong>{" "}
-										on Accelerator.
-										<br />
+							{/* Divider */}
+							<div className="h-px bg-border/50"></div>
+
+							{/* Perfect For Section */}
+							<div className="space-y-3">
+								<p className="text-sm font-semibold text-foreground">
+									Perfect for:
+								</p>
+								<ul className="space-y-2">
+									{plan.targetAudience.map((feature, i) => (
+										<li
+											key={i}
+											className="text-sm text-foreground/80 flex items-start gap-2"
+										>
+											<span className="text-primary font-bold text-lg leading-none mt-0.5">
+												+
+											</span>
+											<span>{feature}</span>
+										</li>
+									))}
+								</ul>
+							</div>
+
+							{/* Breakeven Info */}
+							{(plan.breakevenMRR || plan.breakevenTime) && (
+								<div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+									<div className="relative group cursor-pointer inline-flex items-center gap-2 w-full">
+										<span className="text-xs font-semibold text-primary">
+											ℹ
+										</span>
+										<span className="text-xs text-foreground/70 flex-1">
+											{plan.breakevenMRR &&
+												`Breakeven at $${new Intl.NumberFormat("en-US").format(
+													plan.breakevenMRR
+												)}/mo`}
+											{plan.breakevenTime &&
+												`Pays for itself in ${plan.breakevenTime}`}
+										</span>
 									</div>
 								</div>
 							)}
 						</div>
-
-						<strong className="text-foreground">Perfect For</strong>
-						<ul className="space-y-2 text-sm text-foreground/80 mt-1">
-							{plan.targetAudience.map((feature, i) => (
-								<li key={i}>✓ {feature}</li>
-							))}
-						</ul>
 					</div>
 				))}
+			</div>
+
+			{/* Pricing Calculator Section */}
+			<div className="space-y-6 pt-8">
+				<div className="space-y-2">
+					<h2 className="text-3xl font-bold text-foreground">
+						Calculate Your Costs
+					</h2>
+					<p className="text-lg text-foreground/70">
+						See exactly what you'll pay with your GMV and commission structure
+					</p>
+				</div>
+				<PricingCalculator />
 			</div>
 		</div>
 	);

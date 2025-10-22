@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { RFD, RFDState } from "@/content/rfd/rfds"
 import ReactMarkdown from "react-markdown"
+import { ChevronLeft, Sparkles, MessageCircle, Calendar, User, Tag, ExternalLink, Search } from "lucide-react"
 
 interface RFDContentProps {
   rfds: RFD[]  // Now passed from server component
@@ -10,13 +11,37 @@ interface RFDContentProps {
   onNavigate?: (number?: number) => void
 }
 
-const stateColors: Record<RFDState, string> = {
-  prediscussion: "bg-gray-200 text-gray-700",
-  ideation: "bg-yellow-200 text-yellow-800",
-  discussion: "bg-blue-200 text-blue-800",
-  published: "bg-green-200 text-green-800",
-  committed: "bg-purple-200 text-purple-800",
-  abandoned: "bg-red-200 text-red-800"
+const stateColors: Record<RFDState, { badge: string; gradient: string; icon: string }> = {
+  prediscussion: {
+    badge: "bg-slate-100 text-slate-700",
+    gradient: "from-slate-50 to-slate-100",
+    icon: "💭"
+  },
+  ideation: {
+    badge: "bg-amber-100 text-amber-700",
+    gradient: "from-amber-50 to-amber-100",
+    icon: "💡"
+  },
+  discussion: {
+    badge: "bg-cyan-100 text-cyan-700",
+    gradient: "from-cyan-50 to-cyan-100",
+    icon: "💬"
+  },
+  published: {
+    badge: "bg-emerald-100 text-emerald-700",
+    gradient: "from-emerald-50 to-emerald-100",
+    icon: "📚"
+  },
+  committed: {
+    badge: "bg-violet-100 text-violet-700",
+    gradient: "from-violet-50 to-violet-100",
+    icon: "✅"
+  },
+  abandoned: {
+    badge: "bg-rose-100 text-rose-700",
+    gradient: "from-rose-50 to-rose-100",
+    icon: "🗑️"
+  }
 }
 
 export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps) {
@@ -84,104 +109,143 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
   }
 
   if (view === 'document' && currentRFD) {
+    const stateInfo = stateColors[currentRFD.state]
     return (
-      <div className="flex flex-col h-full">
-        {/* RFD Header */}
-        <div className="border-b border-gray-300 p-4 bg-gray-50">
+      <div className="flex flex-col h-full bg-white">
+        {/* Premium Header with Gradient Background */}
+        <div className={`bg-gradient-to-r ${stateInfo.gradient} border-b border-gray-200 p-6 shadow-sm`}>
           <button
             onClick={handleBackToList}
-            className="text-blue-600 hover:underline mb-3 flex items-center gap-1"
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-4 transition-colors group"
           >
-            ← Back to all RFDs
+            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-medium">Back to all RFDs</span>
           </button>
-          
-          <div className="flex items-start justify-between mb-2">
-            <h1 className="text-2xl font-bold flex-1">
-              RFD {currentRFD.number}: {currentRFD.title.replace(`RFD ${currentRFD.number}: `, '')}
-            </h1>
-            <span className={`px-3 py-1 rounded text-sm font-medium ${stateColors[currentRFD.state]}`}>
-              {currentRFD.state}
-            </span>
+
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-3xl">{stateInfo.icon}</span>
+                <span className={`${stateInfo.badge} px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide`}>
+                  {currentRFD.state}
+                </span>
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+                RFD {currentRFD.number}
+              </h1>
+              <p className="text-lg text-gray-700 mt-2">
+                {currentRFD.title.replace(`RFD ${currentRFD.number}: `, '')}
+              </p>
+            </div>
           </div>
-          
-          <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
-            <span>👤 {currentRFD.authors.join(', ')}</span>
-            <span>📅 {currentRFD.date}</span>
+
+          {/* Metadata Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex items-center gap-2 text-sm">
+              <User className="w-4 h-4 text-gray-600" />
+              <span className="font-medium text-gray-900">{currentRFD.authors.join(', ')}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="w-4 h-4 text-gray-600" />
+              <span className="font-medium text-gray-900">{currentRFD.date}</span>
+            </div>
             {currentRFD.discussion && (
-              <a 
-                href={currentRFD.discussion}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                💬 Discussion
-              </a>
+              <div className="col-span-2 md:col-span-2">
+                <a
+                  href={currentRFD.discussion}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-violet-600 hover:text-violet-700 font-medium transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Join Discussion</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
             )}
           </div>
-          
-          <div className="flex gap-2">
-            {currentRFD.labels.map(label => (
-              <span
-                key={label}
-                className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
-              >
-                {label}
-              </span>
-            ))}
-          </div>
+
+          {/* Labels */}
+          {currentRFD.labels.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-300 border-opacity-50">
+              {currentRFD.labels.map(label => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-white bg-opacity-60 text-gray-700 text-xs font-medium rounded-full border border-gray-300 border-opacity-50"
+                >
+                  <Tag className="w-3 h-3" />
+                  {label}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* RFD Content */}
-        <div className="flex-1 overflow-y-auto p-6 prose prose-sm max-w-none">
-          <ReactMarkdown>{currentRFD.content}</ReactMarkdown>
+        {/* Premium Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-4xl mx-auto px-8 py-8">
+            <article className="prose prose-lg prose-slate max-w-none prose-headings:text-gray-900 prose-headings:font-bold prose-a:text-violet-600 prose-a:no-underline hover:prose-a:underline prose-code:text-rose-600 prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-strong:text-gray-900 prose-em:text-gray-700">
+              <ReactMarkdown>{currentRFD.content}</ReactMarkdown>
+            </article>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="border-b border-gray-300 p-4 bg-gray-50">
-        <h1 className="text-xl font-bold mb-1">Requests for Discussion</h1>
-        <p className="text-sm text-gray-600 mb-3">
-          Design documents and technical decisions made in public
+    <div className="flex flex-col h-full bg-gray-50">
+      {/* Premium Header */}
+      <div className="border-b border-gray-200 p-6 bg-white shadow-sm">
+        <div className="flex items-center gap-3 mb-4">
+          <Sparkles className="w-6 h-6 text-violet-600" />
+          <h1 className="text-3xl font-bold text-gray-900">Requests for Discussion</h1>
+        </div>
+        <p className="text-base text-gray-600 mb-6 max-w-2xl">
+          Design decisions, architecture proposals, and technical RFDs shaped through open discussion. Read our thinking process in public.
         </p>
-        
-        {/* Search Bar */}
-        <div ref={searchRef}>
+
+        {/* Premium Search Bar */}
+        <div ref={searchRef} className="relative mb-6">
           <div className="relative">
+            <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search RFDs..."
+              placeholder="Search by title, topic, or label..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => searchQuery && setShowAutocomplete(true)}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white transition-all"
             />
-            
-            {/* Autocomplete Dropdown */}
+
+            {/* Premium Autocomplete Dropdown */}
             {showAutocomplete && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-64 overflow-y-auto z-10">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto z-10">
                 {filteredRFDs?.length > 0 ? (
-                  filteredRFDs.map(rfd => (
-                    <button
-                      key={rfd.number}
-                      onClick={() => handleRFDClick(rfd)}
-                      className="w-full text-left px-3 py-2 hover:bg-gray-100 border-b border-gray-200 last:border-b-0"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs text-gray-500">RFD {rfd.number}</span>
-                        <span className={`px-2 py-0.5 rounded text-xs ${stateColors[rfd.state]}`}>
-                          {rfd.state}
-                        </span>
-                      </div>
-                      <div className="font-medium mt-1">{rfd.title}</div>
-                    </button>
-                  ))
+                  <div className="divide-y divide-gray-100">
+                    {filteredRFDs.map(rfd => {
+                      const rfdState = stateColors[rfd.state]
+                      return (
+                        <button
+                          key={rfd.number}
+                          onClick={() => handleRFDClick(rfd)}
+                          className="w-full text-left px-4 py-3 hover:bg-violet-50 transition-colors group"
+                        >
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="text-lg">{rfdState.icon}</span>
+                            <span className="font-mono text-xs font-bold text-gray-500">RFD {rfd.number}</span>
+                            <span className={`${rfdState.badge} px-2 py-0.5 rounded-full text-xs font-semibold uppercase`}>
+                              {rfd.state}
+                            </span>
+                          </div>
+                          <div className="font-semibold text-gray-900 group-hover:text-violet-600 transition-colors">{rfd.title}</div>
+                        </button>
+                      )
+                    })}
+                  </div>
                 ) : (
-                  <div className="px-3 py-4 text-gray-500 text-center">
-                    No RFDs found
+                  <div className="px-4 py-8 text-center text-gray-500">
+                    <p className="text-sm">No RFDs found</p>
                   </div>
                 )}
               </div>
@@ -189,60 +253,100 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
           </div>
         </div>
 
-        {/* State Filter */}
-        <div className="flex gap-2 mt-3 flex-wrap text-sm">
+        {/* State Filter - Premium Styled */}
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setFilterState('all')}
-            className={`px-3 py-1 rounded ${filterState === 'all' ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+            className={`px-4 py-2 rounded-full font-medium transition-all ${
+              filterState === 'all'
+                ? 'bg-gray-900 text-white shadow-md'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+            }`}
           >
-            All
+            All RFDs
           </button>
-          {(['prediscussion', 'ideation', 'discussion', 'published', 'committed', 'abandoned'] as RFDState[]).map(state => (
-            <button
-              key={state}
-              onClick={() => setFilterState(state)}
-              className={`px-3 py-1 rounded ${filterState === state ? stateColors[state] : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-            >
-              {state}
-            </button>
-          ))}
+          {(['prediscussion', 'ideation', 'discussion', 'published', 'committed', 'abandoned'] as RFDState[]).map(state => {
+            const stateInfo = stateColors[state]
+            return (
+              <button
+                key={state}
+                onClick={() => setFilterState(state)}
+                className={`px-4 py-2 rounded-full font-medium transition-all flex items-center gap-2 ${
+                  filterState === state
+                    ? `${stateInfo.badge} shadow-md`
+                    : `bg-white text-gray-700 border border-gray-300 hover:bg-gray-100`
+                }`}
+              >
+                <span>{stateInfo.icon}</span>
+                <span className="capitalize text-sm">{state}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* RFD List */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Premium RFD Grid/List */}
+      <div className="flex-1 overflow-y-auto p-6">
         {filteredRFDs?.length > 0 ? (
-          filteredRFDs.map(rfd => (
-            <button
-              key={rfd.number}
-              onClick={() => handleRFDClick(rfd)}
-              className="w-full text-left p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-start justify-between mb-2">
-                <h2 className="text-lg font-bold flex-1">
-                  RFD {rfd.number}: {rfd.title.replace(`RFD ${rfd.number}: `, '')}
-                </h2>
-                <span className={`px-2 py-1 rounded text-xs font-medium ${stateColors[rfd.state]}`}>
-                  {rfd.state}
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
-                <span>👤 {rfd.authors.join(', ')}</span>
-                <span>•</span>
-                <span>📅 {rfd.date}</span>
-              </div>
-              
-              <div className="flex gap-2">
-                {rfd.labels.map(label => (
-                  <span key={label} className="text-xs text-blue-600">#{label}</span>
-                ))}
-              </div>
-            </button>
-          ))
+          <div className="grid gap-4 max-w-4xl">
+            {filteredRFDs.map(rfd => {
+              const rfdState = stateColors[rfd.state]
+              return (
+                <button
+                  key={rfd.number}
+                  onClick={() => handleRFDClick(rfd)}
+                  className={`text-left p-5 rounded-xl border border-gray-200 bg-white hover:shadow-lg hover:border-violet-200 transition-all group cursor-pointer bg-gradient-to-r ${rfdState.gradient}`}
+                >
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl flex-shrink-0">{rfdState.icon}</span>
+                        <span className="font-mono text-xs font-bold text-gray-600">RFD {rfd.number}</span>
+                        <span className={`${rfdState.badge} px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider`}>
+                          {rfd.state}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 group-hover:text-violet-600 transition-colors truncate">
+                        {rfd.title.replace(`RFD ${rfd.number}: `, '')}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Metadata Row */}
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3 pb-3 border-b border-gray-200 border-opacity-50">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-gray-400" />
+                      <span className="font-medium text-gray-900">{rfd.authors.join(', ')}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-700">{rfd.date}</span>
+                    </div>
+                  </div>
+
+                  {/* Labels */}
+                  {rfd.labels.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {rfd.labels.map(label => (
+                        <span
+                          key={label}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-white bg-opacity-70 text-gray-700 text-xs font-medium rounded-full border border-gray-300 border-opacity-50"
+                        >
+                          <Tag className="w-3 h-3" />
+                          {label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </button>
+              )
+            })}
+          </div>
         ) : (
-          <div className="p-8 text-center text-gray-500">
-            No RFDs match the selected filter
+          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+            <Sparkles className="w-12 h-12 mb-4 opacity-30" />
+            <p className="text-lg font-medium text-gray-700">No RFDs match your filters</p>
+            <p className="text-sm mt-2">Try adjusting your search or filters</p>
           </div>
         )}
       </div>

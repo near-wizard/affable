@@ -2,7 +2,8 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { RFDState } from "@/content/rfd/rfds";
+
+export type RFDState = 'prediscussion' | 'ideation' | 'discussion' | 'published' | 'committed' | 'abandoned'
 
 export interface RFD {
 	number: number;
@@ -33,7 +34,7 @@ export function getAllRFDs(): RFD[] {
 
 			// extract the number: rfdXXXX.md -> XXXX
 			const numberMatch = filename.match(/^rfd(\d+)\.md$/i);
-			const number = numberMatch ? numberMatch[1] : "";
+			const number = numberMatch ? parseInt(numberMatch[1], 10) : 0;
 
 			return {
 				number,
@@ -42,11 +43,11 @@ export function getAllRFDs(): RFD[] {
 				date: data.date || "",
 				content,
 				...data,
-			};
+			} as RFD;
 		});
 
 	// sort by number ascending
-	rfds.sort((a, b) => (a.number > b.number ? 1 : -1));
+	rfds.sort((a, b) => a.number - b.number);
 
 	return rfds;
 }

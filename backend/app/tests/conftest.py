@@ -289,10 +289,9 @@ def partner_token(partner):
     """Create JWT token for partner."""
     token_data = {
         "sub": str(partner.partner_id),
-        "user_type": "partner",  # Fixed: was "type", should be "user_type"
+        "user_type": "partner",
         "email": partner.email
     }
-    print(f"DEBUG: Creating partner token with data: {token_data}")
     return create_access_token(data=token_data)
 
 
@@ -301,11 +300,10 @@ def vendor_token(vendor_user):
     """Create JWT token for vendor user."""
     token_data = {
         "sub": str(vendor_user.vendor_user_id),
-        "user_type": "vendor_user",  # Fixed: was "type", should be "user_type"
+        "user_type": "vendor_user",
         "email": vendor_user.email,
         "vendor_id": vendor_user.vendor_id
     }
-    print(f"DEBUG: Creating vendor token for vendor_user_id={vendor_user.vendor_user_id}, role={vendor_user.role}, data: {token_data}")
     return create_access_token(data=token_data)
 
 

@@ -1,19 +1,39 @@
 # robots.txt for https://affablelink.com
 
-# Allow all bots to crawl the main landing page
+# Allow all bots to crawl and index
 User-agent: *
-Disallow:
+Allow: /
 
-# Prevent indexing of development and preview environments
-# These lines ensure only the production domain is indexed
+# Prevent indexing of internal admin/partner/vendor dashboard routes
 User-agent: *
-Disallow: /
+Disallow: /admin/
+Disallow: /partner/dashboard
+Disallow: /vendor/dashboard
 
-Host: https://affablelink.com
+# Allow specific LLM crawlers for training data
+User-agent: GPTBot
+Allow: /
 
-# Notes:
-# - All bots (including GPTBot, AhrefsBot, etc.) are allowed on production
-#   because you don’t mind scraping or aggregation.
-# - No sitemap specified yet; can add later:
-#   Sitemap: https://affablelink.com/sitemap.xml
-# - No crawl delay; Vercel handles default traffic fine.
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Crawl delay and request rate
+Crawl-delay: 0
+
+# Sitemap location
+Sitemap: https://affablelink.com/sitemap.xml
+
+# Additional notes:
+# - Public-facing marketing pages are fully crawlable
+# - Dashboard pages excluded to avoid indexing private content
+# - All major search bots and LLM crawlers are explicitly allowed
+# - Production site only (not preview/staging environments)

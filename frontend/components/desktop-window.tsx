@@ -24,12 +24,14 @@ export function DesktopWindow({
 }) {
   const [position, setPosition] = useState(initialPosition)
   const [size, setSize] = useState(() => {
-    // Responsive initial size based on viewport
-    const vw = typeof window !== 'undefined' ? window.innerWidth : 700
-    const vh = typeof window !== 'undefined' ? window.innerHeight : 500
+    // Default size accounting for menu bar and cascading window offset
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 800
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 600
+    const menuBarHeight = 32
+    const cascadeOffset = 60 // Account for cascading windows
     return {
-      width: Math.min(800, vw * 0.9),
-      height: Math.min(600, vh * 0.7)
+      width: (vw - cascadeOffset) * 0.9,
+      height: (vh - menuBarHeight - cascadeOffset) * 0.9
     }
   })
   const [isDragging, setIsDragging] = useState(false)

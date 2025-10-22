@@ -5,6 +5,7 @@
 
 # Claude Code
 *.claude*
+*CLAUDE*
 CLAUDE_*.md
 CLAUDE.md
 COMPLETION_SUMMARY.md

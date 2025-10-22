@@ -42,7 +42,7 @@ export default function AboutFounder() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section - More Dynamic */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
+      <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600">
         {/* Animated background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
@@ -53,36 +53,36 @@ export default function AboutFounder() {
           <div className="text-center">
             {/* Fun animated emoji */}
             <div className="inline-block mb-8 relative">
-              <div className="text-8xl animate-bounce rounded-full overflow-hidden">
+              <div className="text-8xl animate-bounce rounded-full overflow-hidden shadow-2xl shadow-purple-900/50">
               <Image
-                src="/nearwizard.jpg"  // path relative to /public
+                src="/nearwizard.jpg"
                 alt="Cartoon Profile picture of founder, animated to bounce"
                 width={300}
                 height={300}
             />
               </div>
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-400 rounded-full border-4 border-white"></div>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-400 rounded-full border-4 border-white shadow-lg"></div>
             </div>
-            
+
             <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight">
-              Built by Someone Who's Been
+              Built by a Founder Who
               <br />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 to-pink-200">
-                On Both Sides of the Table
+                Actually Knows the Game
               </span>
             </h1>
-            
-            <p className="text-xl md:text-2xl text-indigo-100 max-w-3xl mx-auto mb-8">
-              A decade breaking referral records as a partner. Software engineer who builds the tools. 
-              Now creating the platform that works for everyone.
+
+            <p className="text-xl md:text-2xl text-purple-100 max-w-3xl mx-auto mb-8 leading-relaxed">
+              10 years breaking referral records as a partner. Software engineer who codes it all.
+              Building a premium platform that scales with founders like you.
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <button className="group bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-yellow-300 hover:text-purple-900 transition-all transform hover:scale-105 shadow-2xl flex items-center gap-2">
+              <button className="group bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-yellow-300 hover:text-purple-900 transition-all transform hover:scale-105 shadow-2xl shadow-purple-900/40 flex items-center gap-2">
                 Get Started Free
                 <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
               </button>
-              <button className="bg-transparent border-3 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/10 transition-all backdrop-blur">
+              <button className="bg-transparent border-3 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/10 transition-all backdrop-blur hover:shadow-xl hover:shadow-white/20">
                 Watch Demo
               </button>
             </div>
@@ -140,10 +140,10 @@ export default function AboutFounder() {
               <div className="space-y-8">
                 {milestones.map((milestone, index) => (
                   <div key={index} className="relative pl-20">
-                    <div className="absolute left-0 w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg transform hover:rotate-12 transition-transform">
+                    <div className="absolute left-0 w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-purple-600/40 transform hover:rotate-12 transition-transform cursor-pointer">
                       {milestone.icon}
                     </div>
-                    <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 hover:border-purple-300 transition-all hover:-translate-y-1">
+                    <div className="bg-white rounded-2xl p-6 shadow-lg shadow-purple-100/40 border-2 border-gray-100 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-200/50 transition-all hover:-translate-y-1 cursor-pointer">
                       <div className="text-sm font-bold text-purple-600 mb-2">{milestone.year}</div>
                       <p className="text-lg text-gray-700">{milestone.text}</p>
                     </div>
@@ -153,7 +153,7 @@ export default function AboutFounder() {
             </div>
 
             {/* The Real Talk Section */}
-            <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-3xl p-8">
+            <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-3xl p-8 shadow-lg shadow-orange-200/30 hover:shadow-lg hover:shadow-orange-200/50 transition-all duration-300">
               <div className="flex items-start gap-4">
                 <div className="text-4xl">🔥</div>
                 <div>
@@ -191,19 +191,19 @@ export default function AboutFounder() {
 
             {/* Credibility Proof */}
             <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-6 text-center">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-6 text-center hover:shadow-lg hover:shadow-blue-200/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
                 <div className="text-4xl mb-3">🎯</div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">Born to Sell</div>
                 <div className="text-gray-700">Top seller since high school fundraisers</div>
                 <div className="text-xs text-gray-600 mt-2">Vendors: I know what drives performance</div>
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-2xl p-6 text-center">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-2xl p-6 text-center hover:shadow-lg hover:shadow-purple-200/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
                 <div className="text-4xl mb-3">📈</div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">Record Breaker</div>
                 <div className="text-gray-700">10 years breaking referral records as a partner</div>
                 <div className="text-xs text-gray-600 mt-2">Partners: I've been in your shoes</div>
               </div>
-              <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-2xl p-6 text-center">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-2xl p-6 text-center hover:shadow-lg hover:shadow-green-200/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
                 <div className="text-4xl mb-3">💻</div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">Builder</div>
                 <div className="text-gray-700">Engineer who codes the solution</div>
@@ -229,7 +229,7 @@ export default function AboutFounder() {
               {principles.map((principle, index) => (
                 <div
                   key={index}
-                  className="group bg-gradient-to-br from-white to-gray-50 rounded-3xl p-8 border-2 border-gray-200 hover:border-purple-400 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+                  className="group bg-gradient-to-br from-white to-gray-50 rounded-3xl p-8 border-2 border-gray-200 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-200/30 transition-all duration-300 hover:-translate-y-2 cursor-pointer"
                 >
                   <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     {principle.icon}
@@ -241,7 +241,7 @@ export default function AboutFounder() {
             </div>
 
             {/* Stats Section */}
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-12 text-white">
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-12 text-white shadow-2xl shadow-purple-600/30">
               <h3 className="text-3xl font-bold mb-8 text-center">By The Numbers</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div className="text-center">
@@ -268,7 +268,7 @@ export default function AboutFounder() {
             </div>
 
             {/* What You Get Section */}
-            <div className="bg-white rounded-3xl p-8 border-2 border-gray-200 shadow-lg">
+            <div className="bg-white rounded-3xl p-8 border-2 border-gray-200 shadow-lg hover:shadow-xl hover:shadow-purple-200/30 transition-all duration-300">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">What Working With Me Means:</h3>
               <div className="space-y-4">
                 {[
@@ -304,23 +304,23 @@ export default function AboutFounder() {
             </div>
 
             {/* Current Status */}
-            <div className="bg-white rounded-3xl p-8 border-2 border-gray-200 shadow-lg">
+            <div className="bg-white rounded-3xl p-8 border-2 border-gray-200 shadow-lg hover:shadow-xl hover:shadow-purple-200/30 transition-all duration-300">
               <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                 Current Status
               </h3>
               <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center p-6 bg-green-50 rounded-2xl border-2 border-green-200">
+                <div className="text-center p-6 bg-green-50 rounded-2xl border-2 border-green-200 hover:shadow-lg hover:shadow-green-200/40 transition-all duration-300 cursor-pointer">
                   <div className="text-3xl mb-3">✅</div>
                   <div className="font-bold text-gray-900 mb-2">Core Platform</div>
                   <div className="text-sm text-gray-600">Gathering Initial Interest, Dashboard <Link href="/vendor/dashboard" className="text-blue-600 hover:underline">Mocks for Vendors</Link> and <Link href="/partner/dashboard" className="text-blue-600 hover:underline">For Partner Sellers</Link></div>
                 </div>
-                <div className="text-center p-6 bg-yellow-50 rounded-2xl border-2 border-yellow-200">
+                <div className="text-center p-6 bg-yellow-50 rounded-2xl border-2 border-yellow-200 hover:shadow-lg hover:shadow-yellow-200/40 transition-all duration-300 cursor-pointer">
                   <div className="text-3xl mb-3">🚧</div>
                   <div className="font-bold text-gray-900 mb-2">In Progress</div>
                   <div className="text-sm text-gray-600">Tracking, attribution, payouts all working </div>
                 </div>
-                <div className="text-center p-6 bg-blue-50 rounded-2xl border-2 border-blue-200">
+                <div className="text-center p-6 bg-blue-50 rounded-2xl border-2 border-blue-200 hover:shadow-lg hover:shadow-blue-200/40 transition-all duration-300 cursor-pointer">
                   <div className="text-3xl mb-3">🔮</div>
                   <div className="font-bold text-gray-900 mb-2">Coming Soon</div>
                   <div className="text-sm text-gray-600">Integrations, Advanced analytics, multi-currency</div>
@@ -337,7 +337,7 @@ export default function AboutFounder() {
                 { phase: 'Q1 2025', items: ['Mobile app', 'API for custom integrations', 'Multi-language support'], status: 'planned' },
                 { phase: 'Q2 2025', items: ['AI-powered insights', 'White-label options', 'Enterprise features'], status: 'planned' },
               ].map((phase, index) => (
-                <div key={index} className="bg-white rounded-2xl p-6 border-2 border-gray-200 hover:border-purple-300 transition-all">
+                <div key={index} className="bg-white rounded-2xl p-6 border-2 border-gray-200 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-200/30 transition-all cursor-pointer">
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-xl font-bold text-gray-900">{phase.phase}</h4>
                     <span className={`px-4 py-1 rounded-full text-sm font-semibold ${
@@ -358,12 +358,12 @@ export default function AboutFounder() {
               ))}
             </div>
 
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 text-white text-center">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 text-white text-center shadow-2xl shadow-purple-600/30 hover:shadow-2xl hover:shadow-purple-600/50 transition-all duration-300">
               <h3 className="text-3xl font-bold mb-4">Your Feedback Matters</h3>
               <p className="text-xl text-blue-100 mb-6">
                 Early users literally shape what gets built. Got an idea? I want to hear it.
               </p>
-              <button className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-yellow-300 hover:text-purple-900 transition-all transform hover:scale-105">
+              <button className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-yellow-300 hover:text-purple-900 transition-all transform hover:scale-105 shadow-lg shadow-white/30">
                 Share Your Ideas
               </button>
             </div>
@@ -385,7 +385,7 @@ export default function AboutFounder() {
             {/* Contact Cards */}
             <div className="grid md:grid-cols-2 gap-6">
               <a href="mailto:founder@yourplatform.com" className="group block">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-8 text-white hover:scale-105 transition-all shadow-xl">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-8 text-white hover:scale-105 transition-all shadow-2xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/50">
                   <Mail size={40} className="mb-4 group-hover:scale-110 transition-transform" />
                   <h3 className="text-2xl font-bold mb-2">Email Me Directly</h3>
                   <p className="text-blue-100 mb-4">founder@yourplatform.com</p>
@@ -396,7 +396,7 @@ export default function AboutFounder() {
               </a>
 
               <a href="https://cal.com/yourname" className="group block" target="_blank" rel="noopener noreferrer">
-                <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl p-8 text-white hover:scale-105 transition-all shadow-xl">
+                <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl p-8 text-white hover:scale-105 transition-all shadow-2xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/50">
                   <Rocket size={40} className="mb-4 group-hover:scale-110 transition-transform" />
                   <h3 className="text-2xl font-bold mb-2">Book a 30min Call</h3>
                   <p className="text-purple-100 mb-4">Let's chat about your needs</p>
@@ -408,7 +408,7 @@ export default function AboutFounder() {
             </div>
 
             {/* Social Links */}
-            <div className="bg-white rounded-3xl p-8 border-2 border-gray-200 shadow-lg">
+            <div className="bg-white rounded-3xl p-8 border-2 border-gray-200 shadow-lg hover:shadow-xl hover:shadow-purple-200/30 transition-all duration-300">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Find Me On</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
@@ -420,7 +420,7 @@ export default function AboutFounder() {
                   <a
                     key={index}
                     href={social.url}
-                    className={`flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-2xl transition-all ${social.color}`}
+                    className={`flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-2xl transition-all hover:shadow-lg cursor-pointer ${social.color}`}
                   >
                     <div className="text-gray-700 mb-2">{social.icon}</div>
                     <div className="text-sm font-semibold text-gray-900">{social.name}</div>
@@ -430,12 +430,12 @@ export default function AboutFounder() {
             </div>
 
             {/* Final CTA */}
-            <div className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 rounded-3xl p-12 text-center">
+            <div className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 rounded-3xl p-12 text-center shadow-2xl shadow-orange-400/30 hover:shadow-2xl hover:shadow-orange-400/50 transition-all duration-300">
               <h3 className="text-4xl font-black text-white mb-4">Ready to Grow Your Partner Revenue?</h3>
               <p className="text-xl text-white/90 mb-8">
                 Join early adopters who are already seeing results. No credit card required.
               </p>
-              <button className="bg-white text-orange-600 px-12 py-5 rounded-full font-bold text-xl hover:bg-yellow-300 hover:text-orange-700 transition-all transform hover:scale-110 shadow-2xl">
+              <button className="bg-white text-orange-600 px-12 py-5 rounded-full font-bold text-xl hover:bg-yellow-300 hover:text-orange-700 transition-all transform hover:scale-110 shadow-2xl shadow-white/30">
                 Start Free Trial →
               </button>
             </div>
@@ -446,7 +446,7 @@ export default function AboutFounder() {
       {/* Floating Action Button */}
       <a
         href="#"
-        className="fixed bottom-8 right-8 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all z-50 group"
+        className="fixed bottom-8 right-8 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-4 rounded-full shadow-2xl shadow-purple-600/50 hover:scale-110 hover:shadow-2xl hover:shadow-purple-600/70 transition-all z-50 group cursor-pointer"
       >
         <Mail className="group-hover:rotate-12 transition-transform" size={24} />
       </a>

@@ -13,6 +13,7 @@ import { CookieBanner } from "./cookiebanner";
 import { TutorialLightbox } from "./tutorial-lightbox";
 import { useParams, useRouter } from "next/navigation";
 import { RFDContent } from "./window-content/rfd";
+import { rfds } from "@/content/rfd/rfds";
 //import { loadPostHog } from "@/utils/posthogLazyLoader"
 import FounderStory from "./window-content/founder-story";
 import VendorInterestForm from "./window-content/interestForm-vendor";
@@ -236,6 +237,7 @@ export function Desktop() {
 			case "rfd":
 				return (
 					<RFDContent
+						rfds={rfds}
 						initialNumber={
 							window.subRoute ? parseInt(window.subRoute) : undefined
 						}
