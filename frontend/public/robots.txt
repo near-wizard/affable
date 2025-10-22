@@ -1,16 +1,35 @@
 # robots.txt for https://affablelink.com
 
-# Allow all bots to crawl and index
-User-agent: *
+# -----------------------------
+# Googlebot-specific rules
+# -----------------------------
+User-agent: Googlebot
+# Allow all public pages
 Allow: /
 
-# Prevent indexing of internal admin/partner/vendor dashboard routes
-User-agent: *
+# Disallow sensitive internal routes
 Disallow: /admin/
 Disallow: /partner/dashboard
 Disallow: /vendor/dashboard
 
-# Allow specific LLM crawlers for training data
+# -----------------------------
+# General rules for all other bots
+# -----------------------------
+User-agent: *
+# Allow all public pages
+Allow: /
+
+# Disallow sensitive internal routes
+Disallow: /admin/
+Disallow: /partner/dashboard
+Disallow: /vendor/dashboard
+
+# Crawl delay (optional)
+Crawl-delay: 0
+
+# -----------------------------
+# Specific LLM crawlers explicitly allowed
+# -----------------------------
 User-agent: GPTBot
 Allow: /
 
@@ -26,14 +45,7 @@ Allow: /
 User-agent: Applebot-Extended
 Allow: /
 
-# Crawl delay and request rate
-Crawl-delay: 0
-
-# Sitemap location
+# -----------------------------
+# Sitemap
+# -----------------------------
 Sitemap: https://affablelink.com/sitemap.xml
-
-# Additional notes:
-# - Public-facing marketing pages are fully crawlable
-# - Dashboard pages excluded to avoid indexing private content
-# - All major search bots and LLM crawlers are explicitly allowed
-# - Production site only (not preview/staging environments)
