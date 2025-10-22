@@ -44,8 +44,8 @@ class Cookie(BaseModel):
     __tablename__ = "cookies"
     
     cookie_id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
-    first_click_id = Column(BigInteger, ForeignKey("clicks.click_id"))
-    last_click_id = Column(BigInteger, ForeignKey("clicks.click_id"))
+    first_click_id = Column(Integer, ForeignKey("clicks.click_id"))
+    last_click_id = Column(Integer, ForeignKey("clicks.click_id"))
     first_partner_id = Column(Integer, ForeignKey("partners.partner_id"))
     last_partner_id = Column(Integer, ForeignKey("partners.partner_id"), index=True)
     last_campaign_version_id = Column(Integer, ForeignKey("campaign_versions.campaign_version_id"))
@@ -79,7 +79,7 @@ class Click(BaseModel):
     
     __tablename__ = "clicks"
     
-    click_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
+    click_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     partner_link_id = Column(Integer, ForeignKey("partner_links.partner_link_id", ondelete="CASCADE"), nullable=False, index=True)
     cookie_id = Column(GUID(), ForeignKey("cookies.cookie_id"), index=True)
     ip_address = Column(String(45))  # IPv4 or IPv6

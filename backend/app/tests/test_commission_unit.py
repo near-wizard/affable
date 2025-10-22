@@ -113,6 +113,10 @@ class CommissionCalculator:
                 return CommissionCalculator.calculate_percentage_commission(
                     event_value, default_commission["value"]
                 )
+            else:  # fixed
+                return CommissionCalculator.calculate_fixed_commission(
+                    event_value, default_commission["value"]
+                )
 
         return Decimal("0.00")
 

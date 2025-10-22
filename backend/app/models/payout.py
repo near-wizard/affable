@@ -107,7 +107,7 @@ class PayoutEvent(Base):
     __tablename__ = "payout_events"
     
     payout_id = Column(Integer, ForeignKey("payouts.payout_id", ondelete="CASCADE"), primary_key=True)
-    conversion_event_id = Column(BigInteger, ForeignKey("conversion_events.conversion_event_id"), primary_key=True)
+    conversion_event_id = Column(Integer, ForeignKey("conversion_events.conversion_event_id"), primary_key=True)
     commission_amount = Column(Numeric(10, 2), nullable=False)
     is_deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime)
@@ -122,12 +122,12 @@ class PayoutEvent(Base):
 
 class AuditLog(BaseModel):
     """Comprehensive audit trail for compliance and debugging."""
-    
+
     __tablename__ = "audit_logs"
-    
-    audit_log_id = Column(BigInteger, primary_key=True, index=True)
+
+    audit_log_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     entity_type = Column(String(50), nullable=False, index=True)
-    entity_id = Column(BigInteger, nullable=False, index=True)
+    entity_id = Column(Integer, nullable=False, index=True)
     action = Column(String(50), nullable=False)  # create, update, delete, approve, reject
     actor_type = Column(String(50))  # vendor_user, partner, system
     actor_id = Column(Integer)

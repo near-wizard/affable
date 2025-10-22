@@ -9,13 +9,22 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 # Create engine with connection pooling
-engine = create_engine(
-    settings.DATABASE_URL,
-    pool_pre_ping=True,  # Verify connections before using
-    pool_size=10,
-    max_overflow=20,
-    echo=settings.ENV == "development",  # Log SQL in development
-)
+# SQLite doesn't support pool_size/max_overflow, only use for production databases
+if settings.DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        settings.DATABASE_URL,
+        echo=settings.ENV == "development",  # Log SQL in development
+        connect_args={"check_same_thread": False},
+        poolclass=NullPool,
+    )
+else:
+    engine = create_engine(
+        settings.DATABASE_URL,
+        pool_pre_ping=True,  # Verify connections before using
+        pool_size=10,
+        max_overflow=20,
+        echo=settings.ENV == "development",  # Log SQL in development
+    )
 
 # Session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
