@@ -1,23 +1,25 @@
-'use client'
+import { LandingNav } from "@/components/landing-nav"
+import { Hero } from "@/components/hero"
+import { Features } from "@/components/features"
+import { Benefits } from "@/components/benefits"
+import { LandingSocialProof } from "@/components/landing-social-proof"
+import { LandingFAQ } from "@/components/landing-faq"
+import { LandingCTA } from "@/components/landing-cta"
+import { LandingFooter } from "@/components/landing-footer"
 
-import { useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-
-export default function RootPage() {
-  const router = useRouter()
-  const params = useParams()
-
-  useEffect(() => {
-    // If no slug provided (root path), redirect to /desktop
-    if (!params.slug || params.slug.length === 0) {
-      router.replace('/desktop')
-    } else {
-      // If slug provided, redirect to /desktop with the slug
-      const slug = Array.isArray(params.slug) ? params.slug.join('/') : params.slug
-      router.replace(`/desktop/${slug}`)
-    }
-  }, [params, router])
-
-  // Show nothing while redirecting
-  return null
+export default function LandingPage() {
+  return (
+    <main className="min-h-screen flex flex-col">
+      <LandingNav />
+      <div className="flex-1">
+        <Hero />
+        <Features />
+        <Benefits />
+        <LandingSocialProof />
+        <LandingFAQ />
+        <LandingCTA />
+      </div>
+      <LandingFooter />
+    </main>
+  )
 }

@@ -1,29 +1,55 @@
 "use client"
 
 import { useState } from "react"
-import { Menu } from "lucide-react"
+import { Menu, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-const links = [
+interface MenuItem {
+  name: string
+  path?: string
+  children?: MenuItem[]
+}
+
+const links: MenuItem[] = [
   { name: "Dashboard", path: "/partner/dashboard" },
+  {
+    name: "Campaigns",
+    children: [
+      { name: "Current Campaigns", path: "/partner/campaigns/current" },
+      { name: "Find Campaigns", path: "/partner/campaigns/find" },
+    ],
+  },
   { name: "Links", path: "/partner/links" },
   { name: "Earnings", path: "/partner/earnings" },
 ]
 
 export default function PartnerLayout({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(true) // default open
+  const [expandedMenu, setExpandedMenu] = useState<string | null>("Campaigns") // default expand Campaigns
   const pathname = usePathname()
+
+  const isMenuActive = (menu: MenuItem): boolean => {
+    if (menu.path) return pathname === menu.path
+    if (menu.children) {
+      return menu.children.some((child) => pathname === child.path)
+    }
+    return false
+  }
+
+  const toggleSubmenu = (menuName: string) => {
+    setExpandedMenu(expandedMenu === menuName ? null : menuName)
+  }
 
   return (
     <div className="flex h-screen">
       {/* Optional overlay for small screens */}
       {isOpen && (
         <div
-        className="fixed inset-0 z-40 md:hidden transition-opacity duration-300"
-        style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-        onClick={() => setIsOpen(false)}
-      />
+          className="fixed inset-0 z-40 md:hidden transition-opacity duration-300"
+          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+          onClick={() => setIsOpen(false)}
+        />
       )}
 
       {/* Sidebar */}
@@ -46,12 +72,52 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
 
         <nav className="p-4 flex flex-col space-y-2">
           {links.map((link) => {
-            const isActive = pathname === link.path
+            const isActive = isMenuActive(link)
+
+            if (link.children) {
+              return (
+                <div key={link.name}>
+                  <button
+                    onClick={() => toggleSubmenu(link.name)}
+                    className={`w-full flex items-center justify-between p-2 rounded hover:bg-gray-100 transition-colors ${
+                      isActive ? "bg-gray-200 font-semibold" : ""
+                    }`}
+                  >
+                    <span>{link.name}</span>
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform duration-200 ${
+                        expandedMenu === link.name ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedMenu === link.name && (
+                    <div className="ml-4 mt-2 space-y-2 border-l-2 border-gray-300 pl-2">
+                      {link.children.map((child) => (
+                        <Link
+                          key={child.path}
+                          href={child.path!}
+                          className={`block p-2 rounded hover:bg-gray-100 text-sm transition-colors ${
+                            pathname === child.path
+                              ? "bg-gray-200 font-semibold text-gray-900"
+                              : "text-gray-700"
+                          }`}
+                          onClick={() => setIsOpen(false)}
+                        >
+                          {child.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
             return (
               <Link
                 key={link.path}
-                href={link.path}
-                className={`p-2 rounded hover:bg-gray-100 ${
+                href={link.path!}
+                className={`p-2 rounded hover:bg-gray-100 transition-colors ${
                   isActive ? "bg-gray-200 font-semibold" : ""
                 }`}
                 onClick={() => setIsOpen(false)}

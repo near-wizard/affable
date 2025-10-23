@@ -1,94 +1,39 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus, Search, MoreVertical, Users, MousePointerClick, TrendingUp, DollarSign, Eye, Edit, Pause, Play, Megaphone } from 'lucide-react';
+import { useCurrentVendor, useVendorCampaigns } from '@/hooks/use-api';
+import { ErrorBoundary, EmptyState } from '@/components/loading-skeleton';
+import type { Campaign } from '@/types/api';
 
 export type CampaignStatus = 'active' | 'paused' | 'draft' | 'archived';
 
-export type CampaignData = {
-  id: number;
-  name: string;
-  status: CampaignStatus;
-  activePartners: number;
-  pendingPartners: number;
-  totalClicks: number;
-  totalConversions: number;
-  conversionRate: number;
-  totalRevenue: number;
-  totalCommission: number;
-  commissionRate: number; // Can represent either % or fixed amount depending on campaign
-  createdAt: string; // ISO or YYYY-MM-DD format
-};
-
 export default function VendorCampaigns() {
-  const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  useEffect(() => {
-    fetchCampaigns();
-  }, []);
+  // Fetch current vendor info
+  const { data: vendor, loading: vendorLoading, error: vendorError } = useCurrentVendor();
 
-  const fetchCampaigns = async () => {
-    try {
-      // Mock data - in production, fetch from API
-      setCampaigns([
-        {
-          id: 1,
-          name: 'Acme SaaS Launch 2025',
-          status: 'active',
-          activePartners: 8,
-          pendingPartners: 3,
-          totalClicks: 4750,
-          totalConversions: 128,
-          conversionRate: 2.69,
-          totalRevenue: 25600,
-          totalCommission: 5120,
-          commissionRate: 20,
-          createdAt: '2024-09-01',
-        },
-        {
-          id: 2,
-          name: 'Acme Enterprise Plan',
-          status: 'active',
-          activePartners: 3,
-          pendingPartners: 1,
-          totalClicks: 890,
-          totalConversions: 5,
-          conversionRate: 0.56,
-          totalRevenue: 25000,
-          totalCommission: 2500,
-          commissionRate: 500,
-          createdAt: '2024-08-15',
-        },
-        {
-          id: 3,
-          name: 'Summer Promotion 2024',
-          status: 'paused',
-          activePartners: 12,
-          pendingPartners: 0,
-          totalClicks: 9780,
-          totalConversions: 209,
-          conversionRate: 2.14,
-          totalRevenue: 17800,
-          totalCommission: 3560,
-          commissionRate: 15,
-          createdAt: '2024-06-01',
-        },
-      ]);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching campaigns:', error);
-      setLoading(false);
-    }
-  };
+  // Fetch vendor's campaigns
+  const { data: campaignsResponse, loading: campaignsLoading, error: campaignsError } = useVendorCampaigns(vendor?.id, {
+    page: 1,
+    limit: 50,
+    status: statusFilter !== 'all' ? statusFilter : undefined,
+  });
+
+  const campaigns = campaignsResponse?.data || [];
+  const loading = vendorLoading || campaignsLoading;
+  const error = vendorError || campaignsError;
 
   const filteredCampaigns = campaigns.filter(campaign => {
     const matchesSearch = campaign.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || campaign.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
+
+  if (error) {
+    return <ErrorBoundary error={error.message} />;
+  }
 
   if (loading) {
     return (
@@ -169,7 +114,7 @@ export default function VendorCampaigns() {
                       </span>
                     </div>
                     <div className="text-sm text-gray-600 mt-1">
-                      Created {new Date(campaign.createdAt).toLocaleDateString()}
+                      Created {new Date(campaign.created_at).toLocaleDateString()}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -194,33 +139,32 @@ export default function VendorCampaigns() {
                   <StatBox
                     icon={<Users size={16} className="text-blue-600" />}
                     label="Active Partners"
-                    value={campaign.activePartners}
-                    badge={campaign.pendingPartners > 0 ? `${campaign.pendingPartners} pending` : undefined}
+                    value={campaign.partner_count || 0}
                   />
                   <StatBox
                     icon={<MousePointerClick size={16} className="text-purple-600" />}
                     label="Total Clicks"
-                    value={campaign.totalClicks.toLocaleString()}
+                    value={(campaign.total_clicks || 0).toLocaleString()}
                   />
                   <StatBox
                     icon={<TrendingUp size={16} className="text-green-600" />}
                     label="Conversions"
-                    value={campaign.totalConversions}
+                    value={campaign.conversion_count || 0}
                   />
                   <StatBox
                     icon={<TrendingUp size={16} className="text-orange-600" />}
                     label="Conv. Rate"
-                    value={`${campaign.conversionRate}%`}
+                    value={`${campaign.conversion_rate || 0}%`}
                   />
                   <StatBox
                     icon={<DollarSign size={16} className="text-green-600" />}
                     label="Total Revenue"
-                    value={`$${campaign.totalRevenue.toLocaleString()}`}
+                    value={`$${(campaign.total_revenue || 0).toLocaleString()}`}
                   />
                   <StatBox
                     icon={<DollarSign size={16} className="text-blue-600" />}
                     label="Commission"
-                    value={`$${campaign.totalCommission.toLocaleString()}`}
+                    value={`$${(campaign.total_commission || 0).toLocaleString()}`}
                   />
                 </div>
 
@@ -240,11 +184,6 @@ export default function VendorCampaigns() {
                     <Users size={16} />
                     Manage Partners
                   </button>
-                  {campaign.pendingPartners > 0 && (
-                    <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
-                      {campaign.pendingPartners} pending applications
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
@@ -252,24 +191,14 @@ export default function VendorCampaigns() {
         </div>
 
         {filteredCampaigns.length === 0 && (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <Search size={48} className="mx-auto" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No campaigns found</h3>
-            <p className="text-gray-600 mb-6">
-              {searchQuery ? 'Try adjusting your search criteria' : 'Get started by creating your first campaign'}
-            </p>
-            {!searchQuery && (
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-              >
-                <Plus size={20} />
-                Create Campaign
-              </button>
-            )}
-          </div>
+          <EmptyState
+            title="No campaigns found"
+            description={searchQuery ? 'Try adjusting your search criteria' : 'Get started by creating your first campaign'}
+            action={!searchQuery ? {
+              label: 'Create Campaign',
+              onClick: () => setShowCreateModal(true),
+            } : undefined}
+          />
         )}
       </div>
 
