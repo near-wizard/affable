@@ -3,30 +3,66 @@ services:
     image: postgres:15-alpine
     container_name: aff_postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-affuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-affpass}
+      POSTGRES_DB: ${POSTGRES_DB:-affdb}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-affuser}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - affable-network
 
   redis:
     image: redis:7-alpine
     container_name: aff_redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - affable-network
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: aff_backend
     ports:
       - "8000:8000"
     env_file:
       - .env.dev
+    environment:
+      - PYTHONUNBUFFERED=1
+      - POSTGRES_USER=${POSTGRES_USER:-affuser}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-affpass}
+      - POSTGRES_DB=${POSTGRES_DB:-affdb}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://affuser:affpass@postgres:5432/affdb}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - INIT_SAMPLE_DATA=true
+    volumes:
+      - ./backend:/app
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    entrypoint: /app/entrypoint.sh
+    networks:
+      - affable-network
+    restart: unless-stopped
+
+networks:
+  affable-network:
+    driver: bridge
 
 volumes:
   pgdata:

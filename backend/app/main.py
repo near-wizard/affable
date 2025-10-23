@@ -96,7 +96,9 @@ app.include_router(tracking.router, tags=["Tracking"])  # No prefix for short UR
 async def startup_event():
     logger.info(f"Starting {settings.APP_NAME} in {settings.ENV} mode")
     # Note: In production, use Alembic migrations instead of creating tables
-    # Base.metadata.create_all(bind=engine)
+    if settings.ENV == "development":
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created (development mode)")
 
 # Shutdown event
 @app.on_event("shutdown")
