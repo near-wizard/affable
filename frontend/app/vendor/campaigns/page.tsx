@@ -12,19 +12,16 @@ export default function VendorCampaigns() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // Fetch current vendor info
-  const { data: vendor, loading: vendorLoading, error: vendorError } = useCurrentVendor();
-
-  // Fetch vendor's campaigns
-  const { data: campaignsResponse, loading: campaignsLoading, error: campaignsError } = useVendorCampaigns(vendor?.id, {
+  // Fetch vendor's campaigns (uses /me endpoint, no vendor ID needed)
+  const { data: campaignsResponse, loading: campaignsLoading, error: campaignsError } = useVendorCampaigns(undefined, {
     page: 1,
     limit: 50,
     status: statusFilter !== 'all' ? statusFilter : undefined,
   });
 
   const campaigns = campaignsResponse?.data || [];
-  const loading = vendorLoading || campaignsLoading;
-  const error = vendorError || campaignsError;
+  const loading = campaignsLoading;
+  const error = campaignsError;
 
   const filteredCampaigns = campaigns.filter(campaign => {
     const matchesSearch = campaign.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -98,7 +95,7 @@ export default function VendorCampaigns() {
         {/* Campaigns List */}
         <div className="space-y-6">
           {filteredCampaigns.map((campaign) => (
-            <div key={campaign.id} className="bg-white rounded-lg shadow hover:shadow-lg transition">
+            <div key={campaign.campaign_id} className="bg-white rounded-lg shadow hover:shadow-lg transition">
               <div className="p-6">
                 {/* Campaign Header */}
                 <div className="flex items-start justify-between mb-4">
@@ -171,14 +168,14 @@ export default function VendorCampaigns() {
                 {/* Campaign Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
                   <button
-                    onClick={() => window.location.href = `/vendor/campaigns/${campaign.id}`}
+                    onClick={() => window.location.href = `/vendor/campaigns/${campaign.campaign_id}`}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                   >
                     <Eye size={16} />
                     View Details
                   </button>
                   <button
-                    onClick={() => window.location.href = `/vendor/campaigns/${campaign.id}/partners`}
+                    onClick={() => window.location.href = `/vendor/campaigns/${campaign.campaign_id}/partners`}
                     className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
                   >
                     <Users size={16} />

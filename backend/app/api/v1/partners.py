@@ -248,8 +248,8 @@ def list_partners(
             "bio": partner.bio,
             "website": partner.website_url,
             "verified": partner.verified,
-            "rating": getattr(partner, 'rating', 4.5),  # Default rating if not available
-            "types": getattr(partner, 'types', []),
+            "rating": partner.rating,
+            "types": [t.name for t in partner.types] if partner.types else [],
             "campaign_count": stats['total_campaigns'],
             "total_conversions": stats['total_conversions'],
             "total_revenue": float(stats['total_revenue']),

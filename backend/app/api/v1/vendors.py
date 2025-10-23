@@ -156,10 +156,18 @@ def get_vendor_campaigns(
     # Get paginated results
     campaigns = query.order_by(desc(Campaign.created_at)).offset((page - 1) * limit).limit(limit).all()
 
+    # Load current versions separately
+    from app.models import CampaignVersion
+    version_ids = [c.current_campaign_version_id for c in campaigns if c.current_campaign_version_id]
+    versions_map = {}
+    if version_ids:
+        versions = db.query(CampaignVersion).filter(CampaignVersion.campaign_version_id.in_(version_ids)).all()
+        versions_map = {v.campaign_version_id: v for v in versions}
+
     # Build response with stats
     campaigns_data = []
     for campaign in campaigns:
-        # Get stats for this campaign
+        # Get stats for this campaign (partners are linked through campaign_version)
         campaign_stats = db.query(
             func.count(CampaignPartner.partner_id.distinct()).label('partner_count'),
             func.sum(CampaignPartner.total_clicks).label('total_clicks'),
@@ -167,7 +175,7 @@ def get_vendor_campaigns(
             func.sum(CampaignPartner.total_revenue).label('total_revenue'),
             func.sum(CampaignPartner.total_commission_earned).label('total_commission')
         ).filter(
-            CampaignPartner.campaign_id == campaign.campaign_id,
+            CampaignPartner.campaign_version_id == campaign.current_campaign_version_id,
             CampaignPartner.is_deleted == False
         ).first()
 
@@ -177,9 +185,13 @@ def get_vendor_campaigns(
         total_revenue = campaign_stats.total_revenue or Decimal('0')
         total_commission = campaign_stats.total_commission or Decimal('0')
 
+        # Get campaign version name from map
+        current_version = versions_map.get(campaign.current_campaign_version_id) if campaign.current_campaign_version_id else None
+        campaign_name = current_version.name if current_version else f"Campaign {campaign.campaign_id}"
+
         campaign_dict = {
             "campaign_id": campaign.campaign_id,
-            "name": campaign.current_campaign_version.name if campaign.current_campaign_version else campaign.name,
+            "name": campaign_name,
             "status": campaign.status,
             "partner_count": partner_count,
             "total_clicks": total_clicks,

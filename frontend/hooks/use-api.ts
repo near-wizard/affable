@@ -126,18 +126,20 @@ export function useCampaignDetail(campaignId?: string) {
 }
 
 /**
- * Hook to fetch vendor's campaigns
+ * Hook to fetch vendor's campaigns (for current authenticated vendor)
  */
 export function useVendorCampaigns(vendorId?: string, params?: {
   page?: number;
   limit?: number;
   status?: string;
 }) {
+  const paramsString = JSON.stringify(params);
   return useAsync(
     () => apiClient.campaigns.listVendor(vendorId!, params),
     {
-      enabled: !!vendorId,
-    }
+      enabled: true, // Always enabled since we use /me endpoint
+    },
+    [paramsString]
   );
 }
 
@@ -172,9 +174,10 @@ export function usePartners(params?: {
   tier?: string;
   verified_only?: boolean;
 }) {
+  const paramsString = JSON.stringify(params);
   return useAsync(() => apiClient.partners.list(params), {
     enabled: true,
-  });
+  }, [paramsString]);
 }
 
 /**
@@ -209,11 +212,13 @@ export function useCampaignPartners(campaignId?: string, params?: {
   limit?: number;
   status?: string;
 }) {
+  const paramsString = JSON.stringify(params);
   return useAsync(
     () => apiClient.partners.campaignPartners(campaignId!, params),
     {
       enabled: !!campaignId,
-    }
+    },
+    [campaignId, paramsString]
   );
 }
 

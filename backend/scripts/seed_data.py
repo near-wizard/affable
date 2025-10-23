@@ -112,7 +112,9 @@ def seed_database():
                 status="active",
                 tier="platinum",
                 bio="Leading technology review website with 500K monthly visitors",
-                website_url="https://techreviewerpro.com"
+                website_url="https://techreviewerpro.com",
+                verified=True,
+                rating=5
             ),
             Partner(
                 name="Marketing Maven",
@@ -121,7 +123,9 @@ def seed_database():
                 status="active",
                 tier="gold",
                 bio="Digital marketing expert and educator",
-                website_url="https://marketingmaven.io"
+                website_url="https://marketingmaven.io",
+                verified=True,
+                rating=5
             ),
             Partner(
                 name="Fitness Influencer Jane",
@@ -130,7 +134,9 @@ def seed_database():
                 status="active",
                 tier="gold",
                 bio="Fitness coach with 200K Instagram followers",
-                website_url="https://instagram.com/janefitness"
+                website_url="https://instagram.com/janefitness",
+                verified=True,
+                rating=4
             ),
             Partner(
                 name="StartupBlogger",
@@ -139,7 +145,9 @@ def seed_database():
                 status="active",
                 tier="silver",
                 bio="Blog about startups and entrepreneurship",
-                website_url="https://startupblogger.net"
+                website_url="https://startupblogger.net",
+                verified=True,
+                rating=4
             ),
             Partner(
                 name="YouTube Tech Channel",
@@ -148,7 +156,9 @@ def seed_database():
                 status="active",
                 tier="platinum",
                 bio="Tech reviews on YouTube - 1M subscribers",
-                website_url="https://youtube.com/techreviews"
+                website_url="https://youtube.com/techreviews",
+                verified=True,
+                rating=5
             ),
             Partner(
                 name="EduTech Reviews",
@@ -157,7 +167,9 @@ def seed_database():
                 status="active",
                 tier="silver",
                 bio="Educational technology reviews",
-                website_url="https://edutechreviews.com"
+                website_url="https://edutechreviews.com",
+                verified=True,
+                rating=4
             ),
         ]
         db.add_all(partners)

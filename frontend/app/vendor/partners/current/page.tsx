@@ -6,7 +6,7 @@ import { useCurrentVendor, useCampaignPartners } from '@/hooks/use-api';
 import { GridSkeleton, ErrorBoundary, EmptyState } from '@/components/loading-skeleton';
 
 // For demo purposes, using a hardcoded campaign ID. In real app, this would be dynamic
-const DEMO_CAMPAIGN_ID = 'campaign-1';
+const DEMO_CAMPAIGN_ID = '1';
 
 export default function CurrentPartnersPage() {
   const [viewMode, setViewMode] = useState<'table' | 'card'>('card');
@@ -37,10 +37,12 @@ export default function CurrentPartnersPage() {
     }
   };
 
-  const sortedPartners = [...partners].filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    (p.email && p.email.toLowerCase().includes(search.toLowerCase()))
-  ).sort((a, b) => {
+  const sortedPartners = [...partners].filter(p => {
+    const name = p.name || p.partner_name || '';
+    const email = (p.email || p.partner_email || '');
+    return name.toLowerCase().includes(search.toLowerCase()) ||
+      email.toLowerCase().includes(search.toLowerCase());
+  }).sort((a, b) => {
     if (!sortColumn) return 0;
     let aValue: any = (a as any)[sortColumn];
     let bValue: any = (b as any)[sortColumn];
@@ -134,9 +136,9 @@ export default function CurrentPartnersPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {sortedPartners.map(p => (
-                      <tr key={p.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 text-gray-900 font-medium">{p.name}</td>
-                        <td className="px-6 py-4 text-gray-700">{p.email || '-'}</td>
+                      <tr key={p.partner_id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 text-gray-900 font-medium">{p.name || p.partner_name}</td>
+                        <td className="px-6 py-4 text-gray-700">{p.email || p.partner_email || '-'}</td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             p.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
@@ -145,10 +147,10 @@ export default function CurrentPartnersPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-gray-700">${(p.total_revenue || 0).toLocaleString()}</td>
-                        <td className="px-6 py-4 text-gray-700">{p.approved_conversions || 0}</td>
-                        <td className="px-6 py-4 text-gray-700">${(p.pending_commission || 0).toLocaleString()}</td>
-                        <td className="px-6 py-4 text-gray-700">{(p.click_count || 0).toLocaleString()}</td>
-                        <td className="px-6 py-4 text-gray-500">{p.created_at ? new Date(p.created_at).toLocaleDateString() : '-'}</td>
+                        <td className="px-6 py-4 text-gray-700">{p.total_conversions || 0}</td>
+                        <td className="px-6 py-4 text-gray-700">${(p.total_commission_earned || 0).toLocaleString()}</td>
+                        <td className="px-6 py-4 text-gray-700">{(p.total_clicks || 0).toLocaleString()}</td>
+                        <td className="px-6 py-4 text-gray-500">{p.applied_at ? new Date(p.applied_at).toLocaleDateString() : '-'}</td>
                         <td className="px-6 py-4">
                           <button className="p-2 hover:bg-gray-100 rounded-lg transition">
                             <Mail size={20} className="text-blue-600" />
@@ -169,9 +171,9 @@ export default function CurrentPartnersPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sortedPartners.map(p => (
-                  <div key={p.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-                    <h2 className="text-lg font-bold text-gray-900 mb-1">{p.name}</h2>
-                    <p className="text-gray-700 mb-2">{p.email || 'No email'}</p>
+                  <div key={p.partner_id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <h2 className="text-lg font-bold text-gray-900 mb-1">{p.name || p.partner_name}</h2>
+                    <p className="text-gray-700 mb-2">{p.email || p.partner_email || 'No email'}</p>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       p.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                     }`}>
@@ -181,9 +183,9 @@ export default function CurrentPartnersPage() {
                     {/* Partner Stat Boxes */}
                     <div className="grid grid-cols-2 gap-4 mt-4">
                       <StatBox icon={<DollarSign size={16} className="text-green-600" />} label="Revenue" value={`$${(p.total_revenue || 0).toLocaleString()}`} />
-                      <StatBox icon={<TrendingUp size={16} className="text-blue-600" />} label="Conversions" value={p.approved_conversions || 0} />
-                      <StatBox icon={<DollarSign size={16} className="text-orange-600" />} label="Pending" value={`$${(p.pending_commission || 0).toLocaleString()}`} />
-                      <StatBox icon={<MousePointerClick size={16} className="text-purple-600" />} label="Clicks" value={p.click_count || 0} />
+                      <StatBox icon={<TrendingUp size={16} className="text-blue-600" />} label="Conversions" value={p.total_conversions || 0} />
+                      <StatBox icon={<DollarSign size={16} className="text-orange-600" />} label="Commission" value={`$${(p.total_commission_earned || 0).toLocaleString()}`} />
+                      <StatBox icon={<MousePointerClick size={16} className="text-purple-600" />} label="Clicks" value={p.total_clicks || 0} />
                     </div>
 
                     <div className="mt-4 flex gap-2">

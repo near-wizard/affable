@@ -11,16 +11,23 @@ export type PartnerTier = 'standard' | 'bronze' | 'silver' | 'gold' | 'platinum'
 export type PartnerStatus = 'pending' | 'active' | 'suspended' | 'rejected';
 
 export interface Partner {
-  id: string;
-  partner_id?: string;
+  id?: string;
+  partner_id?: number;
   name: string;
   email: string;
   status: PartnerStatus;
   tier: PartnerTier;
   bio?: string;
+  website?: string;
   website_url?: string;
+  verified?: boolean;
+  rating?: number;
+  types?: string[];
+  campaign_count?: number;
+  total_conversions?: number;
+  total_revenue?: number;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface PartnerDetail extends Partner {

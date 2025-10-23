@@ -24,7 +24,8 @@ from app.schemas.campaign import (
     CampaignPartnerResponse,
     CampaignVersionCreate,
     PartnerCampaignOverrideCreate,
-    PartnerCampaignOverrideResponse
+    PartnerCampaignOverrideResponse,
+    CampaignPartnerListResponse
 )
 from app.models import (
     Campaign, CampaignVersion, CampaignPartner, Partner, VendorUser,
@@ -360,16 +361,18 @@ def apply_to_campaign(
     )
 
 
-@router.get("/{campaign_id}/partners", response_model=List[CampaignPartnerResponse])
+@router.get("/{campaign_id}/partners", response_model=CampaignPartnerListResponse)
 def get_campaign_partners(
     campaign_id: int,
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
     status_filter: Optional[str] = Query(None, alias="status"),
     vendor_user: VendorUser = Depends(get_current_vendor_user),
     db: Session = Depends(get_db)
 ):
     """
-    Get all partners enrolled in a campaign.
-    
+    Get partners enrolled in a campaign (paginated).
+
     Vendor users only.
     """
     campaign = db.query(Campaign).filter(
@@ -377,21 +380,26 @@ def get_campaign_partners(
         Campaign.vendor_id == vendor_user.vendor_id,
         Campaign.is_deleted == False
     ).first()
-    
+
     if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
-    
+
     query = db.query(CampaignPartner).filter(
         CampaignPartner.campaign_version_id == campaign.current_campaign_version_id,
         CampaignPartner.is_deleted == False
     )
-    
+
     if status_filter:
         query = query.filter(CampaignPartner.status == status_filter)
-    
-    enrollments = query.all()
-    
-    return [
+
+    # Get total count
+    total = query.count()
+
+    # Paginate
+    enrollments = query.offset((page - 1) * limit).limit(limit).all()
+
+    # Build response
+    partners = [
         CampaignPartnerResponse(
             campaign_partner_id=e.campaign_partner_id,
             campaign_version_id=e.campaign_version_id,
@@ -414,6 +422,14 @@ def get_campaign_partners(
         )
         for e in enrollments
     ]
+
+    return CampaignPartnerListResponse(
+        data=partners,
+        total=total,
+        page=page,
+        limit=limit,
+        total_pages=(total + limit - 1) // limit
+    )
 
 
 @router.post("/{campaign_id}/partners/{partner_id}/approve", response_model=CampaignPartnerResponse)

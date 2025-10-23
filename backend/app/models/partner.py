@@ -30,6 +30,8 @@ class Partner(BaseModel):
     website_url = Column(Text)
     oauth_provider = Column(String(50))
     oauth_provider_id = Column(String(255))
+    verified = Column(Boolean, default=False, nullable=False)  # Whether partner is verified
+    rating = Column(Integer, default=0, nullable=False)  # Average rating (0-5 stars)
     
     # Relationships
     types = relationship("PartnerType", secondary=partner_partner_types, back_populates="partners")

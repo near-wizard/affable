@@ -113,7 +113,7 @@ export default function FindPartnersPage() {
               <>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
                   {filteredPartners.map((partner) => (
-                  <div key={partner.id} className="bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+                  <div key={partner.partner_id || partner.id} className="bg-white rounded-lg shadow hover:shadow-lg transition p-6">
                     {/* Header with Tier Badge */}
                     <div className="mb-4">
                       <div className="flex items-start justify-between mb-3">
@@ -193,8 +193,8 @@ export default function FindPartnersPage() {
 
                     {/* CTA Buttons */}
                     <div className="flex gap-2">
-                      {partner.website && (
-                        <a href={partner.website} target="_blank" rel="noopener noreferrer" className="flex-1">
+                      {(partner.website || partner.website_url) && (
+                        <a href={partner.website || partner.website_url} target="_blank" rel="noopener noreferrer" className="flex-1">
                           <button className="w-full flex items-center justify-center gap-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm font-medium">
                             <ExternalLink className="h-4 w-4" />
                             Visit

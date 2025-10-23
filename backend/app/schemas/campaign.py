@@ -216,3 +216,12 @@ class CampaignListResponse(BaseModel):
     page: int
     page_size: int
     total_pages: int
+
+
+class CampaignPartnerListResponse(BaseModel):
+    """Paginated campaign partners list response."""
+    data: List['CampaignPartnerResponse']
+    total: int
+    page: int
+    limit: int
+    total_pages: int

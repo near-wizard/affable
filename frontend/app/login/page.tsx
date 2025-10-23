@@ -22,7 +22,7 @@ export default function LoginPage() {
 			const endpoint =
 				role === "partner"
 					? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/v1/auth/login/partner`
-					: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/v1/auth/login/vendor-user`;
+					: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/v1/auth/login/vendor`;
 
 			const response = await fetch(endpoint, {
 				method: "POST",
