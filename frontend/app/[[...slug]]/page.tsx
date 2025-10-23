@@ -1,38 +1,23 @@
-import { Desktop } from "@/components/desktop"
+'use client'
 
-export default function Home() {
+import { useEffect } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 
-  return (
-    <main className="min-h-screen">
-        <Desktop />
+export default function RootPage() {
+  const router = useRouter()
+  const params = useParams()
 
-    </main>
-  )
-}
-
-/*
-export function generateMetadata({ params }: { params: { slug?: string[] } }) {
-  const [mainSlug, subSlug] = params.slug || []
-  
-  // Handle RFD metadata
-  if (mainSlug === 'rfd' && subSlug) {
-    const rfd = getRFDByNumber(parseInt(subSlug))
-    if (rfd) {
-      return {
-        title: `${rfd.title} - Affable`,
-        description: `RFD ${rfd.number} - State: ${rfd.state}`
-      }
+  useEffect(() => {
+    // If no slug provided (root path), redirect to /desktop
+    if (!params.slug || params.slug.length === 0) {
+      router.replace('/desktop')
+    } else {
+      // If slug provided, redirect to /desktop with the slug
+      const slug = Array.isArray(params.slug) ? params.slug.join('/') : params.slug
+      router.replace(`/desktop/${slug}`)
     }
-  }
-  
-  // Handle RFD list
-  if (mainSlug === 'rfd') {
-    return {
-      title: "RFDs - Affable",
-      description: "Design documents and technical decisions made in public"
-    }
-  }
-  
-  // ... other metadata
+  }, [params, router])
+
+  // Show nothing while redirecting
+  return null
 }
-  */

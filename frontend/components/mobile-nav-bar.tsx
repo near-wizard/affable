@@ -15,9 +15,9 @@ interface NavItem {
 const navItems: NavItem[] = [
   {
     label: "Home",
-    href: "/",
+    href: "/desktop",
     icon: Home,
-    activePatterns: ["/$", "/[slug]"],
+    activePatterns: ["/desktop$", "/desktop/"],
   },
   {
     label: "Links",
