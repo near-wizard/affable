@@ -258,6 +258,7 @@ export function Desktop() {
 			case "blog":
 				return (
 					<BlogContent
+						blogPosts={blogPosts}
 						initialSlug={window.subRoute}
 						onNavigate={(slug) => {
 							// Update the current window's subRoute
@@ -338,7 +339,6 @@ export function Desktop() {
 				<DesktopIcon
 					icon="📚"
 					label="Blog (coming soon)"
-					disabled
 					onClick={() => openWindow("blog")}
 				/>
 				<DesktopIcon
