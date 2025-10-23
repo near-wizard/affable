@@ -4,6 +4,9 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
+import { MobileHeader } from "@/components/mobile-header";
+import { MobileNavBar } from "@/components/mobile-nav-bar";
+import { ServiceWorkerRegister } from "@/components/service-worker-register";
 
 import "./globals.css";
 
@@ -82,9 +85,22 @@ export default function RootLayout({
 			<head>
 				{/* Add cache-busting favicon */}
 				<link rel="icon" href="/favicon.ico?v=2" />
+
+				{/* PWA Manifest */}
+				<link rel="manifest" href="/manifest.json" />
+
+				{/* iOS Web App Meta Tags */}
+				<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+				<meta name="theme-color" content="#8b5a2b" />
+				<meta name="apple-mobile-web-app-capable" content="yes" />
+				<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+				<meta name="apple-mobile-web-app-title" content="AffableLink" />
 			</head>
 			<body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+				<ServiceWorkerRegister />
+				<MobileHeader />
 				{children}
+				<MobileNavBar showOn="dashboard" />
 				<Analytics />
 				<Script id="posthog-init" strategy="afterInteractive">
 					{`

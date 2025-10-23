@@ -2,6 +2,8 @@
 
 import { X, Minus, Square } from "lucide-react"
 import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useSafeArea } from "@/hooks/use-safe-area"
+import { useHaptic } from "@/hooks/use-haptic"
 
 type ResizeDirection = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | null
 
@@ -22,6 +24,8 @@ export function DesktopWindow({
   zIndex: number
   initialPosition: { x: number; y: number }
 }) {
+  const safeArea = useSafeArea()
+  const haptic = useHaptic()
   const [position, setPosition] = useState(initialPosition)
   const [size, setSize] = useState(() => {
     // Default size accounting for menu bar and cascading window offset
@@ -207,8 +211,8 @@ export function DesktopWindow({
       ref={windowRef}
       className="absolute bg-[oklch(0.92_0.03_75)] border-4 border-[oklch(0.45_0.06_45)] shadow-[8px_8px_0_0_oklch(0.35_0.05_40)]"
       style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
+        left: `${position.x + safeArea.left}px`,
+        top: `${position.y + safeArea.top}px`,
         width: `${size.width}px`,
         height: `${size.height}px`,
         zIndex,
@@ -222,30 +226,38 @@ export function DesktopWindow({
         onTouchStart={handleTouchDragStart}
       >
         <span className="font-semibold text-sm">{title}</span>
-        <div className="flex items-center gap-2 window-controls">
+        <div className="flex items-center gap-1 md:gap-2 window-controls">
           <button
-            className="w-8 h-8 md:w-5 md:h-5 bg-[oklch(0.80_0.04_60)] hover:bg-[oklch(0.75_0.05_55)] border border-[oklch(0.60_0.06_50)] flex items-center justify-center transition-colors touch-manipulation"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Minus className="w-4 h-4 md:w-3 md:h-3 text-[oklch(0.30_0.04_45)]" />
-          </button>
-          <button
-            className="w-8 h-8 md:w-5 md:h-5 bg-[oklch(0.80_0.04_60)] hover:bg-[oklch(0.75_0.05_55)] border border-[oklch(0.60_0.06_50)] flex items-center justify-center transition-colors touch-manipulation"
+            className="w-11 h-11 md:w-8 md:h-8 bg-[oklch(0.80_0.04_60)] hover:bg-[oklch(0.75_0.05_55)] active:scale-95 border border-[oklch(0.60_0.06_50)] flex items-center justify-center transition-all duration-100 touch-manipulation rounded"
             onClick={(e) => {
               e.stopPropagation()
+              haptic.light()
+            }}
+            title="Minimize"
+          >
+            <Minus className="w-5 h-5 md:w-4 md:h-4 text-[oklch(0.30_0.04_45)]" />
+          </button>
+          <button
+            className="w-11 h-11 md:w-8 md:h-8 bg-[oklch(0.80_0.04_60)] hover:bg-[oklch(0.75_0.05_55)] active:scale-95 border border-[oklch(0.60_0.06_50)] flex items-center justify-center transition-all duration-100 touch-manipulation rounded"
+            onClick={(e) => {
+              e.stopPropagation()
+              haptic.medium()
               handleMaximize()
             }}
+            title="Maximize"
           >
-            <Square className="w-4 h-4 md:w-3 md:h-3 text-[oklch(0.30_0.04_45)]" />
+            <Square className="w-5 h-5 md:w-4 md:h-4 text-[oklch(0.30_0.04_45)]" />
           </button>
           <button
-            className="w-8 h-8 md:w-5 md:h-5 bg-[oklch(0.50_0.15_25)] hover:bg-[oklch(0.45_0.16_25)] border border-[oklch(0.40_0.12_25)] flex items-center justify-center transition-colors touch-manipulation"
+            className="w-11 h-11 md:w-8 md:h-8 bg-[oklch(0.50_0.15_25)] hover:bg-[oklch(0.45_0.16_25)] active:scale-95 border border-[oklch(0.40_0.12_25)] flex items-center justify-center transition-all duration-100 touch-manipulation rounded"
             onClick={(e) => {
               e.stopPropagation()
+              haptic.success()
               onClose()
             }}
+            title="Close"
           >
-            <X className="w-4 h-4 md:w-3 md:h-3 text-[oklch(0.98_0.01_75)]" />
+            <X className="w-5 h-5 md:w-4 md:h-4 text-[oklch(0.98_0.01_75)]" />
           </button>
         </div>
       </div>

@@ -15,6 +15,7 @@ import { useParams, useRouter } from "next/navigation";
 import { RFDContent } from "./window-content/rfd";
 import { rfds } from "@/content/rfd/rfds";
 //import { loadPostHog } from "@/utils/posthogLazyLoader"
+import { useSafeArea } from "@/hooks/use-safe-area";
 import FounderStory from "./window-content/founder-story";
 import VendorInterestForm from "./window-content/interestForm-vendor";
 import PartnerInterestForm from "./window-content/interestForm-partner";
@@ -40,6 +41,7 @@ export function Desktop() {
 	const [tutorialStep, setTutorialStep] = useState(0);
 	const router = useRouter();
 	const hasInitialized = useRef(false);
+	const safeArea = useSafeArea();
 
 	const params = useParams();
 	const [initialSlug, initialSubSlug] = params.slug || [];
@@ -257,7 +259,7 @@ export function Desktop() {
 	};
 
 	return (
-		<div className="min-h-screen desktop-texture relative overflow-hidden flex flex-col">
+		<div className="min-h-screen desktop-texture relative overflow-hidden flex flex-col safe-pt" style={{ paddingRight: `${safeArea.right}px`, paddingBottom: `${safeArea.bottom}px`, paddingLeft: `${safeArea.left}px` }}>
 			<MenuBar onWindowOpen={openWindow} />
 
 			<img

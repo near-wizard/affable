@@ -66,7 +66,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
 
       {/* Main content */}
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${
+        className={`flex-1 flex flex-col transition-all duration-300 pt-16 md:pt-0 ${
           isOpen ? "ml-64" : "ml-0"
         }`}
       >
@@ -81,7 +81,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
           <h1 className="text-xl font-bold">Vendor Page</h1>
         </header>
 
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto pb-20 md:pb-0">{children}</main>
       </div>
     </div>
   )
