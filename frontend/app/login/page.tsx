@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { storeAuthCredentials } from "@/lib/auth-utils";
 
 export default function LoginPage() {
 	const router = useRouter();
@@ -20,8 +21,8 @@ export default function LoginPage() {
 		try {
 			const endpoint =
 				role === "partner"
-					? `${process.env.NEXT_PUBLIC_API_URL}/v1/auth/login/partner`
-					: `${process.env.NEXT_PUBLIC_API_URL}/v1/auth/login/vendor-user`;
+					? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/v1/auth/login/partner`
+					: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/v1/auth/login/vendor-user`;
 
 			const response = await fetch(endpoint, {
 				method: "POST",
@@ -41,15 +42,14 @@ export default function LoginPage() {
 
 			const data = await response.json();
 
-			// Store tokens in localStorage
-			localStorage.setItem("access_token", data.access_token);
-			if (data.refresh_token) {
-				localStorage.setItem("refresh_token", data.refresh_token);
-			}
-
-			// Store user role for later reference
-			localStorage.setItem("user_role", role);
-			localStorage.setItem("user_id", data.user_id || "");
+			// Store auth credentials (tokens, role, user ID, email)
+			storeAuthCredentials(
+				data.access_token,
+				data.refresh_token,
+				role as 'partner' | 'vendor',
+				data.user_id,
+				email
+			);
 
 			// Redirect based on role
 			const redirectUrl =

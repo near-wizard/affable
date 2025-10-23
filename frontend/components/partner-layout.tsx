@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { Menu, ChevronDown } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Menu, ChevronDown, LogOut, Settings, User } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { clearAuthCredentials, getUserEmail } from "@/lib/auth-utils"
 
 interface MenuItem {
   name: string
@@ -27,7 +28,13 @@ const links: MenuItem[] = [
 export default function PartnerLayout({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(true) // default open
   const [expandedMenu, setExpandedMenu] = useState<string | null>("Campaigns") // default expand Campaigns
+  const [userEmail, setUserEmail] = useState<string | null>(null)
   const pathname = usePathname()
+  const router = useRouter()
+
+  useEffect(() => {
+    setUserEmail(getUserEmail())
+  }, [])
 
   const isMenuActive = (menu: MenuItem): boolean => {
     if (menu.path) return pathname === menu.path
@@ -39,6 +46,11 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
 
   const toggleSubmenu = (menuName: string) => {
     setExpandedMenu(expandedMenu === menuName ? null : menuName)
+  }
+
+  const handleSignOut = () => {
+    clearAuthCredentials()
+    router.push('/')
   }
 
   return (
@@ -60,17 +72,25 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
           ${isOpen ? "translate-x-0" : "-translate-x-64"}
         `}
       >
-        <div className="flex justify-between items-center p-4 border-b border-gray-200">
-          <h2 className="font-bold text-lg">Partner Menu</h2>
-          <button
-            className="text-gray-600 hover:text-gray-900"
-            onClick={() => setIsOpen(false)}
-          >
-            ✕
-          </button>
+        <div className="flex flex-col gap-3 p-4 border-b border-gray-200">
+          <div className="flex justify-between items-start">
+            <h2 className="font-bold text-lg">Partner Menu</h2>
+            <button
+              className="text-gray-600 hover:text-gray-900"
+              onClick={() => setIsOpen(false)}
+            >
+              ✕
+            </button>
+          </div>
+          {userEmail && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <User size={16} />
+              <span className="truncate">{userEmail}</span>
+            </div>
+          )}
         </div>
 
-        <nav className="p-4 flex flex-col space-y-2">
+        <nav className="p-4 flex flex-col space-y-2 flex-1">
           {links.map((link) => {
             const isActive = isMenuActive(link)
 
@@ -126,6 +146,28 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
               </Link>
             )
           })}
+
+          {/* Spacer to push buttons to bottom */}
+          <div className="flex-1"></div>
+
+          {/* Settings and Sign Out buttons */}
+          <div className="border-t border-gray-200 pt-4 space-y-2">
+            <Link
+              href="/partner/settings"
+              className="w-full flex items-center gap-2 p-2 rounded hover:bg-gray-100 transition-colors text-gray-700"
+              onClick={() => setIsOpen(false)}
+            >
+              <Settings size={18} />
+              <span>Settings</span>
+            </Link>
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-2 p-2 rounded hover:bg-red-100 transition-colors text-red-600 hover:text-red-700"
+            >
+              <LogOut size={18} />
+              <span>Sign Out</span>
+            </button>
+          </div>
         </nav>
       </aside>
 
@@ -136,14 +178,28 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
         }`}
       >
         {/* Top bar */}
-        <header className="p-4 bg-white border-b border-gray-300 flex items-center">
+        <header className="p-4 bg-white border-b border-gray-300 flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              className="p-2 mr-4 rounded hover:bg-gray-200"
+              onClick={() => setIsOpen(true)}
+            >
+              <Menu size={24} />
+            </button>
+            <div className="flex flex-col">
+              <h1 className="text-xl font-bold">Partner Dashboard</h1>
+              {userEmail && (
+                <p className="text-sm text-gray-600">Welcome, {userEmail}</p>
+              )}
+            </div>
+          </div>
           <button
-            className="p-2 mr-4 rounded hover:bg-gray-200"
-            onClick={() => setIsOpen(true)}
+            onClick={handleSignOut}
+            className="flex items-center gap-2 px-4 py-2 rounded hover:bg-red-100 transition-colors text-red-600 hover:text-red-700 font-medium"
           >
-            <Menu size={24} />
+            <LogOut size={20} />
+            <span>Sign Out</span>
           </button>
-          <h1 className="text-xl font-bold">Partner Page</h1>
         </header>
 
         <main className="flex-1 overflow-auto pb-20 md:pb-0">{children}</main>

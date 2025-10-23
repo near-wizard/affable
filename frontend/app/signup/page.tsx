@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { storeAuthCredentials } from "@/lib/auth-utils"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -11,6 +12,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [role, setRole] = useState("partner")
   const [companyName, setCompanyName] = useState("")
+  const [websiteUrl, setWebsiteUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -27,6 +29,24 @@ export default function SignupPage() {
     // Validate password strength
     if (password.length < 8) {
       setError("Password must be at least 8 characters")
+      return
+    }
+
+    // Check for uppercase letter
+    if (!/[A-Z]/.test(password)) {
+      setError("Password must contain at least one uppercase letter")
+      return
+    }
+
+    // Check for number
+    if (!/[0-9]/.test(password)) {
+      setError("Password must contain at least one number")
+      return
+    }
+
+    // For vendors, validate website URL
+    if (role === "vendor" && !websiteUrl) {
+      setError("Website URL is required for vendors")
       return
     }
 
@@ -50,6 +70,7 @@ export default function SignupPage() {
           password,
           company_name: companyName || email.split("@")[1], // Use domain or provided company name
           name: email.split("@")[0],
+          website_url: websiteUrl,
         }
       }
 
@@ -68,19 +89,24 @@ export default function SignupPage() {
 
       const data = await response.json()
 
-      // Store tokens in localStorage
-      localStorage.setItem("access_token", data.access_token)
-      if (data.refresh_token) {
-        localStorage.setItem("refresh_token", data.refresh_token)
+      // Signup successful - account created
+      // For partners: account is pending approval, must log in after approval
+      // For vendors: account is active, can log in immediately
+
+      // Store user info in localStorage for context
+      localStorage.setItem("signup_success_email", email)
+      localStorage.setItem("signup_success_role", role)
+      localStorage.setItem("signup_user_id", data.user_id || "")
+
+      // Show appropriate message and redirect to login
+      if (role === "partner") {
+        alert("Account created successfully! Your partner account is pending approval. You'll be able to log in once approved.")
+      } else {
+        alert("Vendor account created successfully! You can now log in with your email and password.")
       }
 
-      // Store user role for later reference
-      localStorage.setItem("user_role", role)
-      localStorage.setItem("user_id", data.user_id || "")
-
-      // Redirect to onboarding or dashboard
-      const redirectUrl = role === "partner" ? "/onboarding/partner" : "/onboarding/vendor"
-      router.push(redirectUrl)
+      // Redirect to login page
+      router.push(`/login?email=${encodeURIComponent(email)}&role=${role}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred during sign up")
       console.error("Sign up error:", err)
@@ -133,19 +159,36 @@ export default function SignupPage() {
           </div>
 
           {role === "vendor" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company Name
-              </label>
-              <input
-                type="text"
-                placeholder="Your company name"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
-                disabled={isLoading}
-              />
-            </div>
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Company Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Your company name"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Website URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://example.com"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+            </>
           )}
 
           <div>
@@ -154,7 +197,7 @@ export default function SignupPage() {
             </label>
             <input
               type="password"
-              placeholder="At least 8 characters"
+              placeholder="Min 8 chars, 1 uppercase, 1 number"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
@@ -162,6 +205,9 @@ export default function SignupPage() {
               disabled={isLoading}
               minLength={8}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Must contain: at least 8 characters, 1 uppercase letter, 1 number
+            </p>
           </div>
 
           <div>

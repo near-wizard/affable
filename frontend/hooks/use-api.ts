@@ -37,7 +37,8 @@ interface UseAsyncOptions {
  */
 export function useAsync<T>(
   asyncFunction: () => Promise<T>,
-  options: UseAsyncOptions = {}
+  options: UseAsyncOptions = {},
+  deps: any[] = []
 ): UseAsyncState<T> {
   const [state, setState] = useState<UseAsyncState<T>>({
     data: null,
@@ -46,6 +47,9 @@ export function useAsync<T>(
   });
 
   const { enabled = true, onSuccess, onError } = options;
+
+  // Memoize the async function to prevent infinite loops
+  const memoizedAsyncFunction = useCallback(asyncFunction, deps);
 
   useEffect(() => {
     if (!enabled) {
@@ -58,7 +62,7 @@ export function useAsync<T>(
     async function execute() {
       try {
         setState(prev => ({ ...prev, loading: true, error: null }));
-        const data = await asyncFunction();
+        const data = await memoizedAsyncFunction();
 
         if (isMounted) {
           setState({ data, loading: false, error: null });
@@ -81,7 +85,7 @@ export function useAsync<T>(
     return () => {
       isMounted = false;
     };
-  }, [enabled, onSuccess, onError]);
+  }, [enabled, memoizedAsyncFunction]);
 
   return state;
 }
@@ -99,9 +103,14 @@ export function useCampaigns(params?: {
   search?: string;
   category?: string;
 }) {
-  return useAsync(() => apiClient.campaigns.list(params), {
+  const paramsString = JSON.stringify(params);
+  console.log('useCampaigns called with params:', params, 'paramsString:', paramsString);
+  return useAsync(() => {
+    console.log('useCampaigns asyncFunction executing...');
+    return apiClient.campaigns.list(params);
+  }, {
     enabled: true,
-  });
+  }, [paramsString]);
 }
 
 /**
@@ -427,5 +436,15 @@ export function useCreatePayout() {
   return useMutation(
     (vars: { partnerId: string; data: any }) =>
       apiClient.payouts.create(vars.partnerId, vars.data, getAuthToken() || undefined)
+  );
+}
+
+/**
+ * Hook to create an affiliate link
+ */
+export function useCreateLink() {
+  return useMutation(
+    (data: any) =>
+      apiClient.links.create(data, getAuthToken() || undefined)
   );
 }

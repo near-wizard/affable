@@ -55,7 +55,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    entrypoint: /app/entrypoint.sh
+    command: sh -c "python scripts/seed_data.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     networks:
       - affable-network
     restart: unless-stopped

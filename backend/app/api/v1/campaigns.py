@@ -5,7 +5,7 @@ Handles campaign CRUD, partner enrollments, and approvals.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from typing import List, Optional
 from datetime import datetime
 
@@ -46,12 +46,13 @@ def list_campaigns(
 ):
     """
     List campaigns.
-    
+
     Partners see public campaigns and their enrolled campaigns.
     Vendors see only their own campaigns.
     """
     query = db.query(Campaign).filter(Campaign.is_deleted == False)
-    
+    has_version_join = False
+
     # Apply filters based on user type
     if isinstance(current_user, Partner):
         # Partners see public campaigns or campaigns they're enrolled in
@@ -67,6 +68,7 @@ def list_campaigns(
                 .filter(CampaignPartner.partner_id == current_user.partner_id)
             ))
         )
+        has_version_join = True
     elif isinstance(current_user, VendorUser):
         # Vendors see only their campaigns
         query = query.filter(Campaign.vendor_id == current_user.vendor_id)
@@ -75,27 +77,28 @@ def list_campaigns(
     if status:
         query = query.filter(Campaign.status == status)
 
-    if is_public is not None:
+    # Only join CampaignVersion if we haven't already
+    if (is_public is not None or search) and not has_version_join:
         query = query.join(
             CampaignVersion,
             Campaign.current_campaign_version_id == CampaignVersion.campaign_version_id,
             isouter=True
-        ).filter(CampaignVersion.is_public == is_public)
+        )
+        has_version_join = True
+
+    if is_public is not None:
+        query = query.filter(CampaignVersion.is_public == is_public)
 
     if search:
-        query = query.join(
-            CampaignVersion,
-            Campaign.current_campaign_version_id == CampaignVersion.campaign_version_id,
-            isouter=True
-        ).filter(
+        query = query.filter(
             CampaignVersion.name.ilike(f"%{search}%")
         )
     
     # Get total count
     total = query.count()
     
-    # Paginate
-    campaigns = query.offset((page - 1) * page_size).limit(page_size).all()
+    # Paginate and eager load the current_version relationship
+    campaigns = query.options(selectinload(Campaign.current_version)).offset((page - 1) * page_size).limit(page_size).all()
     
     # Build summaries
     summaries = []

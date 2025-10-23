@@ -8,13 +8,20 @@ import sys
 import os
 from datetime import datetime, timedelta
 from decimal import Decimal
+import io
+
+# Fix for Windows encoding issues
+if sys.platform == 'win32':
+    # Redirect stdout to use UTF-8
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 # Add parent directories to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from app.core.database import SessionLocal
 from app.models import (
-    Partner, Vendor, Campaign, CampaignVersion, CampaignPartner, PartnerLink, Click,
+    Partner, Vendor, VendorUser, Campaign, CampaignVersion, CampaignPartner, PartnerLink, Click,
     ConversionEventType, ConversionEvent, Payout
 )
 
@@ -58,6 +65,40 @@ def seed_database():
         db.add_all(vendors)
         db.flush()
         print(f"  ✓ Created {len(vendors)} vendors")
+
+        # Create vendor users
+        # Password for all: "password" (hashed with pbkdf2-sha256)
+        password_hash = "$pbkdf2-sha256$29000$dY6x1jqntPY.x9jbO0copQ$0xgyXxBxvPlWEdVAAYF2d1VB57vp2XLjneCjs/1/Mrs"
+
+        vendor_users = [
+            VendorUser(
+                vendor_id=vendors[0].vendor_id,
+                email="admin@techsaas.com",
+                password_hash=password_hash,
+                name="Tech Admin",
+                role="owner",
+                status="active"
+            ),
+            VendorUser(
+                vendor_id=vendors[1].vendor_id,
+                email="admin@eduplatform.com",
+                password_hash=password_hash,
+                name="Edu Admin",
+                role="owner",
+                status="active"
+            ),
+            VendorUser(
+                vendor_id=vendors[2].vendor_id,
+                email="admin@fitnessgear.com",
+                password_hash=password_hash,
+                name="Fitness Admin",
+                role="owner",
+                status="active"
+            ),
+        ]
+        db.add_all(vendor_users)
+        db.flush()
+        print(f"  ✓ Created {len(vendor_users)} vendor users")
 
         # Create partners
         # Password for all: "password" (hashed with pbkdf2-sha256)

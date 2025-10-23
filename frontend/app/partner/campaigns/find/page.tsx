@@ -124,7 +124,12 @@ export default function FindCampaignsPage() {
     category: selectedCategory !== 'All' ? selectedCategory : undefined,
   });
 
-  const campaigns = campaignsResponse?.data || [];
+  // Debug logging
+  console.log('Campaigns Response:', campaignsResponse);
+  console.log('Loading:', loading);
+  console.log('Error:', error);
+
+  const campaigns = campaignsResponse?.campaigns || [];
 
   const filteredCampaigns = campaigns;
 

@@ -1,411 +1,402 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { Plus, Copy, ExternalLink, BarChart2, Trash2, Edit2, Check } from 'lucide-react';
+import { Plus, Copy, ExternalLink, BarChart2, Trash2, Check, AlertCircle, Loader } from 'lucide-react';
+import { useCurrentPartner, usePartnerLinks, usePartnerCampaigns, useCreateLink } from '@/hooks/use-api';
+
+interface LinkFormData {
+  campaignPartnerId: number;
+  linkLabel: string;
+  utmParams?: {
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    utm_content?: string;
+  };
+}
 
 export default function PartnerLinks() {
-  const [links, setLinks] = useState([]);
-  const [campaigns, setCampaigns] = useState([]);
-  const [selectedCampaign, setSelectedCampaign] = useState('all');
+  const { data: currentPartner, loading: partnerLoading } = useCurrentPartner();
+  const { data: enrolledCampaigns, loading: campaignsLoading } = usePartnerCampaigns(
+    currentPartner?.partner_id?.toString()
+  );
+  const { data: links, loading: linksLoading } = usePartnerLinks(
+    currentPartner?.partner_id?.toString()
+  );
+  const { mutate: createLink, loading: creatingLink, error: createError } = useCreateLink();
+
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [copiedLink, setCopiedLink] = useState<number | null>(null);
+  const [formData, setFormData] = useState<LinkFormData>({
+    campaignPartnerId: 0,
+    linkLabel: '',
+    utmParams: {
+      utm_source: '',
+      utm_medium: '',
+      utm_campaign: '',
+      utm_content: '',
+    },
+  });
+  const [formError, setFormError] = useState('');
+  const [selectedCampaign, setSelectedCampaign] = useState('all');
 
-  useEffect(() => {
-    fetchLinks();
-    fetchCampaigns();
-  }, []);
-
-  const fetchCampaigns = async () => {
-    // Mock data
-    setCampaigns([
-      { id: 1, name: 'Acme SaaS Launch 2025' },
-      { id: 2, name: 'Acme Enterprise Plan' },
-      { id: 3, name: 'Beta Corp Free Trial' },
-    ]);
-  };
-
-  const fetchLinks = async () => {
-    try {
-      // Mock data
-      setLinks([
-        {
-          id: 1,
-          campaignId: 1,
-          campaignName: 'Acme SaaS Launch 2025',
-          label: 'Blog Post CTA',
-          shortCode: 'sarah-blog-1',
-          shortUrl: 'https://afl.ink/sarah-blog-1',
-          destinationUrl: 'https://acmesaas.com/signup',
-          clicks: 1240,
-          conversions: 28,
-          earnings: 560.00,
-          conversionRate: 2.26,
-          createdAt: '2024-09-15',
-        },
-        {
-          id: 2,
-          campaignId: 1,
-          campaignName: 'Acme SaaS Launch 2025',
-          label: 'Email Newsletter',
-          shortCode: 'sarah-email-1',
-          shortUrl: 'https://afl.ink/sarah-email-1',
-          destinationUrl: 'https://acmesaas.com/signup',
-          clicks: 890,
-          conversions: 19,
-          earnings: 380.00,
-          conversionRate: 2.13,
-          createdAt: '2024-09-20',
-        },
-        {
-          id: 3,
-          campaignId: 3,
-          campaignName: 'Beta Corp Free Trial',
-          label: 'YouTube Video Description',
-          shortCode: 'sarah-beta-1',
-          shortUrl: 'https://afl.ink/sarah-beta-1',
-          destinationUrl: 'https://betacorp.com/trial',
-          clicks: 650,
-          conversions: 12,
-          earnings: 180.00,
-          conversionRate: 1.85,
-          createdAt: '2024-10-01',
-        },
-      ]);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching links:', error);
-      setLoading(false);
-    }
-  };
-
-  const copyToClipboard = (url, id) => {
+  const copyToClipboard = (url: string, id: number) => {
     navigator.clipboard.writeText(url);
     setCopiedLink(id);
     setTimeout(() => setCopiedLink(null), 2000);
   };
 
+  const handleCreateLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError('');
+
+    // Validate required fields
+    if (!formData.campaignPartnerId) {
+      setFormError('Please select a campaign');
+      return;
+    }
+
+    if (!formData.linkLabel.trim()) {
+      setFormError('Please enter a link label');
+      return;
+    }
+
+    try {
+      const payload = {
+        campaign_partner_id: formData.campaignPartnerId,
+        link_label: formData.linkLabel,
+        utm_params: Object.fromEntries(
+          Object.entries(formData.utmParams || {}).filter(([, v]) => v)
+        ) || undefined,
+      };
+
+      await createLink(payload);
+      setShowCreateModal(false);
+      setFormData({
+        campaignPartnerId: 0,
+        linkLabel: '',
+        utmParams: {
+          utm_source: '',
+          utm_medium: '',
+          utm_campaign: '',
+          utm_content: '',
+        },
+      });
+      // The hook will automatically refetch links
+    } catch (error) {
+      console.error('Failed to create link:', error);
+    }
+  };
+
   const filteredLinks = selectedCampaign === 'all'
     ? links
-    : links.filter(link => link.campaignId === parseInt(selectedCampaign));
+    : links?.filter(link => link.campaign_partner_id === parseInt(selectedCampaign));
 
-  if (loading) {
+  if (partnerLoading || campaignsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading links...</p>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
   }
 
+  // Filter campaigns to only approved ones (where partner can create links)
+  const approvedCampaigns = enrolledCampaigns?.filter(
+    (camp: any) => camp.status === 'approved'
+  ) || [];
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Links</h1>
-              <p className="text-gray-600 mt-1">Create and manage your tracking links</p>
-            </div>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-            >
-              <Plus size={20} />
-              Create Link
-            </button>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Affiliate Links</h1>
+            <p className="text-gray-600 mt-2">
+              Create and manage your tracking links. One link per piece of content helps you understand what works best.
+            </p>
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Create Link
+          </button>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filter */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
+        {/* Campaign Filter */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Campaign</label>
           <select
             value={selectedCampaign}
             onChange={(e) => setSelectedCampaign(e.target.value)}
-            className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full max-w-xs border border-gray-300 rounded-lg p-2 text-gray-900"
           >
             <option value="all">All Campaigns</option>
-            {campaigns.map(campaign => (
-              <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
+            {approvedCampaigns.map((campaign: any) => (
+              <option key={campaign.campaign_partner_id} value={campaign.campaign_partner_id}>
+                {campaign.campaign_version?.name || 'Unnamed Campaign'}
+              </option>
             ))}
           </select>
         </div>
 
-        {/* Links Grid */}
-        <div className="space-y-4">
-          {filteredLinks.map((link) => (
-            <div key={link.id} className="bg-white rounded-lg shadow hover:shadow-lg transition">
-              <div className="p-6">
-                {/* Link Header */}
-                <div className="flex items-start justify-between mb-4">
+        {/* Links List */}
+        {linksLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading links...</p>
+          </div>
+        ) : filteredLinks && filteredLinks.length > 0 ? (
+          <div className="grid gap-4">
+            {filteredLinks.map((link: any) => (
+              <div key={link.partner_link_id} className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-gray-900">{link.label}</h3>
-                      <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                        {link.campaignName}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <code className="px-3 py-1 bg-gray-100 text-gray-900 rounded font-mono text-sm">
-                        {link.shortUrl}
-                      </code>
-                      <button
-                        onClick={() => copyToClipboard(link.shortUrl, link.id)}
-                        className="p-2 hover:bg-gray-100 rounded transition"
-                        title="Copy link"
-                      >
-                        {copiedLink === link.id ? (
-                          <Check size={18} className="text-green-600" />
-                        ) : (
-                          <Copy size={18} className="text-gray-600" />
-                        )}
-                      </button>
-                      <a
-                        href={link.shortUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 hover:bg-gray-100 rounded transition"
-                        title="Open link"
-                      >
-                        <ExternalLink size={18} className="text-gray-600" />
-                      </a>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Destination: <span className="font-mono">{link.destinationUrl}</span>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      Created {new Date(link.createdAt).toLocaleDateString()}
-                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900">{link.link_label}</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Campaign: {link.campaign_partner?.campaign_version?.name || 'Unknown'}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button className="p-2 hover:bg-gray-100 rounded transition">
-                      <Edit2 size={18} className="text-gray-600" />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => copyToClipboard(link.tracking_url, link.partner_link_id)}
+                      className="p-2 hover:bg-gray-100 rounded"
+                      title="Copy tracking URL"
+                    >
+                      {copiedLink === link.partner_link_id ? (
+                        <Check size={20} className="text-green-600" />
+                      ) : (
+                        <Copy size={20} className="text-gray-600" />
+                      )}
                     </button>
-                    <button className="p-2 hover:bg-red-50 rounded transition">
-                      <Trash2 size={18} className="text-red-600" />
-                    </button>
+                    <a
+                      href={link.tracking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 hover:bg-gray-100 rounded"
+                      title="Test link"
+                    >
+                      <ExternalLink size={20} className="text-gray-600" />
+                    </a>
                   </div>
                 </div>
 
-                {/* Link Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <StatBox
-                    label="Clicks"
-                    value={link.clicks.toLocaleString()}
-                    color="text-blue-600"
-                  />
-                  <StatBox
-                    label="Conversions"
-                    value={link.conversions}
-                    color="text-green-600"
-                  />
-                  <StatBox
-                    label="Conversion Rate"
-                    value={`${link.conversionRate}%`}
-                    color="text-purple-600"
-                  />
-                  <StatBox
-                    label="Earnings"
-                    value={`$${link.earnings.toLocaleString()}`}
-                    color="text-green-600"
-                  />
+                {/* Link URLs */}
+                <div className="bg-gray-50 rounded-lg p-4 mb-4 font-mono text-sm">
+                  <div className="mb-3">
+                    <p className="text-gray-600 text-xs mb-1">Tracking URL:</p>
+                    <p className="text-gray-900 break-all">{link.tracking_url}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-xs mb-1">Destination:</p>
+                    <p className="text-gray-900 break-all text-xs">{link.full_url}</p>
+                  </div>
                 </div>
 
-                {/* View Details Button */}
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
-                    <BarChart2 size={18} />
-                    View Detailed Analytics
-                  </button>
+                {/* Stats */}
+                <div className="grid grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">Clicks</p>
+                    <p className="text-2xl font-bold text-gray-900">0</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Conversions</p>
+                    <p className="text-2xl font-bold text-gray-900">0</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Conv. Rate</p>
+                    <p className="text-2xl font-bold text-gray-900">0%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Earnings</p>
+                    <p className="text-2xl font-bold text-gray-900">$0.00</p>
+                  </div>
                 </div>
+
+                <p className="text-xs text-gray-500 mt-4">
+                  Created: {new Date(link.created_at).toLocaleDateString()}
+                </p>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {filteredLinks.length === 0 && (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <Plus size={48} className="mx-auto" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No links yet</h3>
-            <p className="text-gray-600 mb-6">
-              Create your first tracking link to start earning commissions
-            </p>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-            >
-              <Plus size={20} />
-              Create Link
-            </button>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <p className="text-gray-600">No links yet. Create your first link to start tracking!</p>
           </div>
         )}
       </div>
 
       {/* Create Link Modal */}
       {showCreateModal && (
-        <CreateLinkModal
-          campaigns={campaigns}
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={fetchLinks}
-        />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Create New Link</h2>
+
+            {createError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded flex items-start gap-2">
+                <AlertCircle size={20} className="mt-0.5" />
+                <div>
+                  <p className="font-semibold">Error</p>
+                  <p className="text-sm">{createError.message}</p>
+                </div>
+              </div>
+            )}
+
+            {formError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded">
+                {formError}
+              </div>
+            )}
+
+            <form onSubmit={handleCreateLink} className="space-y-4">
+              {/* Campaign Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Campaign *
+                </label>
+                <select
+                  value={formData.campaignPartnerId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, campaignPartnerId: parseInt(e.target.value) })
+                  }
+                  className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+                  disabled={creatingLink}
+                >
+                  <option value={0}>Select a campaign...</option>
+                  {approvedCampaigns.map((campaign: any) => (
+                    <option
+                      key={campaign.campaign_partner_id}
+                      value={campaign.campaign_partner_id}
+                    >
+                      {campaign.campaign_version?.name || 'Unnamed Campaign'}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Only approved campaigns are available
+                </p>
+              </div>
+
+              {/* Link Label */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Link Label (e.g., "Blog Post Title") *
+                </label>
+                <input
+                  type="text"
+                  value={formData.linkLabel}
+                  onChange={(e) =>
+                    setFormData({ ...formData, linkLabel: e.target.value })
+                  }
+                  placeholder="e.g., Blog Post CTA, YouTube Description"
+                  className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+                  disabled={creatingLink}
+                  maxLength={255}
+                />
+              </div>
+
+              {/* UTM Parameters */}
+              <div className="pt-2 border-t border-gray-200">
+                <p className="text-sm font-medium text-gray-700 mb-3">UTM Parameters (Optional)</p>
+
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="UTM Source (e.g., blog, twitter)"
+                    value={formData.utmParams?.utm_source || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        utmParams: {
+                          ...formData.utmParams,
+                          utm_source: e.target.value,
+                        },
+                      })
+                    }
+                    className="w-full text-sm border border-gray-300 rounded-lg p-2 text-gray-900"
+                    disabled={creatingLink}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="UTM Medium (e.g., post, tweet)"
+                    value={formData.utmParams?.utm_medium || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        utmParams: {
+                          ...formData.utmParams,
+                          utm_medium: e.target.value,
+                        },
+                      })
+                    }
+                    className="w-full text-sm border border-gray-300 rounded-lg p-2 text-gray-900"
+                    disabled={creatingLink}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="UTM Campaign"
+                    value={formData.utmParams?.utm_campaign || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        utmParams: {
+                          ...formData.utmParams,
+                          utm_campaign: e.target.value,
+                        },
+                      })
+                    }
+                    className="w-full text-sm border border-gray-300 rounded-lg p-2 text-gray-900"
+                    disabled={creatingLink}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="UTM Content"
+                    value={formData.utmParams?.utm_content || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        utmParams: {
+                          ...formData.utmParams,
+                          utm_content: e.target.value,
+                        },
+                      })
+                    }
+                    className="w-full text-sm border border-gray-300 rounded-lg p-2 text-gray-900"
+                    disabled={creatingLink}
+                  />
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  disabled={creatingLink}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                  disabled={creatingLink}
+                >
+                  {creatingLink && <Loader size={18} className="animate-spin" />}
+                  {creatingLink ? 'Creating...' : 'Create Link'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
-    </div>
-  );
-}
-
-function StatBox({ label, value, color }) {
-  return (
-    <div className="bg-gray-50 rounded-lg p-3">
-      <div className="text-sm text-gray-600 mb-1">{label}</div>
-      <div className={`text-lg font-bold ${color}`}>{value}</div>
-    </div>
-  );
-}
-
-function CreateLinkModal({ campaigns, onClose, onSuccess }) {
-  const [formData, setFormData] = useState({
-    campaignId: '',
-    label: '',
-    utmSource: '',
-    utmMedium: '',
-    utmCampaign: '',
-    utmContent: '',
-  });
-
-  const handleCreate = () => {
-    // In production, submit to API
-    console.log('Creating link:', formData);
-    onSuccess();
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Create New Link</h2>
-          <p className="text-gray-600 mt-1">Generate a tracking link for your content</p>
-        </div>
-        
-        <div className="p-6 space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Campaign *
-            </label>
-            <select
-              value={formData.campaignId}
-              onChange={(e) => setFormData({...formData, campaignId: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Select a campaign</option>
-              {campaigns.map(campaign => (
-                <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Link Label *
-            </label>
-            <input
-              type="text"
-              value={formData.label}
-              onChange={(e) => setFormData({...formData, label: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., Blog Post CTA, Instagram Bio, Email Signature"
-            />
-            <p className="text-sm text-gray-600 mt-1">
-              This helps you identify where the link is used
-            </p>
-          </div>
-
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="font-semibold text-gray-900 mb-4">
-              UTM Parameters (Optional)
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Add UTM parameters to track the source of your traffic more precisely
-            </p>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  UTM Source
-                </label>
-                <input
-                  type="text"
-                  value={formData.utmSource}
-                  onChange={(e) => setFormData({...formData, utmSource: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., instagram, blog"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  UTM Medium
-                </label>
-                <input
-                  type="text"
-                  value={formData.utmMedium}
-                  onChange={(e) => setFormData({...formData, utmMedium: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., post, story, bio"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  UTM Campaign
-                </label>
-                <input
-                  type="text"
-                  value={formData.utmCampaign}
-                  onChange={(e) => setFormData({...formData, utmCampaign: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., launch2025"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  UTM Content
-                </label>
-                <input
-                  type="text"
-                  value={formData.utmContent}
-                  onChange={(e) => setFormData({...formData, utmContent: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., cta-button, header"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 pt-6 border-t border-gray-200">
-            <button
-              onClick={handleCreate}
-              disabled={!formData.campaignId || !formData.label}
-              className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-              Create Link
-            </button>
-            <button
-              onClick={onClose}
-              className="flex-1 border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-50 transition font-medium"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
