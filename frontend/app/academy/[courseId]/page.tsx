@@ -120,72 +120,113 @@ export default function CoursePage() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)]">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Sidebar */}
-      <aside className="md:w-72 w-full border-r bg-gray-50 p-4 overflow-y-auto">
+      <aside className="md:w-80 w-full border-r border-gray-200 bg-white/80 backdrop-blur-sm p-6 overflow-y-auto shadow-lg">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => router.push("/academy")}
-          className="mb-4 flex items-center gap-2 text-muted-foreground"
+          className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ArrowLeft className="h-4 w-4" /> Back to Academy
         </Button>
 
-        <h2 className="font-semibold text-lg mb-2">{courseData.title}</h2>
-        <p className="text-sm text-muted-foreground mb-4">{courseData.description}</p>
+        <div className="space-y-4 mb-6">
+          <div>
+            <h2 className="font-bold text-lg text-gray-900 mb-2">{courseData.title}</h2>
+            <p className="text-sm text-gray-600 leading-relaxed">{courseData.description}</p>
+          </div>
 
-        <Progress value={progress} className="mb-6" />
-        <ul className="space-y-2">
-          {courseData.lessons.map((lesson) => (
-            <li key={lesson.id}>
-              <button
-                onClick={() => setActiveLesson(lesson)}
-                className={clsx(
-                  "w-full text-left text-sm px-3 py-2 rounded-lg transition",
-                  lesson.id === activeLesson?.id
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-gray-100",
-                  lesson.completed && "opacity-80"
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <span>{lesson.title}</span>
-                  {lesson.completed && (
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-xs text-gray-600">
+              <span className="font-semibold">Course Progress</span>
+              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-bold">{Math.round(progress)}%</span>
+            </div>
+            <div className="relative h-3 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full overflow-hidden">
+              <Progress value={progress} className="h-full bg-gradient-to-r from-blue-400 to-blue-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-200 pt-4">
+          <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wider">Lessons</h3>
+          <ul className="space-y-2">
+            {courseData.lessons.map((lesson, index) => (
+              <li key={lesson.id}>
+                <button
+                  onClick={() => setActiveLesson(lesson)}
+                  className={clsx(
+                    "w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-between group",
+                    lesson.id === activeLesson?.id
+                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30"
+                      : "hover:bg-gray-100 text-gray-700 hover:text-gray-900",
+                    lesson.completed && "opacity-90"
                   )}
-                </div>
-              </button>
-            </li>
-          ))}
-        </ul>
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className="text-xs font-bold opacity-60">{index + 1}</span>
+                    <span className="text-sm font-medium truncate">{lesson.title}</span>
+                  </div>
+                  {lesson.completed && (
+                    <CheckCircle2 className="w-4 h-4 flex-shrink-0 ml-2" />
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-y-auto">
-        <div className="max-w-3xl mx-auto">
+      <main className="flex-1 p-8 overflow-y-auto">
+        <div className="max-w-4xl mx-auto">
           {activeLesson ? (
             <>
-              <h1 className="text-2xl font-bold mb-4">{activeLesson.title}</h1>
-              <Card>
-                <CardContent className="pt-6 space-y-4">
-                  <p className="text-gray-700 leading-relaxed">{activeLesson.content}</p>
+              <div className="mb-8 space-y-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-1 w-12 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full" />
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Lesson</span>
+                </div>
+                <h1 className="text-4xl font-bold text-gray-900">
+                  {activeLesson.title}
+                </h1>
+              </div>
+
+              <Card className="bg-white/80 backdrop-blur-sm border-gray-200 shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                <CardContent className="pt-8 space-y-6">
+                  <p className="text-gray-700 leading-relaxed text-lg">
+                    {activeLesson.content}
+                  </p>
                 </CardContent>
               </Card>
-              <div className="flex justify-end mt-6">
+
+              <div className="flex justify-end mt-8 gap-4">
                 {!activeLesson.completed ? (
-                  <Button onClick={() => markComplete(activeLesson.id)}>
-                    Mark Complete
+                  <Button
+                    onClick={() => markComplete(activeLesson.id)}
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 px-8 py-3 h-auto font-semibold"
+                  >
+                    <CheckCircle2 className="w-5 h-5 mr-2" />
+                    Mark as Complete
                   </Button>
                 ) : (
-                  <Button variant="outline" disabled>
+                  <Button
+                    variant="outline"
+                    disabled
+                    className="border-green-300 text-green-700 bg-green-50"
+                  >
+                    <CheckCircle2 className="w-5 h-5 mr-2 text-green-600" />
                     Completed
                   </Button>
                 )}
               </div>
             </>
           ) : (
-            <p className="text-muted-foreground">Select a lesson to begin.</p>
+            <div className="flex flex-col items-center justify-center h-96 text-center">
+              <BookOpen className="w-16 h-16 text-gray-300 mb-4" />
+              <p className="text-lg text-gray-500">Select a lesson to begin learning.</p>
+            </div>
           )}
         </div>
       </main>

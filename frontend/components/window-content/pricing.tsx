@@ -87,11 +87,10 @@ export function PricingContent() {
 			type: "flat",
 			price: 25,
 			performanceFee: "10% of GMV",
-			breakevenMRR: 4000,
 			targetAudience: [
 				"Launching your first product or planning your first launch",
 				"Testing your product with minimal recurring costs",
-				"Making a small (one-time) $20 commitment to show you’re serious (credited toward your first payout)",
+				"Making a small (one-time) $20 commitment to show you're serious (credited toward your first payout)",
 			],
 			popular: true,
 		},
@@ -101,7 +100,8 @@ export function PricingContent() {
 			monthly: 200,
 			annual: 200 * 11,
 			performanceFee: "8% of GMV",
-			breakevenMRR: 36000,
+			breakevenMRR: 4000,
+			breakevenNote: "breakeven with Beta",
 			targetAudience: [
 				"Small teams with a few partners, ready to start scaling",
 				"Businesses that want an affordable monthly subscription with moderate GMV",
@@ -113,6 +113,8 @@ export function PricingContent() {
 			monthly: 2000,
 			annual: 2000 * 11,
 			performanceFee: "5% of GMV",
+			breakevenMRR: 36000,
+			breakevenNote: "breakeven with Bootstrap",
 			targetAudience: [
 				"Large and growing companies, scaling partner programs",
 				"Pay a predictable monthly fee and retain a larger share of your partner-generated revenue.",
@@ -315,11 +317,11 @@ export function PricingContent() {
 										</span>
 										<span className="text-xs text-foreground/70 flex-1">
 											{plan.breakevenMRR &&
-												`Breakeven at $${new Intl.NumberFormat("en-US").format(
+												`Breakeven at a GMV of $${new Intl.NumberFormat(
+													"en-US"
+												).format(
 													plan.breakevenMRR
-												)}/mo`}
-											{plan.breakevenTime &&
-												`Pays for itself in ${plan.breakevenTime}`}
+												)}/mo compared to the previous tier plan`}
 										</span>
 									</div>
 								</div>

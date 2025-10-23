@@ -52,24 +52,49 @@ export default function AcademyPage() {
   const [courses] = useState<Course[]>(sampleCourses)
 
   return (
-    <div className="flex flex-col gap-8 p-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-        <div>
-          <h1 className="text-3xl font-bold mb-1">Affiliate Academy</h1>
-          <p className="text-muted-foreground">
-            Grow your skills and become a Certified Affable Link Partner.
-          </p>
+    <div className="flex flex-col gap-10 p-8 min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+      {/* Desktop-like texture background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 opacity-30 mix-blend-multiply"
+          style={{
+            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, #65432108 2px 4px), repeating-linear-gradient(90deg, transparent, transparent 2px, #65432108 2px 4px), radial-gradient(circle at 20%, #8b5a2b0d 0, transparent 50%)"
+          }}
+        />
+      </div>
+
+      {/* Header with Premium Styling */}
+      <div className="relative z-10">
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-600/10 to-orange-600/10 rounded-2xl blur-3xl" />
+        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-8 bg-gradient-to-r from-amber-700 via-orange-700 to-yellow-700 rounded-2xl shadow-2xl text-white">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <span className="text-amber-100 text-sm font-semibold uppercase tracking-wider">Learning Hub</span>
+            </div>
+            <h1 className="text-4xl font-bold mb-2">Affiliate Academy</h1>
+            <p className="text-amber-50 text-lg max-w-xl">
+              Master affiliate marketing and become a certified partner. Unlock exclusive benefits and join our elite community.
+            </p>
+          </div>
+          <Button className="mt-4 md:mt-0 bg-amber-50 text-amber-700 hover:bg-amber-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold px-8 py-2 h-auto">
+            Continue Learning
+          </Button>
         </div>
-        <Button className="mt-4 md:mt-0">Continue Learning</Button>
       </div>
 
       {/* Progress Overview */}
       <ProgressSummary />
 
-      {/* Courses */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4">Courses</h2>
+      {/* Courses Section */}
+      <section className="space-y-6 relative z-10">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-amber-900">Courses</h2>
+            <p className="text-amber-700 mt-1">Structured learning paths to master affiliate marketing</p>
+          </div>
+        </div>
         <div className="grid md:grid-cols-3 gap-6">
           {courses.map((course) => (
             <CourseCard key={course.id} course={course} />
@@ -77,48 +102,92 @@ export default function AcademyPage() {
         </div>
       </section>
 
-      {/* Resources */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4">Resources & Assets</h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="flex items-center gap-3">
-              <Download className="text-purple-500" />
-              <CardTitle>Brand Assets</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-3">
-                Download logos, product screenshots, and banners.
-              </p>
-              <Button variant="outline" size="sm">Download Kit</Button>
-            </CardContent>
-          </Card>
+      {/* Resources Section */}
+      <section className="space-y-6 mt-4 relative z-10">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-amber-900">Resources & Assets</h2>
+            <p className="text-amber-700 mt-1">Everything you need to succeed</p>
+          </div>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Brand Assets Card */}
+          <div className="group">
+            <Card className="h-full overflow-hidden bg-amber-50 border-amber-200 hover:border-amber-400 hover:shadow-2xl hover:shadow-amber-600/10 transition-all duration-300 hover:-translate-y-1">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2.5 bg-amber-100 group-hover:bg-amber-200 rounded-lg transition-colors">
+                    <Download className="text-amber-700 w-5 h-5" />
+                  </div>
+                  <CardTitle className="text-amber-900 group-hover:text-amber-800">Brand Assets</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-amber-800">
+                  Download logos, product screenshots, marketing banners, and more.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-amber-300 text-amber-700 hover:bg-amber-100 hover:border-amber-400 transition-all duration-300 group-hover:shadow-md"
+                >
+                  Download Kit
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card>
-            <CardHeader className="flex items-center gap-3">
-              <Trophy className="text-orange-500" />
-              <CardTitle>Leaderboard</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-3">
-                See how you rank among top affiliates this month.
-              </p>
-              <Button variant="outline" size="sm">View Leaderboard</Button>
-            </CardContent>
-          </Card>
+          {/* Leaderboard Card */}
+          <div className="group">
+            <Card className="h-full overflow-hidden bg-orange-50 border-orange-200 hover:border-orange-400 hover:shadow-2xl hover:shadow-orange-600/10 transition-all duration-300 hover:-translate-y-1">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2.5 bg-orange-100 group-hover:bg-orange-200 rounded-lg transition-colors">
+                    <Trophy className="text-orange-700 w-5 h-5" />
+                  </div>
+                  <CardTitle className="text-orange-900 group-hover:text-orange-800">Leaderboard</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-orange-800">
+                  Compete with other affiliates and see your ranking among top performers.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-orange-300 text-orange-700 hover:bg-orange-100 hover:border-orange-400 transition-all duration-300 group-hover:shadow-md"
+                >
+                  View Leaderboard
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card>
-            <CardHeader className="flex items-center gap-3">
-              <BookOpen className="text-blue-500" />
-              <CardTitle>Guides & FAQs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-3">
-                Access compliance info, templates, and marketing tips.
-              </p>
-              <Button variant="outline" size="sm">View Guides</Button>
-            </CardContent>
-          </Card>
+          {/* Guides & FAQs Card */}
+          <div className="group">
+            <Card className="h-full overflow-hidden bg-yellow-50 border-yellow-200 hover:border-yellow-400 hover:shadow-2xl hover:shadow-yellow-600/10 transition-all duration-300 hover:-translate-y-1">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2.5 bg-yellow-100 group-hover:bg-yellow-200 rounded-lg transition-colors">
+                    <BookOpen className="text-yellow-700 w-5 h-5" />
+                  </div>
+                  <CardTitle className="text-yellow-900 group-hover:text-yellow-800">Guides & FAQs</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-yellow-800">
+                  Access compliance guides, templates, and pro marketing tips.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-yellow-300 text-yellow-700 hover:bg-yellow-100 hover:border-yellow-400 transition-all duration-300 group-hover:shadow-md"
+                >
+                  View Guides
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
     </div>
