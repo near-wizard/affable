@@ -360,3 +360,208 @@ def cleanup_old_data(self, table_name: str, days_old: int = 90):
     except Exception as exc:
         logger.error(f"Error cleaning up data: {exc}", exc_info=True)
         raise self.retry(exc=exc)
+
+
+@celery_app.task(
+    base=DatabaseTask,
+    bind=True,
+    name='app.workers.tasks.verify_content_url',
+    max_retries=2,
+    default_retry_delay=30
+)
+def verify_content_url(self, partner_link_id: int):
+    """
+    Verify that a content URL contains the tracking link.
+
+    Fetches the HTML from the content URL and checks if it includes
+    the tracking URL. Updates the verification status accordingly.
+
+    Args:
+        partner_link_id: ID of the partner link to verify
+    """
+    import requests
+    from urllib.parse import urljoin
+
+    logger.info(f"Verifying content URL for partner link {partner_link_id}")
+
+    try:
+        db = self.db
+
+        # Get the partner link
+        partner_link = db.query(PartnerLink).filter(
+            PartnerLink.partner_link_id == partner_link_id,
+            PartnerLink.is_deleted == False
+        ).first()
+
+        if not partner_link:
+            logger.error(f"Partner link {partner_link_id} not found")
+            return {'status': 'error', 'message': 'Link not found'}
+
+        if not partner_link.content_url:
+            logger.warning(f"Partner link {partner_link_id} has no content URL")
+            return {'status': 'error', 'message': 'No content URL attached'}
+
+        if partner_link.content_verification_status == 'verified':
+            logger.info(f"Partner link {partner_link_id} already verified")
+            return {'status': 'already_verified', 'partner_link_id': partner_link_id}
+
+        # Get the tracking URL (check both HTTP and HTTPS)
+        from app.config import settings
+        tracking_url_https = f"https://{settings.TRACKING_DOMAIN}/r/{partner_link.short_code}"
+        tracking_url_http = f"http://{settings.TRACKING_DOMAIN}/r/{partner_link.short_code}"
+
+        # Fetch the content page (try Playwright first for JavaScript-rendered content)
+        try:
+            html_content = None
+
+            # Try Playwright for JavaScript-rendered content (with security restrictions)
+            try:
+                from playwright.sync_api import sync_playwright
+
+                with sync_playwright() as p:
+                    browser = p.chromium.launch(
+                        headless=True,
+                        args=[
+                            '--no-sandbox',  # Allows running in Docker
+                            '--disable-setuid-sandbox',
+                            '--disable-dev-shm-usage',  # Reduce memory usage
+                        ]
+                    )
+
+                    context = browser.new_context(
+                        ignore_https_errors=True,  # Allow testing with self-signed certs
+                        # Security: Don't allow popups or new windows
+                        extra_http_headers={'User-Agent': 'AffableLink-Verification/1.0'}
+                    )
+
+                    page = context.new_page()
+
+                    # Security: Block potentially dangerous requests
+                    def handle_route(route):
+                        url = route.request.url.lower()
+
+                        # Allow localhost and 127.0.0.1 only in development (testing purposes)
+                        if settings.ENV == 'development' and ('localhost' in url or '127.0.0.1' in url):
+                            route.continue_()
+                            return
+
+                        # Block external tracking services that could track us
+                        blocked_domains = [
+                            'google-analytics',
+                            'google-analytics.com',
+                            'googletagmanager.com',
+                            'facebook.com/tr',
+                            'segment.com',
+                            'mixpanel.com',
+                            'heap.io',
+                            'hotjar.com',
+                            'amplitude.com',
+                            'intercom.io',
+                            'fullstory.com',
+                            'datadog.com',
+                            'newrelic.com',
+                        ]
+
+                        blocked_paths = [
+                            '/api/track',
+                            '/api/analytics',
+                            '/api/events',
+                            '/api/telemetry',
+                            '/tracking/',
+                            '/analytics/',
+                        ]
+
+                        # Check if URL contains blocked domains
+                        if any(domain in url for domain in blocked_domains):
+                            route.abort()
+                            return
+
+                        # Check if URL path contains blocked patterns
+                        if any(path in url for path in blocked_paths):
+                            route.abort()
+                            return
+
+                        # Allow all other requests
+                        route.continue_()
+
+                    page.route('**/*', handle_route)
+
+                    # Navigate with timeout and wait for network to be idle
+                    page.goto(
+                        partner_link.content_url,
+                        timeout=15000,
+                        wait_until='networkidle'
+                    )
+
+                    # Wait a bit more for any delayed rendering
+                    page.wait_for_timeout(2000)
+
+                    html_content = page.content()
+                    context.close()
+                    browser.close()
+
+                logger.info(f"Partner link {partner_link_id} - fetched content via Playwright (JavaScript-rendered)")
+            except Exception as playwright_error:
+                # Fall back to requests for static HTML
+                logger.debug(f"Playwright failed for {partner_link_id}, falling back to requests: {str(playwright_error)}")
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+                response = requests.get(
+                    partner_link.content_url,
+                    headers=headers,
+                    timeout=10,
+                    allow_redirects=True
+                )
+                response.raise_for_status()
+                html_content = response.text
+                logger.info(f"Partner link {partner_link_id} - fetched content via requests (static HTML)")
+
+            # Check if tracking URL is in the content (check both HTTP and HTTPS)
+            is_verified = (tracking_url_https in html_content) or (tracking_url_http in html_content)
+
+            if is_verified:
+                partner_link.content_verification_status = 'verified'
+                logger.info(f"Partner link {partner_link_id} verification SUCCESS - tracking URL found in content")
+                result_status = 'verified'
+            else:
+                partner_link.content_verification_status = 'failed'
+                # Log more details for debugging
+                logger.warning(
+                    f"Partner link {partner_link_id} verification FAILED - tracking URL not found in content\n"
+                    f"  Content URL: {partner_link.content_url}\n"
+                    f"  Looking for HTTPS: {tracking_url_https}\n"
+                    f"  Looking for HTTP: {tracking_url_http}\n"
+                    f"  Content length: {len(html_content)} characters\n"
+                    f"  First 500 chars: {html_content[:500]}"
+                )
+                result_status = 'failed'
+
+            partner_link.updated_at = datetime.utcnow()
+            db.commit()
+
+            return {
+                'status': result_status,
+                'partner_link_id': partner_link_id,
+                'tracking_url_https': tracking_url_https,
+                'tracking_url_http': tracking_url_http,
+                'content_url': partner_link.content_url
+            }
+
+        except requests.exceptions.Timeout:
+            logger.error(f"Timeout fetching {partner_link.content_url}")
+            partner_link.content_verification_status = 'failed'
+            partner_link.updated_at = datetime.utcnow()
+            db.commit()
+            return {'status': 'error', 'message': 'Timeout fetching content URL'}
+
+        except requests.exceptions.RequestException as req_exc:
+            logger.error(f"Error fetching {partner_link.content_url}: {req_exc}")
+            partner_link.content_verification_status = 'failed'
+            partner_link.updated_at = datetime.utcnow()
+            db.commit()
+            return {'status': 'error', 'message': f'Failed to fetch content URL: {str(req_exc)}'}
+
+    except Exception as exc:
+        logger.error(f"Error verifying content URL: {exc}", exc_info=True)
+        raise self.retry(exc=exc)

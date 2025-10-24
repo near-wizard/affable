@@ -898,6 +898,8 @@ def get_partner_links(
             "utm_params": link.utm_params,
             "link_label": link.link_label,
             "content_piece_id": link.content_piece_id,
+            "content_url": link.content_url,
+            "content_verification_status": link.content_verification_status,
             "created_at": link.created_at,
             "click_count": click_count,
             "campaign_partner": {

@@ -24,6 +24,11 @@ class PartnerLinkUpdate(BaseModel):
     utm_params: Optional[Dict[str, str]] = None
 
 
+class AttachContentUrlRequest(BaseModel):
+    """Attach content URL to partner link request."""
+    content_url: str = Field(..., description="URL where the tracking link is used")
+
+
 class PartnerLinkResponse(PartnerLinkBase):
     """Partner link response."""
     partner_link_id: int
@@ -32,8 +37,13 @@ class PartnerLinkResponse(PartnerLinkBase):
     full_url: str
     tracking_url: str
     content_piece_id: Optional[int] = None
+    content_url: Optional[str] = None
+    content_verification_status: str = "no_content"
     created_at: datetime
-    
+    # Click statistics
+    click_count: int = 0
+    total_clicks: int = 0
+
     class Config:
         from_attributes = True
 

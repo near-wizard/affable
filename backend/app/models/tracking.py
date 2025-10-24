@@ -26,6 +26,10 @@ class PartnerLink(BaseModel):
     deactivated_at = Column(DateTime, nullable=True)  # When link was manually deactivated
     deactivation_reason = Column(String(255), nullable=True)  # Reason for deactivation
 
+    # Content verification
+    content_url = Column(Text, nullable=True)  # URL where the tracking link is used
+    content_verification_status = Column(String(50), default="no_content", nullable=False)  # no_content, unverified, verified, failed
+
     # Relationships
     campaign_partner = relationship("CampaignPartner", back_populates="partner_links")
     clicks = relationship("Click", back_populates="partner_link")

@@ -104,17 +104,8 @@ export function useCampaigns(params?: {
 	category?: string;
 }) {
 	const paramsString = JSON.stringify(params);
-	console.log(
-		"useCampaigns called with params:",
-		params,
-		"paramsString:",
-		paramsString
-	);
 	return useAsync(
-		() => {
-			console.log("useCampaigns asyncFunction executing...");
-			return apiClient.campaigns.list(params);
-		},
+		() => apiClient.campaigns.list(params, getAuthToken() || undefined),
 		{
 			enabled: true,
 		},
@@ -164,9 +155,13 @@ export function usePartnerCampaigns(
 	}
 ) {
 	const paramsString = JSON.stringify(params);
-	return useAsync(() => apiClient.partnerCampaigns.list(partnerId!, params), {
-		enabled: !!partnerId,
-	}, [partnerId, paramsString]);
+	return useAsync(
+		() => apiClient.partnerCampaigns.list(partnerId!, params),
+		{
+			enabled: !!partnerId,
+		},
+		[partnerId, paramsString]
+	);
 }
 
 // ============================================================================

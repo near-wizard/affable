@@ -92,6 +92,8 @@ async function apiRequest<T>(
       ...rest,
     });
 
+    console.debug('API Response Status:', response.status, 'Content-Type:', response.headers.get('content-type'));
+
     // Handle non-OK responses
     if (!response.ok) {
       let errorData: ApiError = {
@@ -101,10 +103,20 @@ async function apiRequest<T>(
       };
 
       try {
-        const json = await response.json();
-        errorData = json.error || errorData;
-      } catch {
-        // Failed to parse error response
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const json = await response.json();
+          errorData = json.error || json || errorData;
+        } else {
+          // Try to get response text for non-JSON responses
+          const text = await response.text();
+          if (text) {
+            errorData.message = `${errorData.message}: ${text.substring(0, 200)}`;
+          }
+        }
+      } catch (parseError) {
+        // Failed to parse error response, use default message
+        console.error('Failed to parse error response:', parseError);
       }
 
       throw new ApiClientError(
@@ -152,17 +164,63 @@ async function apiRequest<T>(
 // ============================================================================
 
 export const apiClient = {
+  /**
+   * Generic POST request
+   */
+  post: async <T>(endpoint: string, body?: any, token?: string): Promise<T> => {
+    return apiRequest<T>(endpoint, {
+      method: 'POST',
+      body,
+      token,
+    });
+  },
+
+  /**
+   * Generic GET request
+   */
+  get: async <T>(endpoint: string, params?: Record<string, any>, token?: string): Promise<T> => {
+    return apiRequest<T>(endpoint, {
+      method: 'GET',
+      params,
+      token,
+    });
+  },
+
+  /**
+   * Generic PUT request
+   */
+  put: async <T>(endpoint: string, body?: any, token?: string): Promise<T> => {
+    return apiRequest<T>(endpoint, {
+      method: 'PUT',
+      body,
+      token,
+    });
+  },
+
+  /**
+   * Generic DELETE request
+   */
+  delete: async <T>(endpoint: string, token?: string): Promise<T> => {
+    return apiRequest<T>(endpoint, {
+      method: 'DELETE',
+      token,
+    });
+  },
+
   // ===== CAMPAIGNS =====
   campaigns: {
     /**
      * Get all campaigns (for partners - public campaigns)
      */
-    list: async (params?: {
-      page?: number;
-      limit?: number;
-      search?: string;
-      category?: string;
-    }) => {
+    list: async (
+      params?: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        category?: string;
+      },
+      token?: string
+    ) => {
       // Map frontend 'limit' parameter to backend 'page_size'
       const backendParams = {
         page: params?.page,
@@ -170,7 +228,7 @@ export const apiClient = {
         search: params?.search,
         is_public: params?.category ? undefined : true, // Show public campaigns
       };
-      return apiRequest('/v1/campaigns', { params: backendParams });
+      return apiRequest('/v1/campaigns', { params: backendParams, token });
     },
 
     /**
@@ -188,8 +246,7 @@ export const apiClient = {
       limit?: number;
       status?: string;
     }) => {
-      // Use /me endpoint since we're already authenticated
-      return apiRequest(`/v1/vendors/me/campaigns`, { params });
+      return apiRequest(`/v1/vendors/${vendorId}/campaigns`, { params });
     },
 
     /**

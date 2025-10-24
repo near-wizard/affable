@@ -38,3 +38,6 @@ sentry-sdk[fastapi]==1.38.0
 
 # HTTP client
 requests==2.31.0
+
+# Browser automation for JavaScript-rendered content verification
+playwright==1.40.0

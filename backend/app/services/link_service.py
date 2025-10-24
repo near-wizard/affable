@@ -338,6 +338,54 @@ class LinkService:
         }
 
     @staticmethod
+    def attach_content_url(
+        db: Session,
+        partner_link_id: int,
+        partner: Partner,
+        content_url: str
+    ) -> PartnerLink:
+        """
+        Attach a content URL to a partner link and mark for verification.
+
+        Args:
+            db: Database session
+            partner_link_id: Link ID
+            partner: Partner attaching the URL
+            content_url: URL where the tracking link is used
+
+        Returns:
+            Updated PartnerLink object
+
+        Raises:
+            NotFoundException: If link not found
+            ForbiddenException: If partner doesn't own the link
+        """
+        partner_link = db.query(PartnerLink).filter(
+            PartnerLink.partner_link_id == partner_link_id,
+            PartnerLink.is_deleted == False
+        ).first()
+
+        if not partner_link:
+            raise NotFoundException("Link not found")
+
+        # Verify ownership through campaign_partner
+        campaign_partner = db.query(CampaignPartner).filter(
+            CampaignPartner.campaign_partner_id == partner_link.campaign_partner_id
+        ).first()
+
+        if not campaign_partner or campaign_partner.partner_id != partner.partner_id:
+            raise ForbiddenException("You can only update your own links")
+
+        partner_link.content_url = content_url
+        partner_link.content_verification_status = "unverified"
+        partner_link.updated_at = datetime.utcnow()
+
+        db.commit()
+        db.refresh(partner_link)
+
+        return partner_link
+
+    @staticmethod
     def _generate_unique_short_code(db: Session, max_attempts: int = 10) -> str:
         """
         Generate a unique short code for tracking links.
