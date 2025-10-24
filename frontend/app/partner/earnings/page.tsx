@@ -1,111 +1,42 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { DollarSign, Clock, CheckCircle, Download, Filter, TrendingUp } from 'lucide-react';
+import { useCurrentPartner, usePartnerConversions, usePartnerPayouts } from '@/hooks/use-api';
 
 export default function PartnerEarnings() {
-  const [conversions, setConversions] = useState([]);
-  const [payouts, setPayouts] = useState([]);
+  const { data: currentPartner, loading: partnerLoading } = useCurrentPartner();
   const [statusFilter, setStatusFilter] = useState('all');
-  const [dateRange, setDateRange] = useState('30');
-  const [loading, setLoading] = useState(true);
 
-  const [summary, setSummary] = useState({
-    totalPending: 0,
-    totalApproved: 0,
-    totalPaid: 0,
-    nextPayoutDate: '2024-11-05',
-  });
+  // Fetch conversions and payouts
+  const { data: conversionsData, loading: conversionsLoading } = usePartnerConversions(
+    currentPartner?.partner_id?.toString()
+  );
+  const { data: payoutsData, loading: payoutsLoading } = usePartnerPayouts(
+    currentPartner?.partner_id?.toString()
+  );
 
-  useEffect(() => {
-    fetchEarnings();
-  }, [dateRange]);
+  // Extract data from responses
+  const conversions = conversionsData?.data || [];
+  const payouts = payoutsData?.data || [];
 
-  const fetchEarnings = async () => {
-    try {
-      // Mock data
-      setConversions([
-        {
-          id: 1,
-          campaignName: 'Acme SaaS Launch 2025',
-          eventType: 'purchase',
-          orderValue: 200.00,
-          commission: 40.00,
-          status: 'approved',
-          occurredAt: '2024-10-08T14:30:00Z',
-          customerEmail: 'customer@example.com',
-        },
-        {
-          id: 2,
-          campaignName: 'Acme SaaS Launch 2025',
-          eventType: 'purchase',
-          orderValue: 150.00,
-          commission: 30.00,
-          status: 'approved',
-          occurredAt: '2024-10-07T10:15:00Z',
-        },
-        {
-          id: 3,
-          campaignName: 'Beta Corp Free Trial',
-          eventType: 'trial_started',
-          orderValue: null,
-          commission: 10.00,
-          status: 'pending',
-          occurredAt: '2024-10-06T16:20:00Z',
-        },
-        {
-          id: 4,
-          campaignName: 'Acme SaaS Launch 2025',
-          eventType: 'purchase',
-          orderValue: 250.00,
-          commission: 50.00,
-          status: 'paid',
-          occurredAt: '2024-09-25T09:45:00Z',
-        },
-        {
-          id: 5,
-          campaignName: 'Acme Enterprise Plan',
-          eventType: 'purchase',
-          orderValue: 2500.00,
-          commission: 500.00,
-          status: 'approved',
-          occurredAt: '2024-10-05T11:30:00Z',
-        },
-      ]);
+  // Calculate summary statistics
+  const pendingCommission = conversions
+    .filter(c => c.status === 'pending')
+    .reduce((sum, c) => sum + (c.commission_amount || 0), 0);
 
-      setPayouts([
-        {
-          id: 1,
-          amount: 1250.00,
-          status: 'completed',
-          paymentMethod: 'Stripe',
-          periodStart: '2024-08-01',
-          periodEnd: '2024-08-31',
-          completedAt: '2024-09-05',
-        },
-        {
-          id: 2,
-          amount: 840.00,
-          status: 'completed',
-          paymentMethod: 'Stripe',
-          periodStart: '2024-07-01',
-          periodEnd: '2024-07-31',
-          completedAt: '2024-08-05',
-        },
-      ]);
+  const approvedCommission = conversions
+    .filter(c => c.status === 'approved')
+    .reduce((sum, c) => sum + (c.commission_amount || 0), 0);
 
-      setSummary({
-        totalPending: 10.00,
-        totalApproved: 620.00,
-        totalPaid: 2090.00,
-        nextPayoutDate: '2024-11-05',
-      });
+  const paidCommission = payouts
+    .filter(p => p.status === 'completed')
+    .reduce((sum, p) => sum + (p.amount || 0), 0);
 
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching earnings:', error);
-      setLoading(false);
-    }
-  };
+  // Estimate next payout (first day of next month)
+  const today = new Date();
+  const nextPayoutDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+
+  const loading = partnerLoading || conversionsLoading || payoutsLoading;
 
   const filteredConversions = conversions.filter(conv => {
     if (statusFilter === 'all') return true;
@@ -147,32 +78,32 @@ export default function PartnerEarnings() {
           <SummaryCard
             icon={<Clock className="text-orange-600" />}
             label="Pending Approval"
-            value={`${summary.totalPending.toLocaleString()}`}
+            value={`$${pendingCommission.toFixed(2)}`}
             bgColor="bg-orange-50"
           />
           <SummaryCard
             icon={<CheckCircle className="text-blue-600" />}
             label="Approved (Unpaid)"
-            value={`${summary.totalApproved.toLocaleString()}`}
+            value={`$${approvedCommission.toFixed(2)}`}
             bgColor="bg-blue-50"
           />
           <SummaryCard
             icon={<DollarSign className="text-green-600" />}
             label="Total Paid Out"
-            value={`${summary.totalPaid.toLocaleString()}`}
+            value={`$${paidCommission.toFixed(2)}`}
             bgColor="bg-green-50"
           />
           <SummaryCard
             icon={<TrendingUp className="text-purple-600" />}
             label="Next Payout"
-            value={new Date(summary.nextPayoutDate).toLocaleDateString()}
+            value={nextPayoutDate.toLocaleDateString()}
             bgColor="bg-purple-50"
             subtext="Estimated"
           />
         </div>
 
         {/* Payout Schedule Banner */}
-        {summary.totalApproved > 0 && (
+        {approvedCommission > 0 && (
           <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6 mb-8">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-600 rounded-lg">
@@ -181,8 +112,8 @@ export default function PartnerEarnings() {
               <div className="flex-1">
                 <h3 className="font-bold text-gray-900 text-lg">Ready for Payout</h3>
                 <p className="text-gray-700">
-                  You have <span className="font-bold text-blue-700">${summary.totalApproved.toLocaleString()}</span> in approved commissions.
-                  Next payout on {new Date(summary.nextPayoutDate).toLocaleDateString()}.
+                  You have <span className="font-bold text-blue-700">${approvedCommission.toFixed(2)}</span> in approved commissions.
+                  Next payout on {nextPayoutDate.toLocaleDateString()}.
                 </p>
               </div>
             </div>
@@ -202,19 +133,8 @@ export default function PartnerEarnings() {
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
-                <option value="paid">Paid</option>
               </select>
             </div>
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="7">Last 7 days</option>
-              <option value="30">Last 30 days</option>
-              <option value="90">Last 90 days</option>
-              <option value="all">All time</option>
-            </select>
           </div>
         </div>
 
@@ -250,31 +170,28 @@ export default function PartnerEarnings() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredConversions.map((conversion) => (
-                  <tr key={conversion.id} className="hover:bg-gray-50 transition">
+                  <tr key={conversion.conversion_event_id} className="hover:bg-gray-50 transition">
                     <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{conversion.campaignName}</div>
-                      {conversion.customerEmail && (
-                        <div className="text-sm text-gray-500">{conversion.customerEmail}</div>
-                      )}
+                      <div className="font-medium text-gray-900">Campaign #{conversion.campaign_id}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">
-                        {conversion.eventType.replace('_', ' ')}
+                        {conversion.event_type.replace('_', ' ')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {conversion.orderValue ? `${conversion.orderValue.toLocaleString()}` : '-'}
+                      {conversion.event_value ? `$${conversion.event_value.toFixed(2)}` : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-semibold text-gray-900">
-                        ${conversion.commission.toLocaleString()}
+                        ${(conversion.commission_amount || 0).toFixed(2)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge status={conversion.status} />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {new Date(conversion.occurredAt).toLocaleDateString()}
+                      {new Date(conversion.occurred_at).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}
@@ -304,7 +221,7 @@ export default function PartnerEarnings() {
 
             <div className="divide-y divide-gray-200">
               {payouts.map((payout) => (
-                <div key={payout.id} className="p-6 hover:bg-gray-50 transition">
+                <div key={payout.payout_id} className="p-6 hover:bg-gray-50 transition">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-3 mb-2">
@@ -313,11 +230,11 @@ export default function PartnerEarnings() {
                         </div>
                         <div>
                           <div className="font-semibold text-gray-900">
-                            ${payout.amount.toLocaleString()}
+                            ${(payout.amount || 0).toFixed(2)}
                           </div>
                           <div className="text-sm text-gray-600">
-                            {new Date(payout.periodStart).toLocaleDateString()} -{' '}
-                            {new Date(payout.periodEnd).toLocaleDateString()}
+                            {new Date(payout.period_start_date).toLocaleDateString()} -{' '}
+                            {new Date(payout.period_end_date).toLocaleDateString()}
                           </div>
                         </div>
                       </div>
@@ -325,10 +242,10 @@ export default function PartnerEarnings() {
                     <div className="text-right">
                       <StatusBadge status={payout.status} />
                       <div className="text-sm text-gray-600 mt-1">
-                        via {payout.paymentMethod}
+                        Partner #{payout.partner_id}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {new Date(payout.completedAt).toLocaleDateString()}
+                        Created: {new Date(payout.created_at).toLocaleDateString()}
                       </div>
                     </div>
                   </div>

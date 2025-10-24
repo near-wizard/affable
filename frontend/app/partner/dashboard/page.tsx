@@ -1,68 +1,114 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { DollarSign, MousePointerClick, TrendingUp, Link2, Clock, CheckCircle } from 'lucide-react';
+import { DollarSign, MousePointerClick, TrendingUp, Link2, Clock, CheckCircle, Filter, X } from 'lucide-react';
+import { usePartnerDashboard, usePartnerConversions, usePartnerLinks, useCurrentPartner, usePartnerAnalytics } from '@/hooks/use-api';
 
 export default function PartnerDashboard() {
-  const [stats, setStats] = useState({
-    totalClicks: 0,
-    totalConversions: 0,
-    totalEarnings: 0,
-    pendingEarnings: 0,
-    activeCampaigns: 0,
-    conversionRate: 0,
-  });
-  
-  const [performanceData, setPerformanceData] = useState([]);
-  const [topLinks, setTopLinks] = useState([]);
-  const [recentConversions, setRecentConversions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: currentPartner } = useCurrentPartner();
+  const partnerId = currentPartner?.partner_id?.toString();
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
 
-  const fetchDashboardData = async () => {
-    try {
-      // Mock data - in production, fetch from API
-      setStats({
-        totalClicks: 4750,
-        totalConversions: 128,
-        totalEarnings: 2560.00,
-        pendingEarnings: 680.00,
-        activeCampaigns: 3,
-        conversionRate: 2.69,
-      });
-      
-      setPerformanceData([
-        { date: 'Oct 1', clicks: 520, conversions: 12, earnings: 240 },
-        { date: 'Oct 2', clicks: 614, conversions: 15, earnings: 300 },
-        { date: 'Oct 3', clicks: 580, conversions: 13, earnings: 260 },
-        { date: 'Oct 4', clicks: 695, conversions: 18, earnings: 360 },
-        { date: 'Oct 5', clicks: 720, conversions: 16, earnings: 320 },
-        { date: 'Oct 6', clicks: 640, conversions: 14, earnings: 280 },
-        { date: 'Oct 7', clicks: 690, conversions: 17, earnings: 340 },
-      ]);
-      
-      setTopLinks([
-        { label: 'Blog Post CTA', clicks: 1240, conversions: 28, earnings: 560, url: 'afl.ink/sarah-blog-1' },
-        { label: 'Email Newsletter', clicks: 890, conversions: 19, earnings: 380, url: 'afl.ink/sarah-email-1' },
-        { label: 'Social Media Bio', clicks: 650, conversions: 12, earnings: 240, url: 'afl.ink/sarah-social-1' },
-      ]);
-      
-      setRecentConversions([
-        { campaign: 'Acme SaaS Launch', amount: 40.00, status: 'approved', date: '2 hours ago' },
-        { campaign: 'Acme SaaS Launch', amount: 30.00, status: 'approved', date: '5 hours ago' },
-        { campaign: 'Beta Corp Trial', amount: 15.00, status: 'pending', date: '1 day ago' },
-        { campaign: 'Acme SaaS Launch', amount: 50.00, status: 'approved', date: '2 days ago' },
-      ]);
-      
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      setLoading(false);
-    }
+  const { data: dashboardData, loading: dashboardLoading } = usePartnerDashboard(partnerId);
+  const { data: conversionsData } = usePartnerConversions(partnerId, { limit: 5 });
+  const { data: linksData } = usePartnerLinks(partnerId, { limit: 5 });
+
+  // Helper function to calculate default dates
+  const getDefaultDates = () => {
+    const today = new Date();
+    const endDate = today.toISOString().split('T')[0];
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - 6); // 7 days including today
+    return {
+      startDate: startDate.toISOString().split('T')[0],
+      endDate,
+    };
   };
+
+  const defaultDates = getDefaultDates();
+
+  // Analytics state and filters - initialize with defaults
+  const [startDate, setStartDate] = useState<string>(defaultDates.startDate);
+  const [endDate, setEndDate] = useState<string>(defaultDates.endDate);
+  const [selectedUTMSource, setSelectedUTMSource] = useState<string>('');
+  const [selectedUTMmedium, setSelectedUTMmedium] = useState<string>('');
+  const [selectedUTMCampaign, setSelectedUTMCampaign] = useState<string>('');
+
+  // Track loaded date range to decide if we need to fetch new data
+  const [loadedStartDate, setLoadedStartDate] = useState<string>('');
+  const [loadedEndDate, setLoadedEndDate] = useState<string>('');
+
+  // Determine if we need to fetch new data
+  // Fetch if user selected dates that extend beyond currently loaded range
+  const displayStartDate = startDate;
+  const displayEndDate = endDate;
+
+  const needsNewFetch = useMemo(() => {
+    // If no data loaded yet, always fetch
+    if (!loadedStartDate || !loadedEndDate) return true;
+    // If requested range extends beyond loaded range, fetch new data
+    if (displayStartDate < loadedStartDate || displayEndDate > loadedEndDate) return true;
+    return false;
+  }, [displayStartDate, displayEndDate, loadedStartDate, loadedEndDate]);
+
+  // Memoize analytics params to avoid recreating the object on every render
+  const analyticsParams = useMemo(() => {
+    if (!needsNewFetch) return undefined;
+    return {
+      start_date: displayStartDate,
+      end_date: displayEndDate,
+      utm_source: selectedUTMSource || undefined,
+      utm_medium: selectedUTMmedium || undefined,
+      utm_campaign: selectedUTMCampaign || undefined,
+    };
+  }, [needsNewFetch, displayStartDate, displayEndDate, selectedUTMSource, selectedUTMmedium, selectedUTMCampaign]);
+
+  // Fetch analytics - only when we need new data
+  const { data: analyticsData, loading: analyticsLoading, error: analyticsError } = usePartnerAnalytics(
+    partnerId,
+    analyticsParams
+  );
+
+
+  // Update loaded date range when we get new data
+  useEffect(() => {
+    if (analyticsData && needsNewFetch) {
+      if (loadedStartDate !== displayStartDate || loadedEndDate !== displayEndDate) {
+        setLoadedStartDate(displayStartDate);
+        setLoadedEndDate(displayEndDate);
+      }
+    }
+  }, [analyticsData, needsNewFetch, displayStartDate, displayEndDate, loadedStartDate, loadedEndDate]);
+
+  // Filter data client-side based on selected filters
+  const filteredAnalyticsData = useMemo(() => {
+    if (!analyticsData?.data) return null;
+
+    let filtered = analyticsData.data;
+
+    // Apply date range filter (for display, in case user adjusted within loaded range)
+    filtered = filtered.filter(d => {
+      return d.date >= displayStartDate && d.date <= displayEndDate;
+    });
+
+    // Apply UTM filters
+    if (selectedUTMSource) {
+      filtered = filtered.filter(d => d.utm_source === selectedUTMSource);
+    }
+    if (selectedUTMmedium) {
+      filtered = filtered.filter(d => d.utm_medium === selectedUTMmedium);
+    }
+    if (selectedUTMCampaign) {
+      filtered = filtered.filter(d => d.utm_campaign === selectedUTMCampaign);
+    }
+
+    return {
+      ...analyticsData,
+      data: filtered,
+    };
+  }, [analyticsData, displayStartDate, displayEndDate, selectedUTMSource, selectedUTMmedium, selectedUTMCampaign]);
+
+  const loading = dashboardLoading;
 
   if (loading) {
     return (
@@ -75,6 +121,38 @@ export default function PartnerDashboard() {
     );
   }
 
+  const stats = dashboardData || {
+    total_clicks: 0,
+    total_conversions: 0,
+    total_earnings: 0,
+    pending_earnings: 0,
+    active_campaigns: 0,
+  };
+
+  const conversionRate = stats.total_clicks > 0
+    ? ((stats.total_conversions / stats.total_clicks) * 100).toFixed(2)
+    : 0;
+
+  // Use filtered analytics data for display
+  const performanceData = filteredAnalyticsData?.data?.map(d => ({
+    date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    clicks: d.clicks,
+    conversions: d.conversions,
+  })) || [];
+
+  const topLinks = (linksData?.data || []).slice(0, 3).map(link => ({
+    label: link.link_label || 'Unnamed Link',
+    clicks: link.click_count || 0,
+    url: link.short_code,
+  }));
+
+  const recentConversions = (conversionsData?.data || []).slice(0, 4).map(conv => ({
+    campaign: `Campaign #${conv.campaign_id}`,
+    amount: conv.commission_amount || 0,
+    status: conv.status,
+    date: new Date(conv.occurred_at).toLocaleDateString(),
+  }));
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -84,14 +162,6 @@ export default function PartnerDashboard() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Partner Dashboard</h1>
               <p className="text-gray-600 mt-1">Track your performance and earnings</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <select className="px-4 py-2 border border-gray-300 rounded-lg">
-                <option>Last 7 days</option>
-                <option>Last 30 days</option>
-                <option>Last 90 days</option>
-                <option>All time</option>
-              </select>
             </div>
           </div>
         </div>
@@ -106,7 +176,7 @@ export default function PartnerDashboard() {
                 <DollarSign size={24} />
                 <span className="text-blue-100">Total Earnings</span>
               </div>
-              <div className="text-4xl font-bold">${stats.totalEarnings.toLocaleString()}</div>
+              <div className="text-4xl font-bold">${(stats.total_earnings || 0).toFixed(2)}</div>
               <div className="text-blue-100 mt-1">All time</div>
             </div>
             <div>
@@ -114,7 +184,7 @@ export default function PartnerDashboard() {
                 <Clock size={24} />
                 <span className="text-blue-100">Pending</span>
               </div>
-              <div className="text-4xl font-bold">${stats.pendingEarnings.toLocaleString()}</div>
+              <div className="text-4xl font-bold">${(stats.pending_earnings || 0).toFixed(2)}</div>
               <div className="text-blue-100 mt-1">Awaiting approval</div>
             </div>
             <div>
@@ -122,8 +192,8 @@ export default function PartnerDashboard() {
                 <TrendingUp size={24} />
                 <span className="text-blue-100">Conversion Rate</span>
               </div>
-              <div className="text-4xl font-bold">{stats.conversionRate}%</div>
-              <div className="text-blue-100 mt-1">+0.3% from last period</div>
+              <div className="text-4xl font-bold">{conversionRate}%</div>
+              <div className="text-blue-100 mt-1">of clicks converting</div>
             </div>
           </div>
         </div>
@@ -133,41 +203,153 @@ export default function PartnerDashboard() {
           <StatCard
             icon={<MousePointerClick className="text-blue-600" />}
             label="Total Clicks"
-            value={stats.totalClicks.toLocaleString()}
-            change="+12%"
+            value={(stats.total_clicks || 0).toLocaleString()}
             bgColor="bg-blue-50"
           />
           <StatCard
             icon={<CheckCircle className="text-green-600" />}
             label="Conversions"
-            value={stats.totalConversions}
-            change="+8%"
+            value={(stats.total_conversions || 0).toLocaleString()}
             bgColor="bg-green-50"
           />
           <StatCard
             icon={<Link2 className="text-purple-600" />}
             label="Active Campaigns"
-            value={stats.activeCampaigns}
-            change="+1"
+            value={(stats.active_campaigns || 0).toLocaleString()}
             bgColor="bg-purple-50"
           />
         </div>
 
+        {/* Analytics Filters */}
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <Filter size={20} />
+              Analytics Filters
+            </h2>
+            {(startDate || endDate || selectedUTMSource || selectedUTMmedium || selectedUTMCampaign) && (
+              <button
+                onClick={() => {
+                  setStartDate('');
+                  setEndDate('');
+                  setSelectedUTMSource('');
+                  setSelectedUTMmedium('');
+                  setSelectedUTMCampaign('');
+                }}
+                className="text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
+              >
+                <X size={16} />
+                Clear Filters
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {/* Date Range */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+              />
+            </div>
+
+            {/* UTM Filters */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">UTM Source</label>
+              <select
+                value={selectedUTMSource}
+                onChange={(e) => setSelectedUTMSource(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+              >
+                <option value="">All Sources</option>
+                {analyticsData?.utm_sources?.map(source => (
+                  <option key={source} value={source}>{source || '(none)'}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">UTM Medium</label>
+              <select
+                value={selectedUTMmedium}
+                onChange={(e) => setSelectedUTMmedium(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+              >
+                <option value="">All Mediums</option>
+                {analyticsData?.utm_mediums?.map(medium => (
+                  <option key={medium} value={medium}>{medium || '(none)'}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">UTM Campaign</label>
+              <select
+                value={selectedUTMCampaign}
+                onChange={(e) => setSelectedUTMCampaign(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+              >
+                <option value="">All Campaigns</option>
+                {analyticsData?.utm_campaigns?.map(campaign => (
+                  <option key={campaign} value={campaign}>{campaign || '(none)'}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
         {/* Performance Chart */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Performance Overview</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={performanceData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis yAxisId="left" />
-              <YAxis yAxisId="right" orientation="right" />
-              <Tooltip />
-              <Line yAxisId="left" type="monotone" dataKey="clicks" stroke="#8b5cf6" strokeWidth={2} name="Clicks" />
-              <Line yAxisId="left" type="monotone" dataKey="conversions" stroke="#10b981" strokeWidth={2} name="Conversions" />
-              <Line yAxisId="right" type="monotone" dataKey="earnings" stroke="#3b82f6" strokeWidth={2} name="Earnings ($)" />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Performance Overview</h2>
+            {analyticsLoading && (
+              <div className="text-sm text-gray-500 flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                Loading...
+              </div>
+            )}
+          </div>
+          {analyticsError ? (
+            <div className="flex items-center justify-center h-64 bg-red-50 rounded text-red-700">
+              <div className="text-center">
+                <p className="font-semibold mb-2">Error loading analytics</p>
+                <p className="text-sm">{analyticsError.message}</p>
+              </div>
+            </div>
+          ) : analyticsLoading && !performanceData.length ? (
+            <div className="flex items-center justify-center h-64 text-gray-500">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p>Loading analytics data...</p>
+              </div>
+            </div>
+          ) : performanceData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={performanceData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip />
+                <Line yAxisId="left" type="monotone" dataKey="clicks" stroke="#8b5cf6" strokeWidth={2} name="Clicks" />
+                <Line yAxisId="left" type="monotone" dataKey="conversions" stroke="#10b981" strokeWidth={2} name="Conversions" />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <p>No click data available for the selected date range and filters.</p>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -180,28 +362,23 @@ export default function PartnerDashboard() {
               </a>
             </div>
             <div className="space-y-4">
-              {topLinks.map((link, index) => (
+              {topLinks.length > 0 ? topLinks.map((link, index) => (
                 <div key={index} className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <div className="font-semibold text-gray-900">{link.label}</div>
                       <div className="text-sm text-gray-500 font-mono">{link.url}</div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-green-600">${link.earnings}</div>
-                    </div>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-600">
                     <span>{link.clicks.toLocaleString()} clicks</span>
-                    <span>•</span>
-                    <span>{link.conversions} conversions</span>
-                    <span>•</span>
-                    <span className="text-green-600 font-medium">
-                      {((link.conversions / link.clicks) * 100).toFixed(2)}% CR
-                    </span>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="p-4 bg-gray-50 rounded-lg text-center text-gray-500">
+                  No links created yet. <a href="/partner/links" className="text-blue-600">Create one now</a>
+                </div>
+              )}
             </div>
           </div>
 
@@ -214,7 +391,7 @@ export default function PartnerDashboard() {
               </a>
             </div>
             <div className="space-y-4">
-              {recentConversions.map((conversion, index) => (
+              {recentConversions.length > 0 ? recentConversions.map((conversion, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
                     <div className="font-semibold text-gray-900">{conversion.campaign}</div>
@@ -231,7 +408,11 @@ export default function PartnerDashboard() {
                     </span>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="p-4 bg-gray-50 rounded-lg text-center text-gray-500">
+                  No conversions yet. <a href="/partner/campaigns" className="text-blue-600">Browse campaigns</a>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -244,19 +425,19 @@ export default function PartnerDashboard() {
               icon={<Link2 />}
               label="Generate New Link"
               description="Create a new tracking link"
-              onClick={() => window.location.href = '/partner/links'}
+              href="/partner/links"
             />
             <ActionButton
               icon={<TrendingUp />}
               label="Browse Campaigns"
               description="Find new opportunities"
-              onClick={() => window.location.href = '/partner/campaigns'}
+              href="/partner/campaigns"
             />
             <ActionButton
               icon={<DollarSign />}
               label="View Earnings"
               description="Check your commission details"
-              onClick={() => window.location.href = '/partner/earnings'}
+              href="/partner/earnings"
             />
           </div>
         </div>
@@ -265,14 +446,13 @@ export default function PartnerDashboard() {
   );
 }
 
-function StatCard({ icon, label, value, change, bgColor }) {
+function StatCard({ icon, label, value, bgColor }) {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-4">
         <div className={`p-3 rounded-lg ${bgColor}`}>
           {icon}
         </div>
-        <span className="text-sm text-green-600 font-medium">{change}</span>
       </div>
       <div className="text-2xl font-bold text-gray-900">{value}</div>
       <div className="text-sm text-gray-600 mt-1">{label}</div>
@@ -280,10 +460,10 @@ function StatCard({ icon, label, value, change, bgColor }) {
   );
 }
 
-function ActionButton({ icon, label, description, onClick }) {
+function ActionButton({ icon, label, description, href }) {
   return (
-    <button
-      onClick={onClick}
+    <a
+      href={href}
       className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left"
     >
       <div className="p-3 bg-blue-100 rounded-lg text-blue-600">
@@ -293,119 +473,6 @@ function ActionButton({ icon, label, description, onClick }) {
         <div className="font-semibold text-gray-900">{label}</div>
         <div className="text-sm text-gray-600">{description}</div>
       </div>
-    </button>
-  );
-}
-
-function PerformanceCard({ label, value, change }) {
-    return (<div>
-        {/* Performance Chart */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Performance Overview</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={performanceData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis yAxisId="left" />
-              <YAxis yAxisId="right" orientation="right" />
-              <Tooltip />
-              <Line yAxisId="left" type="monotone" dataKey="clicks" stroke="#8b5cf6" strokeWidth={2} name="Clicks" />
-              <Line yAxisId="left" type="monotone" dataKey="conversions" stroke="#10b981" strokeWidth={2} name="Conversions" />
-              <Line yAxisId="right" type="monotone" dataKey="earnings" stroke="#3b82f6" strokeWidth={2} name="Earnings ($)" />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Top Performing Links */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Top Performing Links</h2>
-              <a href="/partner/links" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                View All →
-              </a>
-            </div>
-            <div className="space-y-4">
-              {topLinks.map((link, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <div className="font-semibold text-gray-900">{link.label}</div>
-                      <div className="text-sm text-gray-500 font-mono">{link.url}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-green-600">${link.earnings}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span>{link.clicks.toLocaleString()} clicks</span>
-                    <span>•</span>
-                    <span>{link.conversions} conversions</span>
-                    <span>•</span>
-                    <span className="text-green-600 font-medium">
-                      {((link.conversions / link.clicks) * 100).toFixed(2)}% CR
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Conversions */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Recent Conversions</h2>
-              <a href="/partner/earnings" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                View All →
-              </a>
-            </div>
-            <div className="space-y-4">
-              {recentConversions.map((conversion, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="font-semibold text-gray-900">{conversion.campaign}</div>
-                    <div className="text-sm text-gray-600">{conversion.date}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-gray-900">${conversion.amount.toFixed(2)}</div>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      conversion.status === 'approved'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-orange-100 text-orange-800'
-                    }`}>
-                      {conversion.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <ActionButton
-              icon={<LinkIcon />}
-              label="Generate New Link"
-              description="Create a new tracking link"
-              onClick={() => window.location.href = '/partner/links'}
-            />
-            <ActionButton
-              icon={<TrendingUp />}
-              label="Browse Campaigns"
-              description="Find new opportunities"
-              onClick={() => window.location.href = '/partner/campaigns'}
-            />
-            <ActionButton
-              icon={<DollarSign />}
-              label="View Earnings"
-              description="Check your commission details"
-              onClick={() => window.location.href = '/partner/earnings'}
-            />
-          </div>
-        </div>
-      </div>
+    </a>
   );
 }

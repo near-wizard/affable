@@ -55,7 +55,39 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    # Initialization steps:
+    # 1. python scripts/seed_data.py - Create tables from ORM models and seed with sample data
+    #    - Creates all database tables based on app/models/*.py definitions
+    #    - Populates with sample vendors, partners, campaigns, links, clicks, and conversions
+    #    - Only runs if database is empty (idempotent)
+    # 2. uvicorn app.main:app - Start the FastAPI development server with auto-reload
     command: sh -c "python scripts/seed_data.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    networks:
+      - affable-network
+    restart: unless-stopped
+
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aff_celery
+    entrypoint: ["celery", "-A", "app.workers.celery_app", "worker", "-l", "info"]
+    env_file:
+      - .env.dev
+    environment:
+      - PYTHONUNBUFFERED=1
+      - POSTGRES_USER=${POSTGRES_USER:-affuser}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-affpass}
+      - POSTGRES_DB=${POSTGRES_DB:-affdb}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://affuser:affpass@postgres:5432/affdb}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - affable-network
     restart: unless-stopped

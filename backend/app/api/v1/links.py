@@ -146,3 +146,72 @@ def delete_link(
     Delete a partner link (soft delete).
     """
     LinkService.delete_link(db, link_id, partner)
+
+
+@router.post("/{link_id}/deactivate", response_model=PartnerLinkResponse)
+def deactivate_link(
+    link_id: int,
+    reason: Optional[str] = None,
+    partner: Partner = Depends(get_current_partner),
+    db: Session = Depends(get_db)
+):
+    """
+    Deactivate a partner link (disable without deleting).
+
+    Deactivated links will no longer redirect to the destination.
+    The link record remains in the database for historical tracking.
+    """
+    partner_link = LinkService.deactivate_link(
+        db=db,
+        partner_link_id=link_id,
+        partner=partner,
+        reason=reason
+    )
+
+    return PartnerLinkResponse(
+        partner_link_id=partner_link.partner_link_id,
+        campaign_partner_id=partner_link.campaign_partner_id,
+        short_code=partner_link.short_code,
+        full_url=partner_link.full_url,
+        tracking_url=LinkService.get_tracking_url(partner_link),
+        custom_params=partner_link.custom_params,
+        utm_params=partner_link.utm_params,
+        link_label=partner_link.link_label,
+        content_piece_id=partner_link.content_piece_id,
+        created_at=partner_link.created_at,
+        is_active=partner_link.is_active,
+        expires_at=partner_link.expires_at
+    )
+
+
+@router.post("/{link_id}/reactivate", response_model=PartnerLinkResponse)
+def reactivate_link(
+    link_id: int,
+    partner: Partner = Depends(get_current_partner),
+    db: Session = Depends(get_db)
+):
+    """
+    Reactivate a previously deactivated link.
+
+    The link will resume redirecting to its destination URL.
+    """
+    partner_link = LinkService.reactivate_link(
+        db=db,
+        partner_link_id=link_id,
+        partner=partner
+    )
+
+    return PartnerLinkResponse(
+        partner_link_id=partner_link.partner_link_id,
+        campaign_partner_id=partner_link.campaign_partner_id,
+        short_code=partner_link.short_code,
+        full_url=partner_link.full_url,
+        tracking_url=LinkService.get_tracking_url(partner_link),
+        custom_params=partner_link.custom_params,
+        utm_params=partner_link.utm_params,
+        link_label=partner_link.link_label,
+        content_piece_id=partner_link.content_piece_id,
+        created_at=partner_link.created_at,
+        is_active=partner_link.is_active,
+        expires_at=partner_link.expires_at
+    )

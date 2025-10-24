@@ -60,9 +60,9 @@ class CommissionService:
             CommissionRule.active == True,
             CommissionRule.is_deleted == False
         ).all()
-        
+
         for rule in rules:
-            if rule.is_active() and CommissionService._rule_applies(conversion_event, rule):
+            if rule.is_active() and CommissionService._rule_applies(db, conversion_event, rule):
                 return CommissionService._calculate_from_rule(conversion_event, rule)
         
         # Get campaign version
@@ -183,49 +183,80 @@ class CommissionService:
         return commission_amount, commission_type, commission_value
     
     @staticmethod
-    def _rule_applies(conversion_event: ConversionEvent, rule: CommissionRule) -> bool:
+    def _rule_applies(db: Session, conversion_event: ConversionEvent, rule: CommissionRule) -> bool:
         """
         Check if a commission rule applies to a conversion event.
-        
+
         Args:
+            db: Database session
             conversion_event: Conversion event
             rule: Commission rule
-            
+
         Returns:
             True if rule applies
         """
         conditions = rule.conditions
-        
+
         # Check date range
         if 'date_range' in conditions:
             date_range = conditions['date_range']
             start = datetime.fromisoformat(date_range.get('start', '2000-01-01'))
             end = datetime.fromisoformat(date_range.get('end', '2099-12-31'))
-            
+
             if not (start <= conversion_event.occurred_at <= end):
                 return False
-        
+
         # Check minimum event value
         if 'min_event_value' in conditions:
             min_value = Decimal(str(conditions['min_event_value']))
             if (conversion_event.event_value or Decimal('0')) < min_value:
                 return False
-        
+
         # Check event types
         if 'event_types' in conditions:
-            # Would need to join with conversion_event_types to check name
-            pass
-        
+            allowed_event_types = conditions.get('event_types', [])
+            if allowed_event_types:
+                # Check if conversion event type is in allowed list
+                from app.models import ConversionEventType
+                event_type = db.query(ConversionEventType).filter(
+                    ConversionEventType.conversion_event_type_id == conversion_event.conversion_event_type_id
+                ).first()
+
+                if not event_type or event_type.name not in allowed_event_types:
+                    return False
+
         # Check partner tiers
         if 'partner_tiers' in conditions:
-            # Would need to check partner tier
-            pass
-        
+            allowed_tiers = conditions.get('partner_tiers', [])
+            if allowed_tiers:
+                # Get partner's tier
+                partner = db.query(Partner).filter(
+                    Partner.partner_id == conversion_event.partner_id
+                ).first()
+
+                if not partner or not hasattr(partner, 'tier') or partner.tier not in allowed_tiers:
+                    return False
+
         # Check if first purchase
         if 'is_first_purchase' in conditions:
-            # Would need to check if this is customer's first purchase
-            pass
-        
+            check_first_purchase = conditions.get('is_first_purchase', False)
+            if check_first_purchase:
+                # Check if this customer has made a previous purchase
+                previous_conversions = db.query(ConversionEvent).filter(
+                    ConversionEvent.customer_email == conversion_event.customer_email,
+                    ConversionEvent.status.in_(['approved', 'paid']),
+                    ConversionEvent.conversion_event_id != conversion_event.conversion_event_id,
+                    ConversionEvent.occurred_at < conversion_event.occurred_at,
+                    ConversionEvent.is_deleted == False
+                ).count()
+
+                # If check_first_purchase is True, rule only applies to first purchases (no previous)
+                # If check_first_purchase is False, rule applies to repeat purchases (has previous)
+                if check_first_purchase and previous_conversions > 0:
+                    return False
+                elif not check_first_purchase and previous_conversions == 0:
+                    return False
+
         return True
     
     @staticmethod

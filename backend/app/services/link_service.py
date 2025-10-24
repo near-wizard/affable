@@ -366,6 +366,94 @@ class LinkService:
         raise RuntimeError("Unable to generate unique short code")
 
     @staticmethod
+    def deactivate_link(
+        db: Session,
+        partner_link_id: int,
+        partner: Partner,
+        reason: Optional[str] = None
+    ) -> PartnerLink:
+        """
+        Deactivate a partner link without deleting it.
+
+        Args:
+            db: Database session
+            partner_link_id: Link ID to deactivate
+            partner: Partner deactivating the link
+            reason: Optional reason for deactivation
+
+        Returns:
+            Updated PartnerLink object
+
+        Raises:
+            NotFoundException: If link not found
+            ForbiddenException: If partner doesn't own the link
+        """
+        partner_link = db.query(PartnerLink).filter(
+            PartnerLink.partner_link_id == partner_link_id,
+            PartnerLink.is_deleted == False
+        ).first()
+
+        if not partner_link:
+            raise NotFoundException("Link not found")
+
+        # Verify ownership
+        campaign_partner = db.query(CampaignPartner).filter(
+            CampaignPartner.campaign_partner_id == partner_link.campaign_partner_id
+        ).first()
+
+        if not campaign_partner or campaign_partner.partner_id != partner.partner_id:
+            raise ForbiddenException("You can only deactivate your own links")
+
+        partner_link.deactivate(reason)
+        db.commit()
+        db.refresh(partner_link)
+
+        return partner_link
+
+    @staticmethod
+    def reactivate_link(
+        db: Session,
+        partner_link_id: int,
+        partner: Partner
+    ) -> PartnerLink:
+        """
+        Reactivate a previously deactivated partner link.
+
+        Args:
+            db: Database session
+            partner_link_id: Link ID to reactivate
+            partner: Partner reactivating the link
+
+        Returns:
+            Updated PartnerLink object
+
+        Raises:
+            NotFoundException: If link not found
+            ForbiddenException: If partner doesn't own the link
+        """
+        partner_link = db.query(PartnerLink).filter(
+            PartnerLink.partner_link_id == partner_link_id,
+            PartnerLink.is_deleted == False
+        ).first()
+
+        if not partner_link:
+            raise NotFoundException("Link not found")
+
+        # Verify ownership
+        campaign_partner = db.query(CampaignPartner).filter(
+            CampaignPartner.campaign_partner_id == partner_link.campaign_partner_id
+        ).first()
+
+        if not campaign_partner or campaign_partner.partner_id != partner.partner_id:
+            raise ForbiddenException("You can only reactivate your own links")
+
+        partner_link.reactivate()
+        db.commit()
+        db.refresh(partner_link)
+
+        return partner_link
+
+    @staticmethod
     def _build_full_url(
         destination_url: str,
         utm_params: Dict[str, str],

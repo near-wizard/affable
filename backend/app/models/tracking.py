@@ -8,9 +8,9 @@ from app.models.base import BaseModel, GUID
 
 class PartnerLink(BaseModel):
     """Trackable URLs generated for partners."""
-    
+
     __tablename__ = "partner_links"
-    
+
     partner_link_id = Column(Integer, primary_key=True, index=True)
     campaign_partner_id = Column(Integer, ForeignKey("campaign_partners.campaign_partner_id", ondelete="CASCADE"), nullable=False, index=True)
     short_code = Column(String(50), unique=True, nullable=False, index=True)
@@ -19,23 +19,51 @@ class PartnerLink(BaseModel):
     utm_params = Column(JSON)
     link_label = Column(String(255))
     content_piece_id = Column(Integer, ForeignKey("content_pieces.content_piece_id"))
-    
+
+    # Link lifecycle management
+    is_active = Column(Boolean, default=True, nullable=False, index=True)
+    expires_at = Column(DateTime, nullable=True, index=True)  # Optional expiration date
+    deactivated_at = Column(DateTime, nullable=True)  # When link was manually deactivated
+    deactivation_reason = Column(String(255), nullable=True)  # Reason for deactivation
+
     # Relationships
     campaign_partner = relationship("CampaignPartner", back_populates="partner_links")
     clicks = relationship("Click", back_populates="partner_link")
     content_piece = relationship("ContentPiece", back_populates="partner_links")
-    
+
     # Convenience relationship to partner
     @property
     def partner(self):
         return self.campaign_partner.partner if self.campaign_partner else None
-    
+
     def __repr__(self):
         return f"<PartnerLink {self.short_code}>"
-    
+
     def get_tracking_url(self, domain: str) -> str:
         """Generate the full tracking URL."""
         return f"https://{domain}/r/{self.short_code}"
+
+    def is_expired(self) -> bool:
+        """Check if link has expired."""
+        if self.expires_at:
+            return datetime.utcnow() > self.expires_at
+        return False
+
+    def is_valid(self) -> bool:
+        """Check if link is valid (active and not expired)."""
+        return self.is_active and not self.is_expired()
+
+    def deactivate(self, reason: str = None):
+        """Deactivate the link."""
+        self.is_active = False
+        self.deactivated_at = datetime.utcnow()
+        self.deactivation_reason = reason
+
+    def reactivate(self):
+        """Reactivate the link."""
+        self.is_active = True
+        self.deactivated_at = None
+        self.deactivation_reason = None
 
 
 class Cookie(BaseModel):

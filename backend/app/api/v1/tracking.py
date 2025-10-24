@@ -59,9 +59,17 @@ def redirect_link(
         PartnerLink.is_deleted == False,
         CampaignPartner.status == 'approved'
     ).first()
-    
+
     if not link:
         raise HTTPException(status_code=404, detail="Link not found or inactive")
+
+    # Validate link is active and not expired
+    if not link.is_valid():
+        reason = "Link has been deactivated"
+        if link.is_expired():
+            reason = "Link has expired"
+        logger.warning(f"Attempt to access invalid link: {short_code} ({reason})")
+        raise HTTPException(status_code=410, detail=f"Link is no longer active: {reason}")
     
     campaign_partner = link.campaign_partner
     campaign_version = campaign_partner.campaign_version
@@ -178,34 +186,37 @@ def redirect_link(
         
         logger.info(f"Updated existing cookie {cookie_id} for click {click.click_id}")
     
+    # Capture click_id before commit (SQLAlchemy lazy loading issue)
+    click_id = click.click_id
+
     # Commit all changes
     db.commit()
-    
+
     # 6. Enqueue background tasks (non-blocking)
     try:
         from app.workers.tasks import process_click, update_campaign_partner_counters
-        
+
         # Process click for analytics
-        process_click.delay(click.click_id)
-        
+        process_click.delay(click_id)
+
         # Update denormalized counters
         update_campaign_partner_counters.delay(
             campaign_partner.partner_id,
             campaign_version.campaign_version_id
         )
-        
+
     except ImportError:
         # Celery not configured - skip background processing
         logger.warning("Celery not available, skipping background tasks")
     except Exception as e:
         # Log error but don't fail the redirect
         logger.error(f"Failed to enqueue background task: {e}", exc_info=True)
-    
+
     logger.info(
-        f"Redirect: link={short_code}, click={click.click_id}, "
+        f"Redirect: link={short_code}, click={click_id}, "
         f"cookie={cookie_id}, new_cookie={new_cookie}"
     )
-    
+
     return response
 
 

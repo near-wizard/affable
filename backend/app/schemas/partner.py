@@ -87,9 +87,30 @@ class PartnerDashboardResponse(BaseModel):
     stats: PartnerStatsResponse
     recent_campaigns: List["CampaignSummary"]
     recent_conversions: List["ConversionSummary"]
-    
+
     class Config:
         from_attributes = True
+
+
+class DailyClickData(BaseModel):
+    """Daily click aggregate data."""
+    date: str  # ISO date format (YYYY-MM-DD)
+    clicks: int
+    conversions: int = 0
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+
+
+class ClickAnalyticsResponse(BaseModel):
+    """Click analytics with daily aggregates."""
+    date_range: dict  # {"start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD"}
+    total_clicks: int
+    total_conversions: int
+    data: List[DailyClickData]
+    utm_sources: List[str] = []  # Unique UTM sources in the data
+    utm_mediums: List[str] = []  # Unique UTM mediums in the data
+    utm_campaigns: List[str] = []  # Unique UTM campaigns in the data
 
 
 # Forward references for circular imports

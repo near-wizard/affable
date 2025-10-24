@@ -157,45 +157,24 @@ async def receive_conversion_webhook(
     db.add(conversion)
     db.commit()
     db.refresh(conversion)
-    
-    # Enqueue attribution and commission calculation (async in production)
-    # For now, do it synchronously for MVP
+
+    # Enqueue attribution and commission calculation asynchronously
+    from app.workers.tasks import process_conversion_attribution
     try:
-        # Calculate attribution
-        attribution_weights = AttributionService.attribute_conversion(
-            db, conversion, attribution_type='last_click'
+        process_conversion_attribution.delay(
+            conversion.conversion_event_id,
+            attribution_type='last_click'
         )
-        
-        # Calculate commission
-        commission_amount, commission_type, commission_value = CommissionService.calculate_commission(
-            db, conversion
-        )
-        
-        # Update conversion with commission
-        CommissionService.update_conversion_commission(
-            db, conversion, commission_amount, commission_type, commission_value
-        )
-        
-        # Create commission snapshot
-        CommissionService.create_commission_snapshot(
-            db, conversion, commission_amount, commission_type, commission_value
-        )
-        
-        # Create touches
-        if commission_amount > 0:
-            AttributionService.create_touches(
-                db, conversion, attribution_weights, commission_amount
-            )
-    
     except Exception as e:
         # Log error but don't fail the webhook
-        print(f"Error processing attribution/commission: {e}")
-    
+        # The conversion is still recorded in pending state
+        print(f"Error enqueueing attribution task: {e}")
+
     return {
         "status": "success",
         "conversion_event_id": conversion.conversion_event_id,
-        "commission_amount": float(conversion.commission_amount) if conversion.commission_amount else 0,
-        "message": "Conversion recorded successfully"
+        "commission_amount": 0,  # Will be calculated asynchronously
+        "message": "Conversion recorded successfully. Processing attribution asynchronously."
     }
 
 

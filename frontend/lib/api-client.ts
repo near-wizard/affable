@@ -337,17 +337,73 @@ export const apiClient = {
     },
 
     /**
-     * Get partner dashboard data
+     * Get current partner dashboard data (authenticated user's own dashboard)
      */
     getPartnerDashboard: async (token?: string) => {
       return apiRequest('/v1/partners/me/dashboard', { token });
     },
 
     /**
-     * Get vendor dashboard data
+     * Get current partner analytics (authenticated user's own analytics)
+     */
+    getPartnerAnalytics: async (
+      token?: string,
+      params?: {
+        start_date?: string;
+        end_date?: string;
+        utm_source?: string;
+        utm_medium?: string;
+        utm_campaign?: string;
+      }
+    ) => {
+      return apiRequest('/v1/partners/me/analytics', { token, params });
+    },
+
+    /**
+     * Get current vendor dashboard data (authenticated user's own dashboard)
      */
     getVendorDashboard: async (token?: string) => {
       return apiRequest('/v1/vendors/me/dashboard', { token });
+    },
+  },
+
+  // ===== PARTNER DASHBOARD & ANALYTICS =====
+  partnerDashboard: {
+    /**
+     * Get partner dashboard data
+     */
+    get: async (partnerId: string, token?: string) => {
+      return apiRequest(`/v1/partners/${partnerId}/dashboard`, { token });
+    },
+  },
+
+  // ===== PARTNER ANALYTICS =====
+  partnerAnalytics: {
+    /**
+     * Get partner analytics with daily click aggregates
+     */
+    get: async (
+      partnerId: string,
+      token?: string,
+      params?: {
+        start_date?: string;
+        end_date?: string;
+        utm_source?: string;
+        utm_medium?: string;
+        utm_campaign?: string;
+      }
+    ) => {
+      return apiRequest(`/v1/partners/${partnerId}/analytics`, { token, params });
+    },
+  },
+
+  // ===== VENDOR DASHBOARD =====
+  vendorDashboard: {
+    /**
+     * Get vendor dashboard data
+     */
+    get: async (vendorId: string, token?: string) => {
+      return apiRequest(`/v1/vendors/${vendorId}/dashboard`, { token });
     },
   },
 

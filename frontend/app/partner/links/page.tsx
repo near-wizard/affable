@@ -16,13 +16,19 @@ interface LinkFormData {
 
 export default function PartnerLinks() {
   const { data: currentPartner, loading: partnerLoading } = useCurrentPartner();
-  const { data: enrolledCampaigns, loading: campaignsLoading } = usePartnerCampaigns(
-    currentPartner?.partner_id?.toString()
+  const partnerId = currentPartner?.partner_id?.toString();
+  const { data: campaignsData, loading: campaignsLoading } = usePartnerCampaigns(
+    partnerId
   );
-  const { data: links, loading: linksLoading } = usePartnerLinks(
-    currentPartner?.partner_id?.toString()
+  const { data: linksData, loading: linksLoading } = usePartnerLinks(
+    partnerId
   );
   const { mutate: createLink, loading: creatingLink, error: createError } = useCreateLink();
+
+  // Extract campaigns from response
+  const enrolledCampaigns = campaignsData?.data || [];
+  // Extract links from response (handle both paginated and non-paginated responses)
+  const links = linksData?.data || linksData || [];
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState<number | null>(null);
@@ -45,6 +51,16 @@ export default function PartnerLinks() {
     setTimeout(() => setCopiedLink(null), 2000);
   };
 
+  const handleOpenModal = () => {
+    setShowCreateModal(true);
+    setFormError('');
+  };
+
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setFormError('');
+  };
+
   const handleCreateLink = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
@@ -64,6 +80,7 @@ export default function PartnerLinks() {
       const payload = {
         campaign_partner_id: formData.campaignPartnerId,
         link_label: formData.linkLabel,
+        custom_params: {},  // Empty by default; can be extended in future
         utm_params: Object.fromEntries(
           Object.entries(formData.utmParams || {}).filter(([, v]) => v)
         ) || undefined,
@@ -84,9 +101,15 @@ export default function PartnerLinks() {
       // The hook will automatically refetch links
     } catch (error) {
       console.error('Failed to create link:', error);
+      if (error instanceof Error) {
+        setFormError(error.message || 'Failed to create link');
+      } else {
+        setFormError('Failed to create link. Please try again.');
+      }
     }
   };
 
+  // Filter links by selected campaign
   const filteredLinks = selectedCampaign === 'all'
     ? links
     : links?.filter(link => link.campaign_partner_id === parseInt(selectedCampaign));
@@ -97,6 +120,18 @@ export default function PartnerLinks() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentPartner) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle size={48} className="mx-auto text-red-600 mb-4" />
+          <p className="text-gray-800 font-semibold">Unable to load partner data</p>
+          <p className="text-gray-600 mt-2">Please ensure you are logged in as a partner</p>
         </div>
       </div>
     );
@@ -119,7 +154,7 @@ export default function PartnerLinks() {
             </p>
           </div>
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={handleOpenModal}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
           >
             <Plus size={20} />
@@ -138,7 +173,7 @@ export default function PartnerLinks() {
             <option value="all">All Campaigns</option>
             {approvedCampaigns.map((campaign: any) => (
               <option key={campaign.campaign_partner_id} value={campaign.campaign_partner_id}>
-                {campaign.campaign_version?.name || 'Unnamed Campaign'}
+                {campaign.name || 'Unnamed Campaign'}
               </option>
             ))}
           </select>
@@ -201,19 +236,19 @@ export default function PartnerLinks() {
                 <div className="grid grid-cols-4 gap-4">
                   <div>
                     <p className="text-sm text-gray-600">Clicks</p>
-                    <p className="text-2xl font-bold text-gray-900">0</p>
+                    <p className="text-2xl font-bold text-gray-900">{link.click_count || 0}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Conversions</p>
-                    <p className="text-2xl font-bold text-gray-900">0</p>
+                    <p className="text-2xl font-bold text-gray-900">-</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Conv. Rate</p>
-                    <p className="text-2xl font-bold text-gray-900">0%</p>
+                    <p className="text-2xl font-bold text-gray-900">-</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Earnings</p>
-                    <p className="text-2xl font-bold text-gray-900">$0.00</p>
+                    <p className="text-2xl font-bold text-gray-900">-</p>
                   </div>
                 </div>
 
@@ -272,7 +307,7 @@ export default function PartnerLinks() {
                       key={campaign.campaign_partner_id}
                       value={campaign.campaign_partner_id}
                     >
-                      {campaign.campaign_version?.name || 'Unnamed Campaign'}
+                      {campaign.name || 'Unnamed Campaign'}
                     </option>
                   ))}
                 </select>
@@ -378,7 +413,7 @@ export default function PartnerLinks() {
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={handleCloseModal}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                   disabled={creatingLink}
                 >
