@@ -12,19 +12,27 @@ export default function VendorCampaigns() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // Fetch vendor's campaigns (uses /me endpoint, no vendor ID needed)
-  const { data: campaignsResponse, loading: campaignsLoading, error: campaignsError } = useVendorCampaigns(undefined, {
-    page: 1,
-    limit: 50,
-    status: statusFilter !== 'all' ? statusFilter : undefined,
-  });
+  // Fetch current vendor to get vendor ID
+  const { data: vendorData, loading: vendorLoading, error: vendorError } = useCurrentVendor();
+
+  // Fetch vendor's campaigns
+  const { data: campaignsResponse, loading: campaignsLoading, error: campaignsError } = useVendorCampaigns(
+    vendorData?.vendor_id?.toString(),
+    {
+      page: 1,
+      limit: 50,
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+    }
+  );
 
   const campaigns = campaignsResponse?.data || [];
-  const loading = campaignsLoading;
-  const error = campaignsError;
+  const loading = vendorLoading || campaignsLoading;
+  const error = vendorError || campaignsError;
 
   const filteredCampaigns = campaigns.filter(campaign => {
-    const matchesSearch = campaign.name.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!searchQuery) return true;
+    const campaignName = campaign.name || campaign.campaign_name || '';
+    const matchesSearch = campaignName.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
 

@@ -1,123 +1,50 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { DollarSign, Clock, CheckCircle, XCircle, Download, Filter, CreditCard } from 'lucide-react';
-import VendorLayout from '../layout';
+import { useVendorPayouts, useCurrentVendor } from '@/hooks/use-api';
+import { ErrorBoundary } from '@/components/loading-skeleton';
 
 export default function VendorPayouts() {
-  const [payouts, setPayouts] = useState([]);
-  const [pendingPayouts, setPendingPayouts] = useState([]);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [loading, setLoading] = useState(true);
+  const { data: vendorData, loading: vendorLoading } = useCurrentVendor();
+  const { data: payoutsResponse, loading: payoutsLoading, error } = useVendorPayouts(
+    vendorData?.vendor_id?.toString(),
+    { status: statusFilter !== 'all' ? statusFilter : undefined }
+  );
 
-  useEffect(() => {
-    fetchPayouts();
-  }, []);
+  const loading = vendorLoading || payoutsLoading;
+  const payouts = payoutsResponse?.data || [];
 
-  const fetchPayouts = async () => {
-    try {
-      // Mock data - in production, fetch from API
-      setPendingPayouts([
-        {
-          partnerId: 1,
-          partnerName: 'Sarah Tech Blogger',
-          amountDue: 1680.00,
-          conversionsCount: 42,
-          oldestUnpaidDate: '2024-09-15',
-        },
-        {
-          partnerId: 2,
-          partnerName: 'Mike Marketing',
-          amountDue: 720.00,
-          conversionsCount: 18,
-          oldestUnpaidDate: '2024-09-18',
-        },
-        {
-          partnerId: 3,
-          partnerName: 'Lisa Influencer',
-          amountDue: 2720.00,
-          conversionsCount: 68,
-          oldestUnpaidDate: '2024-09-12',
-        },
-      ]);
-
-      setPayouts([
-        {
-          id: 1,
-          partnerId: 1,
-          partnerName: 'Sarah Tech Blogger',
-          amount: 1250.00,
-          status: 'completed',
-          paymentMethod: 'Stripe',
-          periodStart: '2024-08-01',
-          periodEnd: '2024-08-31',
-          processedAt: '2024-09-05',
-          completedAt: '2024-09-05',
-        },
-        {
-          id: 2,
-          partnerId: 2,
-          partnerName: 'Mike Marketing',
-          amount: 580.00,
-          status: 'completed',
-          paymentMethod: 'PayPal',
-          periodStart: '2024-08-01',
-          periodEnd: '2024-08-31',
-          processedAt: '2024-09-05',
-          completedAt: '2024-09-06',
-        },
-        {
-          id: 3,
-          partnerId: 3,
-          partnerName: 'Lisa Influencer',
-          amount: 2150.00,
-          status: 'processing',
-          paymentMethod: 'Stripe',
-          periodStart: '2024-09-01',
-          periodEnd: '2024-09-30',
-          processedAt: '2024-10-05',
-          completedAt: null,
-        },
-        {
-          id: 4,
-          partnerId: 4,
-          partnerName: 'Tom Affiliate',
-          amount: 450.00,
-          status: 'failed',
-          paymentMethod: 'Direct Deposit',
-          periodStart: '2024-08-01',
-          periodEnd: '2024-08-31',
-          processedAt: '2024-09-05',
-          failureReason: 'Invalid bank account details',
-        },
-      ]);
-
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching payouts:', error);
-      setLoading(false);
-    }
-  };
+  // Separate payouts by status
+  const pendingPayouts = payouts.filter(p => p.status === 'pending');
+  const completedPayouts = payouts.filter(p => p.status === 'completed');
+  const processingPayouts = payouts.filter(p => p.status === 'processed' || p.status === 'processing');
+  const failedPayouts = payouts.filter(p => p.status === 'failed');
 
   const filteredPayouts = payouts.filter(payout => {
     if (statusFilter === 'all') return true;
     return payout.status === statusFilter;
   });
 
-  const totalPending = pendingPayouts.reduce((sum, p) => sum + p.amountDue, 0);
+  const totalPending = pendingPayouts.reduce((sum, p) => sum + (p.amount || 0), 0);
 
   const processBatchPayout = () => {
     console.log('Processing batch payout for all pending partners');
-    // In production, call API
+    // TODO: Call API to process batch payouts
   };
+
+  if (error) {
+    return <ErrorBoundary error={error.message} />;
+  }
 
   if (loading) {
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading payouts...</p>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading payouts...</p>
         </div>
+      </div>
     );
   }
 
@@ -160,22 +87,22 @@ export default function VendorPayouts() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                {pendingPayouts.map((payout) => (
-                  <div key={payout.partnerId} className="bg-white rounded-lg p-4 shadow">
+                {pendingPayouts.slice(0, 3).map((payout) => (
+                  <div key={payout.payout_id} className="bg-white rounded-lg p-4 shadow">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <div className="font-semibold text-gray-900">{payout.partnerName}</div>
+                        <div className="font-semibold text-gray-900">Partner {payout.partner_id}</div>
                         <div className="text-sm text-gray-600">
-                          {payout.conversionsCount} conversions
+                          1 pending conversion
                         </div>
                       </div>
                       <Clock className="text-orange-600" size={20} />
                     </div>
                     <div className="text-2xl font-bold text-gray-900 mb-2">
-                      ${payout.amountDue.toLocaleString()}
+                      ${(payout.amount || 0).toLocaleString()}
                     </div>
                     <div className="text-xs text-gray-600">
-                      Oldest unpaid: {new Date(payout.oldestUnpaidDate).toLocaleDateString()}
+                      Oldest unpaid: {payout.start_date ? new Date(payout.start_date).toLocaleDateString() : 'N/A'}
                     </div>
                     <button className="w-full mt-3 bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition text-sm font-medium">
                       Process Payout
@@ -196,19 +123,19 @@ export default function VendorPayouts() {
             />
             <SummaryCard
               label="Processing"
-              value={`$${payouts.filter(p => p.status === 'processing').reduce((s, p) => s + p.amount, 0).toLocaleString()}`}
+              value={`$${processingPayouts.reduce((s, p) => s + (p.amount || 0), 0).toLocaleString()}`}
               icon={<Clock className="text-blue-600" />}
               bgColor="bg-blue-50"
             />
             <SummaryCard
               label="Completed This Month"
-              value={`$${payouts.filter(p => p.status === 'completed').reduce((s, p) => s + p.amount, 0).toLocaleString()}`}
+              value={`$${completedPayouts.reduce((s, p) => s + (p.amount || 0), 0).toLocaleString()}`}
               icon={<CheckCircle className="text-green-600" />}
               bgColor="bg-green-50"
             />
             <SummaryCard
               label="Failed"
-              value={payouts.filter(p => p.status === 'failed').length}
+              value={failedPayouts.length}
               icon={<XCircle className="text-red-600" />}
               bgColor="bg-red-50"
             />
@@ -263,30 +190,28 @@ export default function VendorPayouts() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredPayouts.map((payout) => (
-                    <tr key={payout.id} className="hover:bg-gray-50 transition">
+                    <tr key={payout.payout_id} className="hover:bg-gray-50 transition">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{payout.partnerName}</div>
+                        <div className="font-medium text-gray-900">Partner {payout.partner_id}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="font-semibold text-gray-900">
-                          ${payout.amount.toLocaleString()}
+                          ${(payout.amount || 0).toLocaleString()}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {new Date(payout.periodStart).toLocaleDateString()} -{' '}
-                        {new Date(payout.periodEnd).toLocaleDateString()}
+                        {payout.start_date ? new Date(payout.start_date).toLocaleDateString() : '-'} {' - '} {' '}
+                        {payout.end_date ? new Date(payout.end_date).toLocaleDateString() : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {payout.paymentMethod}
+                        {payout.currency || 'USD'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <StatusBadge status={payout.status} />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {payout.completedAt
-                          ? new Date(payout.completedAt).toLocaleDateString()
-                          : payout.processedAt
-                          ? new Date(payout.processedAt).toLocaleDateString()
+                        {payout.created_at
+                          ? new Date(payout.created_at).toLocaleDateString()
                           : '-'}
                       </td>
                     </tr>

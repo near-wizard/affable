@@ -1,104 +1,16 @@
 "use client"
-import { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Users, MousePointerClick, DollarSign, Activity } from 'lucide-react';
 import Link from 'next/link';
-import VendorLayout from '@/app/vendor/layout';
+import { useVendorDashboard } from '@/hooks/use-api';
+import { ErrorBoundary } from '@/components/loading-skeleton';
 
-type PerformanceData = {
-  date: string;
-  clicks: number;
-  conversions: number;
-  revenue: number;
-};
-
-type TopPartnerData = {
-  name: string;
-  clicks: number;
-  conversions: number;
-  revenue: number;
-  commission: number;
-};
-
-type RecentActivity = 
-  | {
-      type: 'conversion' | 'payout';
-      partner: string;
-      amount: number;
-      time: string;
-    }
-  | {
-      type: 'application';
-      partner: string;
-      campaign: string;
-      time: string;
-    };
 export default function VendorDashboard() {
-  const [stats, setStats] = useState({
-    totalCampaigns: 0,
-    activePartners: 0,
-    totalClicks: 0,
-    totalConversions: 0,
-    totalRevenue: 0,
-    totalCommission: 0,
-    conversionRate: 0,
-  });
-  
-  const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
-  const [topPartners, setTopPartners] = useState<TopPartnerData[]>([]);
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: dashboardData, loading, error } = useVendorDashboard();
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      // In production, fetch from API
-      // const response = await fetch('/api/vendors/1/dashboard');
-      // const data = await response.json();
-      
-      // Mock data for demonstration
-      setStats({
-        totalCampaigns: 3,
-        activePartners: 12,
-        totalClicks: 15420,
-        totalConversions: 342,
-        totalRevenue: 68400.00,
-        totalCommission: 13680.00,
-        conversionRate: 2.22,
-      });
-      
-      setPerformanceData([
-        { date: 'Oct 1', clicks: 520, conversions: 12, revenue: 2400 },
-        { date: 'Oct 2', clicks: 614, conversions: 15, revenue: 3000 },
-        { date: 'Oct 3', clicks: 580, conversions: 13, revenue: 2600 },
-        { date: 'Oct 4', clicks: 695, conversions: 18, revenue: 3600 },
-        { date: 'Oct 5', clicks: 720, conversions: 16, revenue: 3200 },
-        { date: 'Oct 6', clicks: 640, conversions: 14, revenue: 2800 },
-        { date: 'Oct 7', clicks: 690, conversions: 17, revenue: 3400 },
-      ]);
-      
-      setTopPartners([
-        { name: 'Lisa Influencer', clicks: 2340, conversions: 68, revenue: 13600, commission: 2720 },
-        { name: 'Sarah Tech Blogger', clicks: 1520, conversions: 42, revenue: 8400, commission: 1680 },
-        { name: 'Mike Marketing', clicks: 890, conversions: 18, revenue: 3600, commission: 720 },
-      ]);
-      
-      setRecentActivity([
-        { type: 'conversion', partner: 'Lisa Influencer', amount: 250, time: '5 minutes ago' },
-        { type: 'application', partner: 'New Partner', campaign: 'Acme SaaS Launch', time: '1 hour ago' },
-        { type: 'conversion', partner: 'Sarah Tech Blogger', amount: 150, time: '2 hours ago' },
-        { type: 'payout', partner: 'Mike Marketing', amount: 720, time: '3 hours ago' },
-      ]);
-      
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      setLoading(false);
-    }
-  };
+  if (error) {
+    return <ErrorBoundary error={error.message} />;
+  }
 
   if (loading) {
     return (
@@ -110,6 +22,47 @@ export default function VendorDashboard() {
       </div>
     );
   }
+
+  // Extract data from API response
+  // The API returns stats directly in the response, not nested
+  const stats = dashboardData || {
+    total_campaigns: 0,
+    total_partners: 0,
+    total_clicks: 0,
+    total_conversions: 0,
+    total_revenue: 0,
+    total_payout: 0,
+    pending_payouts: 0,
+  };
+
+  // Calculate conversion rate
+  const conversionRate = stats.total_clicks > 0
+    ? ((stats.total_conversions / stats.total_clicks) * 100).toFixed(2)
+    : 0;
+
+  // Mock performance data and top partners since backend doesn't provide them yet
+  const performanceData = [
+    { date: 'Oct 1', clicks: 520, conversions: 12, revenue: 2400 },
+    { date: 'Oct 2', clicks: 614, conversions: 15, revenue: 3000 },
+    { date: 'Oct 3', clicks: 580, conversions: 13, revenue: 2600 },
+    { date: 'Oct 4', clicks: 695, conversions: 18, revenue: 3600 },
+    { date: 'Oct 5', clicks: 720, conversions: 16, revenue: 3200 },
+    { date: 'Oct 6', clicks: 640, conversions: 14, revenue: 2800 },
+    { date: 'Oct 7', clicks: 690, conversions: 17, revenue: 3400 },
+  ];
+
+  const topPartners = [
+    { partner_name: 'Lisa Influencer', total_clicks: 2340, total_conversions: 68, total_revenue: 13600, total_commission: 2720 },
+    { partner_name: 'Sarah Tech Blogger', total_clicks: 1520, total_conversions: 42, total_revenue: 8400, total_commission: 1680 },
+    { partner_name: 'Mike Marketing', total_clicks: 890, total_conversions: 18, total_revenue: 3600, total_commission: 720 },
+  ];
+
+  const recentActivity = [
+    { type: 'conversion', partner: 'Lisa Influencer', amount: 250, time: '5 minutes ago' },
+    { type: 'application', partner: 'New Partner', campaign: 'Acme SaaS Launch', time: '1 hour ago' },
+    { type: 'conversion', partner: 'Sarah Tech Blogger', amount: 150, time: '2 hours ago' },
+    { type: 'payout', partner: 'Mike Marketing', amount: 720, time: '3 hours ago' },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -140,28 +93,28 @@ export default function VendorDashboard() {
           <StatCard
             icon={<Activity className="text-blue-600" />}
             label={<Link href="/vendor/campaigns" className="text-blue-500 hover:underline">Total Campaigns</Link>}
-            value={stats.totalCampaigns}
+            value={stats.total_campaigns || 0}
             change="+2"
             bgColor="bg-blue-50"
           />
           <StatCard
             icon={<Users className="text-green-600" />}
             label="Active Partners"
-            value={stats.activePartners}
+            value={stats.total_partners || 0}
             change="+5"
             bgColor="bg-green-50"
           />
           <StatCard
             icon={<MousePointerClick className="text-purple-600" />}
             label="Total Clicks"
-            value={stats.totalClicks.toLocaleString()}
+            value={(stats.total_clicks || 0).toLocaleString()}
             change="+12%"
             bgColor="bg-purple-50"
           />
           <StatCard
             icon={<TrendingUp className="text-orange-600" />}
             label="Conversions"
-            value={stats.totalConversions}
+            value={stats.total_conversions || 0}
             change="+8%"
             bgColor="bg-orange-50"
           />
@@ -175,29 +128,29 @@ export default function VendorDashboard() {
               <DollarSign className="text-green-600" size={20} />
             </div>
             <div className="text-3xl font-bold text-gray-900">
-              ${stats.totalRevenue.toLocaleString()}
+              ${(stats.total_revenue || 0).toLocaleString()}
             </div>
             <div className="text-sm text-green-600 mt-1">+15% from last period</div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm">Commission Paid</span>
+              <span className="text-gray-600 text-sm">Total Payouts</span>
               <DollarSign className="text-blue-600" size={20} />
             </div>
             <div className="text-3xl font-bold text-gray-900">
-              ${stats.totalCommission.toLocaleString()}
+              ${(stats.total_payout || 0).toLocaleString()}
             </div>
-            <div className="text-sm text-blue-600 mt-1">20% of revenue</div>
+            <div className="text-sm text-blue-600 mt-1">{stats.pending_payouts || 0} pending</div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-600 text-sm">Conversion Rate</span>
               <TrendingUp className="text-purple-600" size={20} />
             </div>
             <div className="text-3xl font-bold text-gray-900">
-              {stats.conversionRate}%
+              {conversionRate}%
             </div>
             <div className="text-sm text-purple-600 mt-1">+0.3% from last period</div>
           </div>
@@ -233,14 +186,14 @@ export default function VendorDashboard() {
               {topPartners.map((partner, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
-                    <div className="font-semibold text-gray-900">{partner.name}</div>
+                    <div className="font-semibold text-gray-900">{partner.name || partner.partner_name || 'Unknown'}</div>
                     <div className="text-sm text-gray-600">
-                      {partner.clicks.toLocaleString()} clicks • {partner.conversions} conversions
+                      {(partner.total_clicks || partner.clicks || 0).toLocaleString()} clicks • {(partner.total_conversions || partner.conversions || 0)} conversions
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-gray-900">${partner.revenue.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600">${partner.commission} commission</div>
+                    <div className="font-bold text-gray-900">${(partner.total_revenue || partner.revenue || 0).toLocaleString()}</div>
+                    <div className="text-sm text-gray-600">${(partner.total_commission || partner.commission || 0).toLocaleString()} commission</div>
                   </div>
                 </div>
               ))}

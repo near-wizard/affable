@@ -124,3 +124,5 @@ class AuthResponse(BaseModel):
     user_type: str
     user_id: int
     email: str
+    access_token: Optional[str] = None
+    refresh_token: Optional[str] = None

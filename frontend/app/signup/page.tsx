@@ -90,23 +90,36 @@ export default function SignupPage() {
       const data = await response.json()
 
       // Signup successful - account created
-      // For partners: account is pending approval, must log in after approval
-      // For vendors: account is active, can log in immediately
-
-      // Store user info in localStorage for context
-      localStorage.setItem("signup_success_email", email)
-      localStorage.setItem("signup_success_role", role)
-      localStorage.setItem("signup_user_id", data.user_id || "")
-
-      // Show appropriate message and redirect to login
       if (role === "partner") {
-        alert("Account created successfully! Your partner account is pending approval. You'll be able to log in once approved.")
-      } else {
-        alert("Vendor account created successfully! You can now log in with your email and password.")
-      }
+        // Partners: account is pending approval, must log in after approval
+        localStorage.setItem("signup_success_email", email)
+        localStorage.setItem("signup_success_role", role)
+        localStorage.setItem("signup_user_id", data.user_id || "")
 
-      // Redirect to login page
-      router.push(`/login?email=${encodeURIComponent(email)}&role=${role}`)
+        alert("Account created successfully! Your partner account is pending approval. You'll be able to log in once approved.")
+
+        // Redirect to login page
+        router.push(`/login?email=${encodeURIComponent(email)}&role=${role}`)
+      } else if (role === "vendor" && data.access_token) {
+        // Vendors: account is active, automatically log in and redirect to dashboard
+        storeAuthCredentials(
+          data.access_token,
+          data.refresh_token,
+          "vendor",
+          data.user_id,
+          data.email
+        )
+
+        // Show success message
+        alert("Account created successfully! You are now logged in.")
+
+        // Redirect to vendor dashboard
+        router.push("/admin")
+      } else {
+        // Fallback: redirect to login if no token received
+        alert("Vendor account created successfully! You can now log in with your email and password.")
+        router.push(`/login?email=${encodeURIComponent(email)}&role=${role}`)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred during sign up")
       console.error("Sign up error:", err)

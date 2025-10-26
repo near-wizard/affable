@@ -137,9 +137,9 @@ export function useVendorCampaigns(
 	return useAsync(
 		() => apiClient.campaigns.listVendor(vendorId!, params),
 		{
-			enabled: true, // Always enabled since we use /me endpoint
+			enabled: !!vendorId, // Only fetch when vendorId is available
 		},
-		[paramsString]
+		[vendorId, paramsString]
 	);
 }
 
@@ -386,9 +386,10 @@ export function useVendorPayouts(
 		status?: string;
 	}
 ) {
+	const paramsString = JSON.stringify(params);
 	return useAsync(() => apiClient.payouts.listVendor(vendorId!, params), {
 		enabled: !!vendorId,
-	});
+	}, [vendorId, paramsString]);
 }
 
 // ============================================================================

@@ -81,16 +81,23 @@ def register_vendor(
 ):
     """
     Register a new vendor account.
-    
-    Creates both vendor and owner user account.
+
+    Creates both vendor and owner user account and generates auth tokens for immediate login.
     """
     vendor = AuthService.register_vendor(db, data)
-    
+
+    # Generate tokens for immediate login
+    from app.core.security import create_tokens
+    vendor_user = db.query(VendorUser).filter_by(vendor_id=vendor.vendor_id).first()
+    tokens = create_tokens(vendor_user.vendor_user_id, "vendor")
+
     return AuthResponse(
-        message="Vendor registered successfully. You can now log in.",
+        message="Vendor registered successfully. You are now logged in.",
         user_type="vendor",
         user_id=vendor.vendor_id,
-        email=vendor.email
+        email=vendor.email,
+        access_token=tokens["access_token"],
+        refresh_token=tokens.get("refresh_token")
     )
 
 
