@@ -143,16 +143,58 @@ export default function PartnerDashboard() {
 			? ((stats.total_conversions / stats.total_clicks) * 100).toFixed(2)
 			: 0;
 
-	// Use filtered analytics data for display
-	const performanceData =
-		filteredAnalyticsData?.data?.map((d) => ({
-			date: new Date(d.date).toLocaleDateString("en-US", {
-				month: "short",
-				day: "numeric",
-			}),
-			clicks: d.clicks,
-			conversions: d.conversions,
-		})) || [];
+	// Generate complete date range with all dates, filling in missing data with zeros
+	const performanceData = (() => {
+		const rawData = filteredAnalyticsData?.data || [];
+
+		// Create a map of existing data for quick lookup
+		const dataMap = new Map();
+		rawData.forEach((d) => {
+			const dateKey = d.date;
+			dataMap.set(dateKey, {
+				date: new Date(d.date).toLocaleDateString("en-US", {
+					month: "short",
+					day: "numeric",
+				}),
+				clicks: d.clicks,
+				conversions: d.conversions,
+			});
+		});
+
+		// Generate all dates in the range
+		const allDates = [];
+
+		// Parse dates properly to avoid timezone issues
+		const [startYear, startMonth, startDay] = displayStartDate.split("-").map(Number);
+		const [endYear, endMonth, endDay] = displayEndDate.split("-").map(Number);
+
+		const start = new Date(startYear, startMonth - 1, startDay);
+		const end = new Date(endYear, endMonth - 1, endDay);
+
+		for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+			const year = d.getFullYear();
+			const month = String(d.getMonth() + 1).padStart(2, "0");
+			const day = String(d.getDate()).padStart(2, "0");
+			const dateKey = `${year}-${month}-${day}`;
+
+			const existingData = dataMap.get(dateKey);
+
+			if (existingData) {
+				allDates.push(existingData);
+			} else {
+				allDates.push({
+					date: d.toLocaleDateString("en-US", {
+						month: "short",
+						day: "numeric",
+					}),
+					clicks: 0,
+					conversions: 0,
+				});
+			}
+		}
+
+		return allDates;
+	})();
 
 	const topLinks = (linksData?.data || [])
 		.sort((a, b) => (b.click_count || 0) - (a.click_count || 0))

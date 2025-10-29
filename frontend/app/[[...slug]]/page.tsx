@@ -6,6 +6,7 @@ import { LandingSocialProof } from "@/components/landing-social-proof";
 import { LandingFAQ } from "@/components/landing-faq";
 import { LandingCTA } from "@/components/landing-cta";
 import { LandingFooter } from "@/components/landing-footer";
+import { Qualifier } from "@/components/qualifier";
 
 export default function LandingPage() {
 	return (
@@ -13,14 +14,12 @@ export default function LandingPage() {
 			<LandingNav />
 			<div className="flex-1">
 				<Hero />
+				<Qualifier />
 				<Features />
-				<Benefits />
+				{/*<Benefits />*/}
 				<LandingSocialProof />
 				<LandingFAQ />
 				<LandingCTA />
-				<a href="https://localhost:8000/r/4qPkxV94">
-					https://localhost:8000/r/4qPkxV94
-				</a>
 			</div>
 			<LandingFooter />
 		</main>

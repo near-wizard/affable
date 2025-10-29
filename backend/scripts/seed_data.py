@@ -330,31 +330,47 @@ def seed_database():
         db.flush()
         print(f"  ✓ Created {len(links)} partner links")
 
-        # Create clicks
+        # Create clicks with UTM parameters
         clicks = []
+        utm_sources = ["google", "facebook", "linkedin", "twitter", "direct"]
+        utm_mediums = ["cpc", "social", "organic", "email", "referral"]
+        utm_campaigns = ["summer_sale", "black_friday", "product_launch", "brand_awareness", "retargeting"]
+
         # YouTube Tech - high performer
         for i in range(50):
             clicks.append(Click(
                 partner_link_id=links[4].partner_link_id,
-                clicked_at=datetime.utcnow() - timedelta(hours=i*2)
+                clicked_at=datetime.utcnow() - timedelta(hours=i*2),
+                utm_source=utm_sources[i % len(utm_sources)],
+                utm_medium=utm_mediums[i % len(utm_mediums)],
+                utm_campaign=utm_campaigns[i % len(utm_campaigns)]
             ))
         # Tech Reviewer Pro - medium performer
         for i in range(30):
             clicks.append(Click(
                 partner_link_id=links[0].partner_link_id,
-                clicked_at=datetime.utcnow() - timedelta(hours=i*3)
+                clicked_at=datetime.utcnow() - timedelta(hours=i*3),
+                utm_source=utm_sources[(i+1) % len(utm_sources)],
+                utm_medium=utm_mediums[(i+2) % len(utm_mediums)],
+                utm_campaign=utm_campaigns[(i+1) % len(utm_campaigns)]
             ))
         # Fitness Influencer
         for i in range(20):
             clicks.append(Click(
                 partner_link_id=links[3].partner_link_id,
-                clicked_at=datetime.utcnow() - timedelta(hours=i*4)
+                clicked_at=datetime.utcnow() - timedelta(hours=i*4),
+                utm_source=utm_sources[(i+2) % len(utm_sources)],
+                utm_medium=utm_mediums[(i+1) % len(utm_mediums)],
+                utm_campaign=utm_campaigns[(i+2) % len(utm_campaigns)]
             ))
         # Marketing Maven
         for i in range(15):
             clicks.append(Click(
                 partner_link_id=links[2].partner_link_id,
-                clicked_at=datetime.utcnow() - timedelta(hours=i*5)
+                clicked_at=datetime.utcnow() - timedelta(hours=i*5),
+                utm_source=utm_sources[(i+3) % len(utm_sources)],
+                utm_medium=utm_mediums[(i+3) % len(utm_mediums)],
+                utm_campaign=utm_campaigns[(i+3) % len(utm_campaigns)]
             ))
         db.add_all(clicks)
         db.flush()

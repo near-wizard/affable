@@ -1,12 +1,60 @@
 "use client"
+import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Users, MousePointerClick, DollarSign, Activity } from 'lucide-react';
 import Link from 'next/link';
-import { useVendorDashboard } from '@/hooks/use-api';
+import { useVendorDashboard, useVendorCampaigns, useAvailablePartners } from '@/hooks/use-api';
 import { ErrorBoundary } from '@/components/loading-skeleton';
 
 export default function VendorDashboard() {
-  const { data: dashboardData, loading, error } = useVendorDashboard();
+  // Filter state - set default dates to last 7 days
+  const [startDate, setStartDate] = useState<string>(() => {
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(start.getDate() - 6); // 7 days including today
+    return start.toISOString().split("T")[0];
+  });
+  const [endDate, setEndDate] = useState<string>(() => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  });
+  const [campaignId, setCampaignId] = useState<number | null>(null);
+  const [selectedPartnerName, setSelectedPartnerName] = useState<string>('');
+  const [selectedPartnerId, setSelectedPartnerId] = useState<number | null>(null);
+  const [utmSource, setUtmSource] = useState<string>('');
+  const [utmMedium, setUtmMedium] = useState<string>('');
+  const [utmCampaign, setUtmCampaign] = useState<string>('');
+
+  // Fetch campaigns for dropdown
+  const { data: campaignsResponse } = useVendorCampaigns(undefined, { page: 1, limit: 100 });
+  const campaigns = campaignsResponse?.data || [];
+
+  // Fetch available partners for selected campaign
+  const { data: partnersResponse } = useAvailablePartners(campaignId || undefined);
+  const availablePartners = partnersResponse?.partners || [];
+
+  // Fetch dashboard data with filters
+  const { data: dashboardData, loading, error } = useVendorDashboard({
+    start_date: startDate || undefined,
+    end_date: endDate || undefined,
+    campaign_id: campaignId || undefined,
+    partner_id: selectedPartnerId || undefined,
+    utm_source: utmSource || undefined,
+    utm_medium: utmMedium || undefined,
+    utm_campaign: utmCampaign || undefined,
+  });
+
+  // Handle partner name to ID mapping
+  useEffect(() => {
+    if (selectedPartnerName) {
+      const partner = availablePartners.find(p => p.name === selectedPartnerName);
+      if (partner) {
+        setSelectedPartnerId(partner.partner_id);
+      }
+    } else {
+      setSelectedPartnerId(null);
+    }
+  }, [selectedPartnerName, availablePartners]);
 
   if (error) {
     return <ErrorBoundary error={error.message} />;
@@ -24,7 +72,6 @@ export default function VendorDashboard() {
   }
 
   // Extract data from API response
-  // The API returns stats directly in the response, not nested
   const stats = dashboardData || {
     total_campaigns: 0,
     total_partners: 0,
@@ -40,22 +87,62 @@ export default function VendorDashboard() {
     ? ((stats.total_conversions / stats.total_clicks) * 100).toFixed(2)
     : 0;
 
-  // Mock performance data and top partners since backend doesn't provide them yet
-  const performanceData = [
-    { date: 'Oct 1', clicks: 520, conversions: 12, revenue: 2400 },
-    { date: 'Oct 2', clicks: 614, conversions: 15, revenue: 3000 },
-    { date: 'Oct 3', clicks: 580, conversions: 13, revenue: 2600 },
-    { date: 'Oct 4', clicks: 695, conversions: 18, revenue: 3600 },
-    { date: 'Oct 5', clicks: 720, conversions: 16, revenue: 3200 },
-    { date: 'Oct 6', clicks: 640, conversions: 14, revenue: 2800 },
-    { date: 'Oct 7', clicks: 690, conversions: 17, revenue: 3400 },
-  ];
+  // Generate complete date range with all dates, filling in missing data with zeros
+  const performanceData = (() => {
+    const rawData = dashboardData?.performance_data || [];
 
-  const topPartners = [
-    { partner_name: 'Lisa Influencer', total_clicks: 2340, total_conversions: 68, total_revenue: 13600, total_commission: 2720 },
-    { partner_name: 'Sarah Tech Blogger', total_clicks: 1520, total_conversions: 42, total_revenue: 8400, total_commission: 1680 },
-    { partner_name: 'Mike Marketing', total_clicks: 890, total_conversions: 18, total_revenue: 3600, total_commission: 720 },
-  ];
+    // Create a map of existing data for quick lookup
+    const dataMap = new Map();
+    rawData.forEach((d) => {
+      const dateKey = d.date;
+      dataMap.set(dateKey, {
+        date: new Date(d.date).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }),
+        clicks: d.clicks,
+        conversions: d.conversions,
+        revenue: d.revenue,
+      });
+    });
+
+    // Generate all dates in the range
+    const allDates = [];
+
+    // Parse dates properly to avoid timezone issues
+    const [startYear, startMonth, startDay] = startDate.split("-").map(Number);
+    const [endYear, endMonth, endDay] = endDate.split("-").map(Number);
+
+    const start = new Date(startYear, startMonth - 1, startDay);
+    const end = new Date(endYear, endMonth - 1, endDay);
+
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const dateKey = `${year}-${month}-${day}`;
+
+      const existingData = dataMap.get(dateKey);
+
+      if (existingData) {
+        allDates.push(existingData);
+      } else {
+        allDates.push({
+          date: d.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          }),
+          clicks: 0,
+          conversions: 0,
+          revenue: 0,
+        });
+      }
+    }
+
+    return allDates;
+  })();
+
+  const topPartners = dashboardData?.top_partners || [];
 
   const recentActivity = [
     { type: 'conversion', partner: 'Lisa Influencer', amount: 250, time: '5 minutes ago' },
@@ -69,19 +156,140 @@ export default function VendorDashboard() {
       {/* Header */}
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2"> <TrendingUp size={32} className="text-blue-600" /> Dashboard</h1>
-            <p className="text-gray-600 mt-1">Manage your partner campaigns</p>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2"><TrendingUp size={32} className="text-blue-600" /> Dashboard</h1>
               <p className="text-gray-600 mt-1">Overview of your partner program performance</p>
             </div>
-            <div className="flex items-center gap-4">
-              <select className="px-4 py-2 border border-gray-300 rounded-lg">
-                <option>Last 7 days</option>
-                <option>Last 30 days</option>
-                <option>Last 90 days</option>
-                <option>All time</option>
+          </div>
+
+          {/* Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Date Range */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Campaign Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Campaign</label>
+              <select
+                value={campaignId || ''}
+                onChange={(e) => {
+                  setCampaignId(e.target.value ? parseInt(e.target.value) : null);
+                  setSelectedPartnerName('');
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Campaigns</option>
+                {dashboardData?.available_campaigns?.map((campaign: any) => (
+                  <option key={campaign.campaign_id} value={campaign.campaign_id}>
+                    {campaign.name}
+                  </option>
+                ))}
               </select>
+            </div>
+
+            {/* Partner Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Partner</label>
+              <select
+                value={selectedPartnerName}
+                onChange={(e) => setSelectedPartnerName(e.target.value)}
+                disabled={availablePartners.length === 0}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+              >
+                <option value="">All Partners</option>
+                {availablePartners.map((partner) => (
+                  <option key={partner.partner_id} value={partner.name}>
+                    {partner.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* UTM Source */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">UTM Source</label>
+              <select
+                value={utmSource}
+                onChange={(e) => setUtmSource(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Sources</option>
+                {dashboardData?.available_utm_sources?.map((source: string) => (
+                  <option key={source} value={source}>
+                    {source}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* UTM Medium */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">UTM Medium</label>
+              <select
+                value={utmMedium}
+                onChange={(e) => setUtmMedium(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Mediums</option>
+                {dashboardData?.available_utm_mediums?.map((medium: string) => (
+                  <option key={medium} value={medium}>
+                    {medium}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* UTM Campaign */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">UTM Campaign</label>
+              <select
+                value={utmCampaign}
+                onChange={(e) => setUtmCampaign(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Campaigns</option>
+                {dashboardData?.available_utm_campaigns?.map((campaign: string) => (
+                  <option key={campaign} value={campaign}>
+                    {campaign}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Clear Filters Button */}
+            <div className="flex items-end">
+              <button
+                onClick={() => {
+                  setStartDate('');
+                  setEndDate('');
+                  setCampaignId(null);
+                  setSelectedPartnerName('');
+                  setUtmSource('');
+                  setUtmMedium('');
+                  setUtmCampaign('');
+                }}
+                className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
+              >
+                Clear Filters
+              </button>
             </div>
           </div>
         </div>

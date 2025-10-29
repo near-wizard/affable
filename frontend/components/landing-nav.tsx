@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 
 export function LandingNav() {
 	const [isOpen, setIsOpen] = useState(false);
@@ -15,7 +16,13 @@ export function LandingNav() {
 					{/* Logo */}
 					<Link href="/" className="flex items-center gap-2 font-bold text-lg">
 						<div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-white text-sm font-bold">
-							A
+							<Image
+								className="rounded"
+								src="images/kappy/cappy.png"
+								width={24}
+								height={24}
+								alt=""
+							/>
 						</div>
 						<span className="text-foreground">AffableLink</span>
 					</Link>

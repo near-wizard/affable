@@ -131,7 +131,8 @@ export function useVendorCampaigns(
 		page?: number;
 		limit?: number;
 		status?: string;
-	}
+	},
+	refetchTrigger?: number
 ) {
 	const paramsString = JSON.stringify(params);
 	return useAsync(
@@ -139,7 +140,7 @@ export function useVendorCampaigns(
 		{
 			enabled: !!vendorId, // Only fetch when vendorId is available
 		},
-		[vendorId, paramsString]
+		[vendorId, paramsString, refetchTrigger] // Include refetchTrigger to trigger refetch
 	);
 }
 
@@ -299,14 +300,37 @@ export function usePartnerAnalytics(
 }
 
 /**
- * Hook to fetch vendor dashboard data
+ * Hook to fetch vendor dashboard data with optional filters
  */
-export function useVendorDashboard() {
+export function useVendorDashboard(params?: {
+	start_date?: string;
+	end_date?: string;
+	campaign_id?: number;
+	partner_id?: number;
+	utm_source?: string;
+	utm_medium?: string;
+	utm_campaign?: string;
+}) {
+	const paramsString = JSON.stringify(params);
 	return useAsync(
-		() => apiClient.currentUser.getVendorDashboard(getAuthToken() || undefined),
+		() => apiClient.currentUser.getVendorDashboard(getAuthToken() || undefined, params),
 		{
 			enabled: true,
-		}
+		},
+		[paramsString]
+	);
+}
+
+/**
+ * Hook to fetch available partners for vendor dashboard filtering
+ */
+export function useAvailablePartners(campaignId?: number) {
+	return useAsync(
+		() => apiClient.vendors.getAvailablePartners(campaignId),
+		{
+			enabled: true,
+		},
+		[campaignId]
 	);
 }
 
@@ -519,5 +543,32 @@ export function useCreatePayout() {
 export function useCreateLink() {
 	return useMutation((data: any) =>
 		apiClient.links.create(data, getAuthToken() || undefined)
+	);
+}
+
+/**
+ * Hook to create a new campaign (vendor)
+ */
+export function useCreateCampaign() {
+	return useMutation((data: any) =>
+		apiClient.campaigns.create(data, getAuthToken() || undefined)
+	);
+}
+
+/**
+ * Hook to update a campaign (vendor)
+ */
+export function useUpdateCampaign() {
+	return useMutation((vars: { campaignId: string | number; data: any }) =>
+		apiClient.campaigns.update(vars.campaignId.toString(), vars.data, getAuthToken() || undefined)
+	);
+}
+
+/**
+ * Hook to create a new campaign version (vendor)
+ */
+export function useCreateCampaignVersion() {
+	return useMutation((vars: { campaignId: string | number; data: any }) =>
+		apiClient.campaigns.createVersion(vars.campaignId.toString(), vars.data, getAuthToken() || undefined)
 	);
 }

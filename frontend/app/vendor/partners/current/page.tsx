@@ -2,31 +2,73 @@
 
 import { useState } from 'react';
 import { Users, Search, Mail, Table, Grid, DollarSign, TrendingUp, MousePointerClick, ChevronUp, ChevronDown } from 'lucide-react';
-import { useCurrentVendor, useCampaignPartners } from '@/hooks/use-api';
+import { useCurrentVendor, useVendorCampaigns, useCampaignPartners } from '@/hooks/use-api';
 import { GridSkeleton, ErrorBoundary, EmptyState } from '@/components/loading-skeleton';
-
-// For demo purposes, using a hardcoded campaign ID. In real app, this would be dynamic
-const DEMO_CAMPAIGN_ID = '1';
 
 export default function CurrentPartnersPage() {
   const [viewMode, setViewMode] = useState<'table' | 'card'>('card');
   const [search, setSearch] = useState('');
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
 
   // Fetch current vendor info
   const { data: vendor, loading: vendorLoading, error: vendorError } = useCurrentVendor();
 
-  // Fetch campaign partners - in a real app, campaign ID would come from route params
-  const { data: partnersResponse, loading: partnersLoading, error: partnersError } = useCampaignPartners(DEMO_CAMPAIGN_ID, {
-    page: 1,
-    limit: 50,
-    status: 'approved',
-  });
+  // Fetch vendor's campaigns
+  const { data: campaignsResponse, loading: campaignsLoading } = useVendorCampaigns(
+    vendor?.vendor_id?.toString(),
+    {
+      page: 1,
+      limit: 100,
+      status: 'active'
+    }
+  );
+
+  const campaigns = campaignsResponse?.data || [];
+
+  // Set the first campaign as selected by default
+  const campaignIdToUse = selectedCampaignId || (campaigns.length > 0 ? campaigns[0].campaign_id?.toString() : null);
+
+  // Fetch campaign partners for the selected campaign
+  const { data: partnersResponse, loading: partnersLoading, error: partnersError } = useCampaignPartners(
+    campaignIdToUse || undefined,
+    {
+      page: 1,
+      limit: 50,
+      status: 'approved',
+    }
+  );
 
   const partners = partnersResponse?.data || [];
-  const loading = vendorLoading || partnersLoading;
+  const loading = vendorLoading || partnersLoading || campaignsLoading;
   const error = vendorError || partnersError;
+
+  // Handle no campaigns scenario
+  if (!loading && campaigns.length === 0 && !error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+              <Users size={32} className="text-blue-600" /> Current Partners
+            </h1>
+            <p className="text-gray-600 mt-1">Manage your active affiliate partners</p>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <EmptyState
+            title="No campaigns found"
+            description="Create a campaign first to start adding partners"
+            action={{
+              label: 'Create Campaign',
+              onClick: () => window.location.href = '/vendor/campaigns'
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -60,13 +102,33 @@ export default function CurrentPartnersPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <Users size={32} className="text-blue-600" /> Current Partners
-            </h1>
-            <p className="text-gray-600 mt-1">Manage your active affiliate partners</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+                <Users size={32} className="text-blue-600" /> Current Partners
+              </h1>
+              <p className="text-gray-600 mt-1">Manage your active affiliate partners</p>
+            </div>
           </div>
+
+          {/* Campaign Selector */}
+          {campaigns.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Select Campaign</label>
+              <select
+                value={campaignIdToUse || ''}
+                onChange={(e) => setSelectedCampaignId(e.target.value || null)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                {campaigns.map((campaign) => (
+                  <option key={campaign.campaign_id} value={campaign.campaign_id?.toString() || ''}>
+                    {campaign.name} ({campaign.partner_count || 0} partners)
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="flex gap-2 items-center w-full md:w-auto">
             <div className="flex gap-2 bg-white rounded-lg border border-gray-200 p-1">

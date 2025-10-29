@@ -272,6 +272,17 @@ export const apiClient = {
     },
 
     /**
+     * Create a new campaign version
+     */
+    createVersion: async (campaignId: string, data: any, token?: string) => {
+      return apiRequest(`/v1/campaigns/${campaignId}/versions`, {
+        method: 'POST',
+        body: data,
+        token,
+      });
+    },
+
+    /**
      * Apply to campaign (partner)
      */
     apply: async (campaignId: string, data?: any, token?: string) => {
@@ -419,8 +430,16 @@ export const apiClient = {
     /**
      * Get current vendor dashboard data (authenticated user's own dashboard)
      */
-    getVendorDashboard: async (token?: string) => {
-      return apiRequest('/v1/vendors/me/dashboard', { token });
+    getVendorDashboard: async (token?: string, params?: {
+      start_date?: string;
+      end_date?: string;
+      campaign_id?: number;
+      partner_id?: number;
+      utm_source?: string;
+      utm_medium?: string;
+      utm_campaign?: string;
+    }) => {
+      return apiRequest('/v1/vendors/me/dashboard', { token, params });
     },
   },
 
@@ -554,6 +573,17 @@ export const apiClient = {
         body: data,
         token,
       });
+    },
+  },
+
+  // ===== VENDORS =====
+  vendors: {
+    /**
+     * Get available partners for vendor dashboard filtering
+     */
+    getAvailablePartners: async (campaignId?: number, token?: string) => {
+      const params = campaignId ? { campaign_id: campaignId } : {};
+      return apiRequest('/v1/vendors/me/available-partners', { token, params });
     },
   },
 

@@ -148,22 +148,26 @@ def create_campaign(
     db.flush()  # Get campaign_id
     
     # Create first version
+    # Extract tiers separately before creating version
+    tiers_data = data.version.tiers or []
+    version_dict = data.version.dict(exclude={'tiers'})
+
     version = CampaignVersion(
         campaign_id=campaign.campaign_id,
         version_number=1,
-        **data.version.dict()
+        **version_dict
     )
-    
+
     db.add(version)
     db.flush()
-    
+
     # Set current version
     campaign.current_campaign_version_id = version.campaign_version_id
-    
+
     # Create tiers if provided
-    if data.version.tiers:
+    if tiers_data:
         from app.models import CampaignTier
-        for tier_data in data.version.tiers:
+        for tier_data in tiers_data:
             tier = CampaignTier(
                 campaign_version_id=version.campaign_version_id,
                 **tier_data.dict()
@@ -253,7 +257,7 @@ def update_campaign(
 ):
     """
     Update campaign status.
-    
+
     Requires owner or admin role.
     """
     campaign = db.query(Campaign).filter(
@@ -261,17 +265,80 @@ def update_campaign(
         Campaign.vendor_id == vendor_user.vendor_id,
         Campaign.is_deleted == False
     ).first()
-    
+
     if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
-    
+
     if data.status:
         campaign.status = data.status
-    
+
     campaign.update()
     db.commit()
     db.refresh(campaign)
-    
+
+    return campaign
+
+
+@router.post("/{campaign_id}/versions", response_model=CampaignResponse)
+def create_campaign_version(
+    campaign_id: int,
+    data: CampaignVersionCreate,
+    vendor_user: VendorUser = Depends(require_vendor_role(['owner', 'admin'])),
+    db: Session = Depends(get_db)
+):
+    """
+    Create a new version of a campaign.
+
+    This allows campaigns to be updated while preserving version history.
+    Requires owner or admin role.
+    """
+    campaign = db.query(Campaign).filter(
+        Campaign.campaign_id == campaign_id,
+        Campaign.vendor_id == vendor_user.vendor_id,
+        Campaign.is_deleted == False
+    ).first()
+
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    # Get the current version to determine next version number
+    current_version = db.query(CampaignVersion).filter(
+        CampaignVersion.campaign_id == campaign_id
+    ).order_by(CampaignVersion.version_number.desc()).first()
+
+    next_version_number = (current_version.version_number + 1) if current_version else 1
+
+    # Extract tiers separately before creating version
+    tiers_data = data.tiers or []
+    version_dict = data.dict(exclude={'tiers'})
+
+    # Create new version
+    new_version = CampaignVersion(
+        campaign_id=campaign_id,
+        version_number=next_version_number,
+        **version_dict
+    )
+
+    db.add(new_version)
+    db.flush()
+
+    # Create tiers if provided
+    if tiers_data:
+        from app.models import CampaignTier
+        for tier_data in tiers_data:
+            tier = CampaignTier(
+                campaign_version_id=new_version.campaign_version_id,
+                **tier_data.dict()
+            )
+            db.add(tier)
+
+    # Update campaign to use new version
+    campaign.current_campaign_version_id = new_version.campaign_version_id
+    campaign.update()
+
+    db.commit()
+    db.refresh(campaign)
+
     return campaign
 
 
