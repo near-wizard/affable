@@ -16,9 +16,19 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 REDIS_URL = os.getenv("REDIS_URL")
 
 # ---------------------------
-# Redis
+# Redis (Optional - lazy initialization)
 # ---------------------------
-redis = aioredis.from_url(REDIS_URL, decode_responses=True)
+redis = None
+
+async def get_redis():
+    """Get Redis client, lazily initializing if needed."""
+    global redis
+    if redis is None and REDIS_URL:
+        try:
+            redis = aioredis.from_url(REDIS_URL, decode_responses=True)
+        except Exception as e:
+            print(f"Warning: Redis connection failed: {e}. Continuing without Redis.")
+    return redis
 
 # ---------------------------
 # Database

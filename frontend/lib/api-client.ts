@@ -617,6 +617,246 @@ export const apiClient = {
       return apiRequest(`/v1/links/${linkId}/stats`);
     },
   },
+
+  // ===== BILLING =====
+  billing: {
+    /**
+     * Get available subscription plans
+     */
+    getPlans: async (token?: string) => {
+      return apiRequest('/v1/billing/plans', { token });
+    },
+
+    /**
+     * Get current vendor subscription
+     */
+    getCurrentSubscription: async (vendorId: string, token?: string) => {
+      return apiRequest(`/v1/billing/subscriptions/${vendorId}`, { token });
+    },
+
+    /**
+     * Create new subscription
+     */
+    createSubscription: async (vendorId: string, planId: string, currency: string = 'USD', token?: string) => {
+      return apiRequest('/v1/billing/subscriptions', {
+        method: 'POST',
+        body: { vendor_id: vendorId, plan_id: planId, currency },
+        token,
+      });
+    },
+
+    /**
+     * Update subscription (change plan)
+     */
+    updateSubscription: async (vendorId: string, planId: string, token?: string) => {
+      return apiRequest(`/v1/billing/subscriptions/${vendorId}`, {
+        method: 'PUT',
+        body: { plan_id: planId },
+        token,
+      });
+    },
+
+    /**
+     * Cancel subscription
+     */
+    cancelSubscription: async (vendorId: string, token?: string) => {
+      return apiRequest(`/v1/billing/subscriptions/${vendorId}`, {
+        method: 'DELETE',
+        token,
+      });
+    },
+
+    /**
+     * Get vendor invoices
+     */
+    getInvoices: async (vendorId: string, params?: {
+      limit?: number;
+      offset?: number;
+    }, token?: string) => {
+      return apiRequest(`/v1/billing/invoices/${vendorId}`, { params, token });
+    },
+
+    /**
+     * Get invoice details
+     */
+    getInvoiceDetail: async (invoiceId: string, token?: string) => {
+      return apiRequest(`/v1/billing/invoices/detail/${invoiceId}`, { token });
+    },
+
+    /**
+     * Create Stripe customer
+     */
+    createStripeCustomer: async (vendorId: string, email: string, name: string, currency: string = 'USD', token?: string) => {
+      return apiRequest('/v1/billing/payments/stripe/customer', {
+        method: 'POST',
+        body: { vendor_id: vendorId, email, name, currency },
+        token,
+      });
+    },
+
+    /**
+     * Create payment for invoice
+     */
+    createPayment: async (invoiceId: string, token?: string) => {
+      return apiRequest(`/v1/billing/payments/invoices/${invoiceId}`, {
+        method: 'POST',
+        token,
+      });
+    },
+
+    /**
+     * Confirm payment
+     */
+    confirmPayment: async (transactionId: string, token?: string) => {
+      return apiRequest(`/v1/billing/payments/${transactionId}/confirm`, {
+        method: 'POST',
+        token,
+      });
+    },
+
+    /**
+     * Create setup intent for payment method
+     */
+    createSetupIntent: async (vendorId: string, token?: string) => {
+      return apiRequest('/v1/billing/payments/setup-intent', {
+        method: 'POST',
+        body: { vendor_id: vendorId },
+        token,
+      });
+    },
+
+    /**
+     * Attach payment method to customer
+     */
+    attachPaymentMethod: async (customerId: string, paymentMethodId: string, token?: string) => {
+      return apiRequest('/v1/billing/payments/attach-method', {
+        method: 'POST',
+        body: { stripe_customer_id: customerId, payment_method_id: paymentMethodId },
+        token,
+      });
+    },
+  },
+
+
+  // ===== BILLING =====
+  billing: {
+    /**
+     * Get available subscription plans
+     */
+    getPlans: async (token?: string) => {
+      return apiRequest('/v1/billing/plans', { token });
+    },
+
+    /**
+     * Get current vendor subscription
+     */
+    getCurrentSubscription: async (vendorId: string, token?: string) => {
+      return apiRequest(`/v1/billing/subscriptions/${vendorId}`, { token });
+    },
+
+    /**
+     * Create new subscription
+     */
+    createSubscription: async (vendorId: string, planId: string, currency: string = 'USD', token?: string) => {
+      return apiRequest('/v1/billing/subscriptions', {
+        method: 'POST',
+        body: { vendor_id: vendorId, plan_id: planId, currency },
+        token,
+      });
+    },
+
+    /**
+     * Update subscription (change plan)
+     */
+    updateSubscription: async (vendorId: string, planId: string, token?: string) => {
+      return apiRequest(`/v1/billing/subscriptions/${vendorId}`, {
+        method: 'PUT',
+        body: { plan_id: planId },
+        token,
+      });
+    },
+
+    /**
+     * Cancel subscription
+     */
+    cancelSubscription: async (vendorId: string, token?: string) => {
+      return apiRequest(`/v1/billing/subscriptions/${vendorId}`, {
+        method: 'DELETE',
+        token,
+      });
+    },
+
+    /**
+     * Get vendor invoices
+     */
+    getInvoices: async (vendorId: string, params?: {
+      limit?: number;
+      offset?: number;
+    }, token?: string) => {
+      return apiRequest(`/v1/billing/invoices/${vendorId}`, { params, token });
+    },
+
+    /**
+     * Get invoice details
+     */
+    getInvoiceDetail: async (invoiceId: string, token?: string) => {
+      return apiRequest(`/v1/billing/invoices/detail/${invoiceId}`, { token });
+    },
+
+    /**
+     * Create Stripe customer
+     */
+    createStripeCustomer: async (vendorId: string, email: string, name: string, currency: string = 'USD', token?: string) => {
+      return apiRequest('/v1/billing/payments/stripe/customer', {
+        method: 'POST',
+        body: { vendor_id: vendorId, email, name, currency },
+        token,
+      });
+    },
+
+    /**
+     * Create payment for invoice
+     */
+    createPayment: async (invoiceId: string, token?: string) => {
+      return apiRequest(`/v1/billing/payments/invoices/${invoiceId}`, {
+        method: 'POST',
+        token,
+      });
+    },
+
+    /**
+     * Confirm payment
+     */
+    confirmPayment: async (transactionId: string, token?: string) => {
+      return apiRequest(`/v1/billing/payments/${transactionId}/confirm`, {
+        method: 'POST',
+        token,
+      });
+    },
+
+    /**
+     * Create setup intent for payment method
+     */
+    createSetupIntent: async (vendorId: string, token?: string) => {
+      return apiRequest('/v1/billing/payments/setup-intent', {
+        method: 'POST',
+        body: { vendor_id: vendorId },
+        token,
+      });
+    },
+
+    /**
+     * Attach payment method to customer
+     */
+    attachPaymentMethod: async (customerId: string, paymentMethodId: string, token?: string) => {
+      return apiRequest('/v1/billing/payments/attach-method', {
+        method: 'POST',
+        body: { stripe_customer_id: customerId, payment_method_id: paymentMethodId },
+        token,
+      });
+    },
+  },
+
 };
 
 // ============================================================================

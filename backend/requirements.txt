@@ -42,5 +42,8 @@ requests==2.31.0
 # Payment processors
 stripe==7.0.0
 
+# PDF Generation
+reportlab>=4.0.0
+
 # Browser automation for JavaScript-rendered content verification
 playwright==1.40.0

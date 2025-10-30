@@ -276,3 +276,118 @@ class PaymentTransaction(BaseModel):
 
     def __repr__(self):
         return f"<PaymentTransaction ${self.amount} - {self.status}>"
+
+
+class DunningStatus(str, Enum):
+    """Dunning process status."""
+    ACTIVE = "active"  # In dunning workflow
+    RESOLVED = "resolved"  # Payment recovered
+    FAILED = "failed"  # Dunning failed, subscription suspended/cancelled
+    CANCELLED = "cancelled"  # Manually cancelled
+
+
+class DunningAttempt(BaseModel):
+    """Dunning attempt records for failed invoice payments."""
+
+    __tablename__ = "dunning_attempts"
+
+    dunning_attempt_id = Column(Integer, primary_key=True, index=True)
+    vendor_invoice_id = Column(Integer, ForeignKey("vendor_invoices.vendor_invoice_id"), nullable=False, index=True)
+    payment_transaction_id = Column(Integer, ForeignKey("payment_transactions.payment_transaction_id"), nullable=True)
+
+    # Attempt details
+    attempt_number = Column(Integer, nullable=False)  # 1st, 2nd, 3rd attempt
+    attempted_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    status = Column(String(50), default='pending', nullable=False)  # pending, succeeded, failed
+
+    # Retry scheduling
+    next_retry_date = Column(DateTime, nullable=True)
+    error_message = Column(Text, nullable=True)
+
+    # Dunning action
+    action_taken = Column(String(100), nullable=True)  # email_sent, payment_retried, subscription_suspended
+
+    # Relationships
+    invoice = relationship("VendorInvoice")
+    transaction = relationship("PaymentTransaction")
+
+    def __repr__(self):
+        return f"<DunningAttempt #{self.attempt_number} for Invoice {self.vendor_invoice_id}>"
+
+
+class DunningPolicy(BaseModel):
+    """Dunning retry policies and escalation rules."""
+
+    __tablename__ = "dunning_policies"
+
+    dunning_policy_id = Column(Integer, primary_key=True, index=True)
+    vendor_id = Column(Integer, ForeignKey("vendors.vendor_id"), nullable=True, index=True)  # NULL = global default
+
+    # Retry configuration
+    max_retry_attempts = Column(Integer, default=3, nullable=False)
+    retry_schedule = Column(JSON, default=lambda: {"1": 1, "2": 3, "3": 7}, nullable=False)  # days between retries
+    initial_grace_period_days = Column(Integer, default=0, nullable=False)  # Days before first retry
+
+    # Escalation actions
+    action_on_max_failed = Column(String(50), default='suspend', nullable=False)  # suspend, cancel
+    suspend_after_days = Column(Integer, default=30, nullable=False)  # Days after first failure to suspend
+
+    # Configuration
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    # Relationships
+    vendor = relationship("Vendor", foreign_keys=[vendor_id])
+
+    def __repr__(self):
+        return f"<DunningPolicy max_attempts={self.max_retry_attempts}>"
+
+
+class BillingReport(BaseModel):
+    """Billing metrics and analytics reports."""
+
+    __tablename__ = "billing_reports"
+
+    billing_report_id = Column(Integer, primary_key=True, index=True)
+    vendor_id = Column(Integer, ForeignKey("vendors.vendor_id"), nullable=False, index=True)
+
+    # Period
+    period_start = Column(DateTime, nullable=False)
+    period_end = Column(DateTime, nullable=False)
+    report_month = Column(String(7), nullable=False)  # YYYY-MM format
+
+    # Revenue metrics
+    total_mrr = Column(Numeric(12, 2), default=0, nullable=False)  # Monthly Recurring Revenue
+    total_gmv = Column(Numeric(14, 2), default=0, nullable=False)  # Total Gross Merchandise Value
+    total_gmv_fees = Column(Numeric(12, 2), default=0, nullable=False)  # GMV-based fees
+    total_subscription_fees = Column(Numeric(12, 2), default=0, nullable=False)  # Subscription fees
+
+    # Invoice metrics
+    invoice_count = Column(Integer, default=0, nullable=False)
+    paid_count = Column(Integer, default=0, nullable=False)
+    unpaid_count = Column(Integer, default=0, nullable=False)
+    overdue_count = Column(Integer, default=0, nullable=False)
+
+    # Refund metrics
+    refund_count = Column(Integer, default=0, nullable=False)
+    total_refunded = Column(Numeric(12, 2), default=0, nullable=False)
+
+    # Churn metrics
+    is_churned = Column(Boolean, default=False, nullable=False)
+    churn_reason = Column(String(255), nullable=True)
+
+    # Calculated metrics
+    payment_success_rate = Column(Numeric(5, 2), default=0, nullable=False)  # Percentage (0-100)
+    total_outstanding = Column(Numeric(12, 2), default=0, nullable=False)  # Total unpaid invoices
+    days_sales_outstanding = Column(Integer, default=0, nullable=False)  # DSO metric
+
+    # Report status
+    report_status = Column(String(50), default='draft', nullable=False)  # draft, generated, finalized
+    generated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    # Relationships
+    vendor = relationship("Vendor", foreign_keys=[vendor_id])
+
+    def __repr__(self):
+        return f"<BillingReport {self.report_month} MRR=${self.total_mrr}>"

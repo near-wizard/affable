@@ -3,6 +3,7 @@
 import logging
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from decimal import Decimal
 
@@ -20,6 +21,10 @@ from app.services.stripe_integration_service import (
     StripeIntegrationService,
     StripeWebhookService,
 )
+from app.services.adjustment_service import AdjustmentService
+from app.services.refund_service import RefundService
+from app.services.invoice_pdf_service import InvoicePDFService
+
 
 logger = logging.getLogger(__name__)
 
@@ -298,3 +303,285 @@ async def stripe_webhook(
     except Exception as e:
         logger.error(f"Error processing webhook: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
+
+# =====================================================
+# ADMIN PANEL: INVOICE ADJUSTMENTS
+# =====================================================
+
+@router.post("/admin/invoices/{invoice_id}/adjustments")
+def create_invoice_adjustment(
+    invoice_id: int,
+    adjustment_type: str,
+    amount: str,
+    reason: str,
+    description: str = None,
+    admin_user_id: int = None,
+    db: Session = Depends(get_db),
+):
+    """Create a manual invoice adjustment (admin only)."""
+    try:
+        adjustment = AdjustmentService.apply_adjustment(
+            db,
+            invoice_id,
+            adjustment_type,
+            Decimal(amount),
+            reason,
+            admin_user_id=admin_user_id,
+            description=description,
+        )
+
+        return {
+            "status": "created",
+            "adjustment_id": adjustment.invoice_adjustment_id,
+            "invoice_id": invoice_id,
+            "type": adjustment.adjustment_type,
+            "amount": str(adjustment.amount),
+            "reason": adjustment.adjustment_reason,
+            "created_at": adjustment.created_at.isoformat(),
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/admin/invoices/{invoice_id}/adjustments")
+def list_invoice_adjustments(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+):
+    """Get all adjustments for an invoice."""
+    try:
+        adjustments = AdjustmentService.get_adjustments(db, invoice_id)
+
+        return {
+            "invoice_id": invoice_id,
+            "adjustments": [
+                {
+                    "adjustment_id": adj.invoice_adjustment_id,
+                    "type": adj.adjustment_type,
+                    "amount": str(adj.amount),
+                    "reason": adj.adjustment_reason,
+                    "created_at": adj.created_at.isoformat(),
+                }
+                for adj in adjustments
+            ],
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/admin/invoices/{invoice_id}/adjustments/{adjustment_id}")
+def reverse_invoice_adjustment(
+    invoice_id: int,
+    adjustment_id: int,
+    reason: str = "User reversal",
+    db: Session = Depends(get_db),
+):
+    """Reverse an invoice adjustment by creating an opposite entry."""
+    try:
+        reversal = AdjustmentService.reverse_adjustment(
+            db,
+            adjustment_id,
+            reason=reason,
+        )
+
+        return {
+            "status": "reversed",
+            "original_adjustment_id": adjustment_id,
+            "reversal_adjustment_id": reversal.invoice_adjustment_id,
+            "reversal_amount": str(reversal.amount),
+            "created_at": reversal.created_at.isoformat(),
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/admin/invoices/{invoice_id}/adjustments/summary")
+def get_adjustment_summary(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+):
+    """Get adjustment summary for an invoice."""
+    try:
+        summary = AdjustmentService.get_adjustment_summary(db, invoice_id)
+
+        return {
+            "invoice_id": invoice_id,
+            "total_adjustments": summary["total_adjustments"],
+            "totals": {
+                "credits": str(summary["total_credits"]),
+                "debits": str(summary["total_debits"]),
+                "discounts": str(summary["total_discounts"]),
+                "fee_waivers": str(summary["total_fee_waivers"]),
+                "overpayments": str(summary["total_overpayment"]),
+                "net_adjustment": str(summary["net_adjustment"]),
+            },
+            "by_type": summary["by_type"],
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/admin/invoices/{invoice_id}/adjustments/audit")
+def get_adjustment_audit_trail(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+):
+    """Get full audit trail for invoice adjustments with validation."""
+    try:
+        audit_trail = AdjustmentService.validate_adjustment_history(db, invoice_id)
+        return audit_trail
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# =====================================================
+# ADMIN PANEL: REFUNDS
+# =====================================================
+
+@router.post("/admin/refunds/requests")
+def create_refund_request(
+    payment_transaction_id: int,
+    amount: str = None,
+    reason: str = "Customer request",
+    description: str = None,
+    db: Session = Depends(get_db),
+):
+    """Create a refund request for a payment."""
+    try:
+        refund_amount = Decimal(amount) if amount else None
+        request = RefundService.create_refund_request(
+            db,
+            payment_transaction_id,
+            amount=refund_amount,
+            reason=reason,
+            description=description,
+        )
+
+        return {
+            "status": "requested",
+            "payment_transaction_id": request["payment_transaction_id"],
+            "invoice_id": request["invoice_id"],
+            "amount": str(request["amount"]),
+            "is_partial": request["is_partial"],
+            "reason": request["reason"],
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/admin/refunds/{payment_transaction_id}/process")
+def process_refund(
+    payment_transaction_id: int,
+    amount: str = None,
+    reason: str = "Customer request",
+    db: Session = Depends(get_db),
+    stripe_service: StripeIntegrationService = Depends(get_stripe_service),
+):
+    """Process a refund through Stripe and update records."""
+    try:
+        refund_amount = Decimal(amount) if amount else None
+        result = RefundService.process_refund(
+            db,
+            payment_transaction_id,
+            amount=refund_amount,
+            reason=reason,
+            stripe_service=stripe_service,
+        )
+
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/admin/refunds/{invoice_id}/history")
+def get_refund_history(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+):
+    """Get refund history for an invoice."""
+    refunds = RefundService.get_refund_history(db, invoice_id)
+
+    return {
+        "invoice_id": invoice_id,
+        "refunds": refunds,
+    }
+
+
+@router.post("/admin/refunds/{invoice_id}/impact")
+def calculate_refund_impact(
+    invoice_id: int,
+    refund_amount: str,
+    db: Session = Depends(get_db),
+):
+    """Calculate impact of a proposed refund."""
+    try:
+        impact = RefundService.calculate_refund_impact(
+            db,
+            invoice_id,
+            Decimal(refund_amount),
+        )
+
+        return {
+            "invoice_id": invoice_id,
+            "current_total": impact["current_total"],
+            "proposed_refund": impact["proposed_refund"],
+            "new_total": impact["new_total"],
+            "is_full_refund": impact["is_full_refund"],
+            "is_valid": impact["is_valid"],
+            "breakdown": impact["breakdown"],
+            "refund_breakdown": impact["refund_breakdown"],
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/admin/credits/memo")
+def create_credit_memo(
+    vendor_id: int,
+    amount: str,
+    reason: str,
+    apply_to_invoice_id: int = None,
+    db: Session = Depends(get_db),
+):
+    """Create a credit memo for a vendor."""
+    try:
+        credit = RefundService.create_credit_memo(
+            db,
+            vendor_id,
+            Decimal(amount),
+            reason,
+            apply_to_invoice_id=apply_to_invoice_id,
+        )
+        return {
+            "credit_id": credit.credit_memo_id,
+            "amount": float(credit.amount),
+            "reason": credit.reason,
+            "created_at": credit.created_at.isoformat(),
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# =====================================================
+# INVOICE PDF DOWNLOAD
+# =====================================================
+
+@router.get("/invoices/{invoice_id}/download")
+def download_invoice(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+):
+    """Download invoice as PDF."""
+    try:
+        pdf_bytes = InvoicePDFService.generate_invoice_pdf(db, invoice_id)
+
+        return StreamingResponse(
+            iter([pdf_bytes]),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=invoice-{invoice_id}.pdf"}
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error generating invoice PDF: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to generate invoice")

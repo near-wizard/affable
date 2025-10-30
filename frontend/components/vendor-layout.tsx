@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, ChevronDown, LogOut, Settings, User } from "lucide-react"
+import { Menu, ChevronDown, LogOut, Settings, User, CreditCard, LayoutDashboard, DollarSign, Megaphone, Users } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { clearAuthCredentials, getUserEmail } from "@/lib/auth-utils"
@@ -9,25 +9,55 @@ import { clearAuthCredentials, getUserEmail } from "@/lib/auth-utils"
 interface MenuItem {
   name: string
   path?: string
+  icon?: React.ReactNode
   children?: MenuItem[]
 }
 
 const links: MenuItem[] = [
-  { name: "Dashboard", path: "/vendor/dashboard" },
-  { name: "Campaigns", path: "/vendor/campaigns" },
+  {
+    name: "Dashboard",
+    icon: <LayoutDashboard size={18} />,
+    children: [
+      { name: "Overview", path: "/vendor/dashboard" },
+    ],
+  },
+  {
+    name: "Campaigns",
+    icon: <Megaphone size={18} />,
+    children: [
+      { name: "All Campaigns", path: "/vendor/campaigns" },
+    ],
+  },
   {
     name: "Partners",
+    icon: <Users size={18} />,
     children: [
       { name: "Current Partners", path: "/vendor/partners/current" },
       { name: "Find Partners", path: "/vendor/partners/find" },
     ],
   },
-  { name: "Payouts", path: "/vendor/payouts" },
+  {
+    name: "Payouts",
+    icon: <DollarSign size={18} />,
+    children: [
+      { name: "Pending Payments", path: "/vendor/payouts" },
+      { name: "Payment History", path: "/vendor/payouts/history" },
+    ],
+  },
+  {
+    name: "Billing & Payments",
+    icon: <CreditCard size={18} />,
+    children: [
+      { name: "Overview", path: "/vendor/billing" },
+      { name: "Plans", path: "/vendor/billing/plans" },
+      { name: "Payment Method", path: "/vendor/billing/payment" },
+    ],
+  },
 ]
 
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(true) // default open
-  const [expandedMenu, setExpandedMenu] = useState<string | null>("Partners") // default expand Partners
+  const [expandedMenu, setExpandedMenu] = useState<string | null>("Dashboard") // default expand Dashboard
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const pathname = usePathname()
   const router = useRouter()
@@ -100,10 +130,13 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
                   <button
                     onClick={() => toggleSubmenu(link.name)}
                     className={`w-full flex items-center justify-between p-2 rounded hover:bg-gray-100 transition-colors ${
-                      isActive ? "bg-gray-200 font-semibold" : ""
+                      isActive ? "bg-blue-50 font-semibold text-blue-900" : ""
                     }`}
                   >
-                    <span>{link.name}</span>
+                    <div className="flex items-center gap-2">
+                      {link.icon && <span className="flex items-center justify-center">{link.icon}</span>}
+                      <span>{link.name}</span>
+                    </div>
                     <ChevronDown
                       size={16}
                       className={`transition-transform duration-200 ${
@@ -119,7 +152,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
                           href={child.path!}
                           className={`block p-2 rounded hover:bg-gray-100 text-sm transition-colors ${
                             pathname === child.path
-                              ? "bg-gray-200 font-semibold text-gray-900"
+                              ? "bg-blue-50 font-semibold text-blue-900"
                               : "text-gray-700"
                           }`}
                           onClick={() => setIsOpen(false)}
@@ -138,7 +171,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
                 key={link.path}
                 href={link.path!}
                 className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-                  isActive ? "bg-gray-200 font-semibold" : ""
+                  isActive ? "bg-blue-50 font-semibold text-blue-900" : ""
                 }`}
                 onClick={() => setIsOpen(false)}
               >

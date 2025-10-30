@@ -55,8 +55,8 @@ export default function VendorPayouts() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex items-center justify-between">
               <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2"> <CreditCard size={32} className="text-blue-600" /> Payouts</h1>
-                <p className="text-gray-600 mt-1">Manage partner payouts and commission payments</p>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2"> <CreditCard size={32} className="text-blue-600" /> Manage Payouts</h1>
+                <p className="text-gray-600 mt-1">Process and manage pending partner payouts</p>
               </div>
               <button className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
                 <Download size={20} />
@@ -158,79 +158,21 @@ export default function VendorPayouts() {
             </div>
           </div>
 
-          {/* Payouts History */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Payout History</h2>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Partner
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Period
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Payment Method
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredPayouts.map((payout) => (
-                    <tr key={payout.payout_id} className="hover:bg-gray-50 transition">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">Partner {payout.partner_id}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-semibold text-gray-900">
-                          ${(payout.amount || 0).toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {payout.start_date ? new Date(payout.start_date).toLocaleDateString() : '-'} {' - '} {' '}
-                        {payout.end_date ? new Date(payout.end_date).toLocaleDateString() : '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {payout.currency || 'USD'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusBadge status={payout.status} />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {payout.created_at
-                          ? new Date(payout.created_at).toLocaleDateString()
-                          : '-'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {filteredPayouts.length === 0 && (
-              <div className="text-center py-12">
-                <DollarSign className="mx-auto text-gray-400 mb-4" size={48} />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No payouts found</h3>
-                <p className="text-gray-600">
-                  {statusFilter !== 'all'
-                    ? 'Try changing the filter to see more payouts'
-                    : 'Payouts will appear here once processed'}
-                </p>
-              </div>
-            )}
+          {/* View Full History */}
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-8 text-center">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">View Complete Payout History</h2>
+            <p className="text-gray-600 mb-6">
+              See all completed and historical payouts with detailed filtering and export options.
+            </p>
+            <a
+              href="/vendor/payouts/history"
+              className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-medium"
+            >
+              View Full History
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
           </div>
         </div>
       </div>
