@@ -193,8 +193,8 @@ export default function PartnerLinks() {
 		switch (status) {
 			case "no_content":
 				return {
-					bgColor: "bg-slate-100",
-					textColor: "text-slate-600",
+					bgColor: "bg-muted",
+					textColor: "text-muted-foreground",
 					label: "No Content",
 				};
 			case "unverified":
@@ -212,7 +212,7 @@ export default function PartnerLinks() {
 			case "failed":
 				return {
 					bgColor: "bg-rose-100",
-					textColor: "text-rose-700",
+					textColor: "text-primary",
 					label: "Verification Failed",
 				};
 			default:
@@ -381,10 +381,10 @@ export default function PartnerLinks() {
 
 	if (partnerLoading || campaignsLoading) {
 		return (
-			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+			<div className="min-h-screen bg-background flex items-center justify-center">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-					<p className="mt-4 text-gray-600">Loading...</p>
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+					<p className="mt-4 text-muted-foreground">Loading...</p>
 				</div>
 			</div>
 		);
@@ -392,13 +392,13 @@ export default function PartnerLinks() {
 
 	if (!currentPartner) {
 		return (
-			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+			<div className="min-h-screen bg-background flex items-center justify-center">
 				<div className="text-center">
-					<AlertCircle size={48} className="mx-auto text-red-600 mb-4" />
-					<p className="text-gray-800 font-semibold">
+					<AlertCircle size={48} className="mx-auto text-destructive mb-4" />
+					<p className="text-foreground font-semibold">
 						Unable to load partner data
 					</p>
-					<p className="text-gray-600 mt-2">
+					<p className="text-muted-foreground mt-2">
 						Please ensure you are logged in as a partner
 					</p>
 				</div>
@@ -411,22 +411,22 @@ export default function PartnerLinks() {
 		enrolledCampaigns?.filter((camp: any) => camp.status === "approved") || [];
 
 	return (
-		<div className="min-h-screen bg-gray-50">
+		<div className="min-h-screen bg-background">
 			<div className="max-w-7xl mx-auto px-4 py-8">
 				{/* Header */}
 				<div className="flex justify-between items-center mb-8">
 					<div>
-						<h1 className="text-3xl font-bold text-gray-900">
+						<h1 className="text-3xl font-bold text-foreground">
 							Affiliate Links
 						</h1>
-						<p className="text-gray-600 mt-2">
+						<p className="text-muted-foreground mt-2">
 							Create and manage your tracking links. One link per piece of
 							content helps you understand what works best.
 						</p>
 					</div>
 					<button
 						onClick={handleOpenModal}
-						className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+						className="border border-blueberry bg-primary/100 text-white px-4 py-2 rounded-lg hover:border-blueberry bg-rose-600 flex items-center gap-2"
 					>
 						<Plus size={20} />
 						Create Link
@@ -435,13 +435,13 @@ export default function PartnerLinks() {
 
 				{/* Campaign Filter */}
 				<div className="mb-6">
-					<label className="block text-sm font-medium text-gray-700 mb-2">
+					<label className="block text-sm font-medium text-foreground mb-2">
 						Filter by Campaign
 					</label>
 					<select
 						value={selectedCampaign}
 						onChange={(e) => setSelectedCampaign(e.target.value)}
-						className="w-full max-w-xs border border-gray-300 rounded-lg p-2 text-gray-900"
+						className="w-full max-w-xs border border-border rounded-lg p-2 text-foreground"
 					>
 						<option value="all">All Campaigns</option>
 						{approvedCampaigns.map((campaign: any) => (
@@ -458,20 +458,20 @@ export default function PartnerLinks() {
 				{/* Links List */}
 				{linksLoading ? (
 					<div className="text-center py-12">
-						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-						<p className="mt-4 text-gray-600">Loading links...</p>
+						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+						<p className="mt-4 text-muted-foreground">Loading links...</p>
 					</div>
 				) : filteredLinks && filteredLinks.length > 0 ? (
 					<div className="grid gap-4">
 						{filteredLinks.map((link: any) => (
 							<div
 								key={link.partner_link_id}
-								className="bg-white rounded-lg border border-gray-200 p-6"
+								className="bg-background rounded-lg border border-border p-6"
 							>
 								<div className="flex justify-between items-start mb-4">
 									<div className="flex-1">
 										<div className="flex items-center gap-3 mb-2">
-											<h3 className="text-lg font-semibold text-gray-900">
+											<h3 className="text-lg font-semibold text-foreground">
 												{link.link_label}
 											</h3>
 											{(() => {
@@ -487,7 +487,7 @@ export default function PartnerLinks() {
 												);
 											})()}
 										</div>
-										<p className="text-sm text-gray-500 mt-1">
+										<p className="text-sm text-muted-foreground mt-1">
 											Campaign:{" "}
 											{link.campaign_partner?.campaign_version?.name ||
 												"Unknown"}
@@ -501,25 +501,25 @@ export default function PartnerLinks() {
 													value={editingContentUrlValue}
 													onChange={(e) => setEditingContentUrlValue(e.target.value)}
 													placeholder="https://example.com"
-													className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+													className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
 														editingContentUrlError
 															? "border-red-500"
-															: "border-gray-300"
+															: "border-border"
 													}`}
 												/>
 												{editingContentUrlError && (
-													<p className="text-xs text-red-600">{editingContentUrlError}</p>
+													<p className="text-xs text-destructive">{editingContentUrlError}</p>
 												)}
 												<div className="flex gap-2">
 													<button
 														onClick={() => handleSaveContentUrl(link.partner_link_id)}
-														className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+														className="text-xs px-3 py-1 border border-blueberry bg-primary/100 text-white rounded hover:border-blueberry bg-rose-600"
 													>
 														Save
 													</button>
 													<button
 														onClick={handleCancelEditContentUrl}
-														className="text-xs px-3 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+														className="text-xs px-3 py-1 bg-gray-300 text-foreground rounded hover:bg-gray-400"
 													>
 														Cancel
 													</button>
@@ -530,12 +530,12 @@ export default function PartnerLinks() {
 												{link.content_url ? (
 													<>
 														<div className="flex-1">
-															<p className="text-xs text-gray-500 mb-1">Content URL:</p>
+															<p className="text-xs text-muted-foreground mb-1">Content URL:</p>
 															<a
 																href={link.content_url}
 																target="_blank"
 																rel="noopener noreferrer"
-																className="text-xs text-gray-600 hover:text-blue-600 break-all"
+																className="text-xs text-muted-foreground hover:text-primary break-all"
 															>
 																{link.content_url}
 															</a>
@@ -547,10 +547,10 @@ export default function PartnerLinks() {
 																	link.content_url || ""
 																)
 															}
-															className="p-1 hover:bg-gray-100 rounded mt-4"
+															className="p-1 hover:bg-muted rounded mt-4"
 															title="Edit content URL"
 														>
-															<Edit2 size={16} className="text-gray-400" />
+															<Edit2 size={16} className="text-muted-foreground" />
 														</button>
 													</>
 												) : (
@@ -558,7 +558,7 @@ export default function PartnerLinks() {
 														onClick={() =>
 															handleEditContentUrl(link.partner_link_id, "")
 														}
-														className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 mt-1"
+														className="flex items-center gap-2 p-1 hover:bg-muted rounded text-muted-foreground hover:text-muted-foreground mt-1"
 														title="Add content URL"
 													>
 														<Edit2 size={16} />
@@ -573,38 +573,38 @@ export default function PartnerLinks() {
 											onClick={() =>
 												copyToClipboard(link.tracking_url, link.partner_link_id)
 											}
-											className="p-2 hover:bg-gray-100 rounded"
+											className="p-2 hover:bg-muted rounded"
 											title="Copy tracking URL"
 										>
 											{copiedLink === link.partner_link_id ? (
-												<Check size={20} className="text-green-600" />
+												<Check size={20} className="text-secondary" />
 											) : (
-												<Copy size={20} className="text-gray-600" />
+												<Copy size={20} className="text-muted-foreground" />
 											)}
 										</button>
 										<a
 											href={link.tracking_url}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="p-2 hover:bg-gray-100 rounded"
+											className="p-2 hover:bg-muted rounded"
 											title="Test link"
 										>
-											<ExternalLink size={20} className="text-gray-600" />
+											<ExternalLink size={20} className="text-muted-foreground" />
 										</a>
 									</div>
 								</div>
 
 								{/* Link URLs */}
-								<div className="bg-gray-50 rounded-lg p-4 mb-4 font-mono text-sm">
+								<div className="bg-background rounded-lg p-4 mb-4 font-mono text-sm">
 									<div className="mb-3">
-										<p className="text-gray-600 text-xs mb-1">Tracking URL:</p>
-										<p className="text-gray-900 break-all">
+										<p className="text-muted-foreground text-xs mb-1">Tracking URL:</p>
+										<p className="text-foreground break-all">
 											{link.tracking_url}
 										</p>
 									</div>
 									<div>
-										<p className="text-gray-600 text-xs mb-1">Destination:</p>
-										<p className="text-gray-900 break-all text-xs">
+										<p className="text-muted-foreground text-xs mb-1">Destination:</p>
+										<p className="text-foreground break-all text-xs">
 											{link.full_url}
 										</p>
 									</div>
@@ -613,34 +613,34 @@ export default function PartnerLinks() {
 								{/* Stats */}
 								<div className="grid grid-cols-4 gap-4">
 									<div>
-										<p className="text-sm text-gray-600">Clicks</p>
-										<p className="text-2xl font-bold text-gray-900">
+										<p className="text-sm text-muted-foreground">Clicks</p>
+										<p className="text-2xl font-bold text-foreground">
 											{link.click_count || 0}
 										</p>
 									</div>
 									<div>
-										<p className="text-sm text-gray-600">Conversions</p>
-										<p className="text-2xl font-bold text-gray-900">-</p>
+										<p className="text-sm text-muted-foreground">Conversions</p>
+										<p className="text-2xl font-bold text-foreground">-</p>
 									</div>
 									<div>
-										<p className="text-sm text-gray-600">Conv. Rate</p>
-										<p className="text-2xl font-bold text-gray-900">-</p>
+										<p className="text-sm text-muted-foreground">Conv. Rate</p>
+										<p className="text-2xl font-bold text-foreground">-</p>
 									</div>
 									<div>
-										<p className="text-sm text-gray-600">Earnings</p>
-										<p className="text-2xl font-bold text-gray-900">-</p>
+										<p className="text-sm text-muted-foreground">Earnings</p>
+										<p className="text-2xl font-bold text-foreground">-</p>
 									</div>
 								</div>
 
-								<p className="text-xs text-gray-500 mt-4">
+								<p className="text-xs text-muted-foreground mt-4">
 									Created: {new Date(link.created_at).toLocaleDateString()}
 								</p>
 							</div>
 						))}
 					</div>
 				) : (
-					<div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-						<p className="text-gray-600">
+					<div className="bg-background rounded-lg border border-border p-12 text-center">
+						<p className="text-muted-foreground">
 							No links yet. Create your first link to start tracking!
 						</p>
 					</div>
@@ -650,13 +650,13 @@ export default function PartnerLinks() {
 			{/* Create Link Modal */}
 			{showCreateModal && (
 				<div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-					<div className="bg-white rounded-lg max-w-md w-full p-6">
-						<h2 className="text-2xl font-bold text-gray-900 mb-4">
+					<div className="bg-background rounded-lg max-w-md w-full p-6">
+						<h2 className="text-2xl font-bold text-foreground mb-4">
 							Create New Link
 						</h2>
 
 						{createError && (
-							<div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded flex items-start gap-2">
+							<div className="mb-4 p-3 bg-destructive/10 border border-red-200 text-red-700 rounded flex items-start gap-2">
 								<AlertCircle size={20} className="mt-0.5" />
 								<div>
 									<p className="font-semibold">Error</p>
@@ -666,7 +666,7 @@ export default function PartnerLinks() {
 						)}
 
 						{formError && (
-							<div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded">
+							<div className="mb-4 p-3 bg-destructive/10 border border-red-200 text-red-700 rounded">
 								{formError}
 							</div>
 						)}
@@ -674,7 +674,7 @@ export default function PartnerLinks() {
 						<form onSubmit={handleCreateLink} className="space-y-4">
 							{/* Campaign Selection */}
 							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-1">
+								<label className="block text-sm font-medium text-foreground mb-1">
 									Campaign *
 								</label>
 								<select
@@ -682,7 +682,7 @@ export default function PartnerLinks() {
 									onChange={(e) =>
 										handleCampaignChange(parseInt(e.target.value))
 									}
-									className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+									className="w-full border border-border rounded-lg p-2 text-foreground"
 									disabled={creatingLink}
 								>
 									<option value={0}>Select a campaign...</option>
@@ -695,14 +695,14 @@ export default function PartnerLinks() {
 										</option>
 									))}
 								</select>
-								<p className="text-xs text-gray-500 mt-1">
+								<p className="text-xs text-muted-foreground mt-1">
 									Only approved campaigns are available
 								</p>
 							</div>
 
 							{/* Link Label */}
 							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-1">
+								<label className="block text-sm font-medium text-foreground mb-1">
 									Link Label (e.g., "Blog Post Title") *
 								</label>
 								<input
@@ -712,15 +712,15 @@ export default function PartnerLinks() {
 										setFormData({ ...formData, linkLabel: e.target.value })
 									}
 									placeholder="e.g., Blog Post CTA, YouTube Description"
-									className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+									className="w-full border border-border rounded-lg p-2 text-foreground"
 									disabled={creatingLink}
 									maxLength={255}
 								/>
 							</div>
 
 							{/* UTM Parameters */}
-							<div className="pt-2 border-t border-gray-200">
-								<p className="text-sm font-medium text-gray-700 mb-3">
+							<div className="pt-2 border-t border-border">
+								<p className="text-sm font-medium text-foreground mb-3">
 									Expected UTM Parameters (Optional)
 								</p>
 
@@ -762,7 +762,7 @@ export default function PartnerLinks() {
 													},
 												})
 											}
-											className="w-full text-sm border border-gray-300 rounded-lg p-2 text-gray-900 mt-1"
+											className="w-full text-sm border border-border rounded-lg p-2 text-foreground mt-1"
 											disabled={creatingLink}
 										/>
 									</div>
@@ -806,16 +806,16 @@ export default function PartnerLinks() {
 													},
 												})
 											}
-											className="w-full text-sm border border-gray-300 rounded-lg p-2 text-gray-900 mt-1"
+											className="w-full text-sm border border-border rounded-lg p-2 text-foreground mt-1"
 											disabled={creatingLink}
 										/>
 									</div>
 
 									{/* UTM Campaign - Auto-populated but can be edited */}
 									<div>
-										<label className="text-xs text-gray-600 mb-1 block">
+										<label className="text-xs text-muted-foreground mb-1 block">
 											UTM Campaign
-											<span className="text-gray-400 text-xs ml-1">
+											<span className="text-muted-foreground text-xs ml-1">
 												(auto-filled from campaign name)
 											</span>
 										</label>
@@ -832,14 +832,14 @@ export default function PartnerLinks() {
 													},
 												})
 											}
-											className="w-full text-sm border border-gray-300 rounded-lg p-2 text-gray-900"
+											className="w-full text-sm border border-border rounded-lg p-2 text-foreground"
 											disabled={creatingLink}
 										/>
 									</div>
 
 									{/* UTM Content */}
 									<div>
-										<label className="text-xs text-gray-600 mb-1 block">
+										<label className="text-xs text-muted-foreground mb-1 block">
 											UTM Content
 										</label>
 										<input
@@ -855,10 +855,10 @@ export default function PartnerLinks() {
 													},
 												})
 											}
-											className="w-full text-sm border border-gray-300 rounded-lg p-2 text-gray-900"
+											className="w-full text-sm border border-border rounded-lg p-2 text-foreground"
 											disabled={creatingLink}
 										/>
-										<p className="text-xs text-gray-500 mt-1">
+										<p className="text-xs text-muted-foreground mt-1">
 											Use this to identify specific elements within your content
 											(e.g., different buttons or images on the same page)
 										</p>
@@ -867,18 +867,18 @@ export default function PartnerLinks() {
 							</div>
 
 							{/* Buttons */}
-							<div className="flex gap-3 pt-4 border-t border-gray-200">
+							<div className="flex gap-3 pt-4 border-t border-border">
 								<button
 									type="button"
 									onClick={handleCloseModal}
-									className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+									className="flex-1 px-4 py-2 border border-border rounded-lg text-foreground hover:bg-background"
 									disabled={creatingLink}
 								>
 									Cancel
 								</button>
 								<button
 									type="submit"
-									className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+									className="flex-1 px-4 py-2 border border-blueberry bg-primary/100 text-white rounded-lg hover:border-blueberry bg-rose-600 disabled:opacity-50 flex items-center justify-center gap-2"
 									disabled={creatingLink}
 								>
 									{creatingLink && (

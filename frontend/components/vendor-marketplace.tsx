@@ -121,7 +121,7 @@ const mockPartners: Partner[] = [
 const partnerTypes = ["All", "Content Creator", "Community", "Agency", "Influencer", "Advisor", "Educator", "Reseller"]
 
 const tierBadgeColor = {
-  standard: "bg-slate-100 text-slate-800",
+  standard: "bg-muted text-slate-800",
   bronze: "bg-amber-100 text-amber-800",
   silver: "bg-zinc-100 text-zinc-800",
   gold: "bg-yellow-100 text-yellow-800",

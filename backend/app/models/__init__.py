@@ -12,7 +12,8 @@ from app.models.campaign import (
     CampaignVersion,
     CampaignTier,
     CampaignPartner,
-    PartnerCampaignOverride
+    PartnerCampaignOverride,
+    PartnerInvitation
 )
 from app.models.tracking import (
     PartnerLink,
@@ -36,6 +37,10 @@ from app.models.payout import (
     Payout,
     PayoutEvent,
     AuditLog
+)
+from app.models.payout_schedule import (
+    PayoutSchedule,
+    PayoutScheduleExecution
 )
 from app.models.billing import (
     SubscriptionPlan,
@@ -75,6 +80,7 @@ __all__ = [
     "CampaignTier",
     "CampaignPartner",
     "PartnerCampaignOverride",
+    "PartnerInvitation",
     
     # Tracking
     "PartnerLink",
@@ -98,6 +104,8 @@ __all__ = [
     "Payout",
     "PayoutEvent",
     "AuditLog",
+    "PayoutSchedule",
+    "PayoutScheduleExecution",
 
     # Billing
     "SubscriptionPlan",

@@ -68,6 +68,7 @@ const PLAN_FEATURES: Record<string, string[]> = {
 		"Advanced analytics",
 		"Priority email support",
 		"Bi-weekly invoicing",
+		"Custom integration support",
 	],
 	ENTERPRISE: [
 		"Unlimited GMV",
@@ -197,14 +198,14 @@ export default function PlansPage() {
 		planId === currentSubscription?.plan_id;
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+		<div className="min-h-screen bg-gradient-to-br from-background to-muted">
 			<div className="container mx-auto px-4 py-8 max-w-7xl">
 				{/* Header */}
 				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-slate-900 mb-2">
+					<h1 className="text-3xl font-bold text-foreground mb-2">
 						Choose Your Plan
 					</h1>
-					<p className="text-slate-600">
+					<p className="text-muted-foreground">
 						Select the perfect plan for your business. Upgrade or downgrade
 						anytime.
 					</p>
@@ -228,10 +229,10 @@ export default function PlansPage() {
 				) : (
 					<div className="space-y-8">
 						{/* Pricing Calculator Section */}
-						<Card className="bg-white border-2 border-blue-100">
-							<CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+						<Card className="bg-background border-2 border-border">
+							<CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
 								<CardTitle className="flex items-center gap-2">
-									<Zap className="h-5 w-5 text-blue-600" />
+									<Zap className="h-5 w-5 text-primary" />
 									Pricing Calculator
 								</CardTitle>
 								<CardDescription>
@@ -242,11 +243,11 @@ export default function PlansPage() {
 								<div className="space-y-6">
 									{/* GMV Input */}
 									<div>
-										<label className="block text-sm font-semibold text-slate-900 mb-2">
+										<label className="block text-sm font-semibold text-foreground mb-2">
 											Expected Monthly GMV
 										</label>
 										<div className="relative">
-											<span className="absolute left-3 top-3 text-slate-600">
+											<span className="absolute left-3 top-3 text-muted-foreground">
 												$
 											</span>
 											<input
@@ -257,7 +258,7 @@ export default function PlansPage() {
 														Math.max(0, parseInt(e.target.value) || 0)
 													)
 												}
-												className="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+												className="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
 												placeholder="10000"
 											/>
 										</div>
@@ -266,7 +267,7 @@ export default function PlansPage() {
 												<button
 													key={amount}
 													onClick={() => setGmvAmount(amount)}
-													className="px-3 py-1 text-xs font-medium rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+													className="px-3 py-1 text-xs font-medium rounded bg-muted text-foreground hover:bg-slate-200 transition"
 												>
 													${(amount / 1000).toFixed(0)}K
 												</button>
@@ -277,41 +278,41 @@ export default function PlansPage() {
 									{/* Calculation Results */}
 									{selectedPlan && calculation && (
 										<div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
-											<div className="bg-slate-50 rounded-lg p-4">
-												<p className="text-xs text-slate-600 uppercase font-semibold mb-1">
+											<div className="bg-background rounded-lg p-4">
+												<p className="text-xs text-muted-foreground uppercase font-semibold mb-1">
 													Base Fee
 												</p>
-												<p className="text-2xl font-bold text-slate-900">
+												<p className="text-2xl font-bold text-foreground">
 													${calculation.base_fee.toFixed(2)}
 												</p>
 											</div>
 
-											<div className="bg-slate-50 rounded-lg p-4">
-												<p className="text-xs text-slate-600 uppercase font-semibold mb-1">
+											<div className="bg-background rounded-lg p-4">
+												<p className="text-xs text-muted-foreground uppercase font-semibold mb-1">
 													GMV Amount
 												</p>
-												<p className="text-2xl font-bold text-slate-900">
+												<p className="text-2xl font-bold text-foreground">
 													${calculation.gmv_amount.toLocaleString()}
 												</p>
 											</div>
 
-											<div className="bg-slate-50 rounded-lg p-4">
-												<p className="text-xs text-slate-600 uppercase font-semibold mb-1">
+											<div className="bg-background rounded-lg p-4">
+												<p className="text-xs text-muted-foreground uppercase font-semibold mb-1">
 													GMV Fee ({selectedPlan.gmv_percentage}%)
 												</p>
-												<p className="text-2xl font-bold text-slate-900">
+												<p className="text-2xl font-bold text-foreground">
 													${calculation.gmv_fee.toFixed(2)}
 												</p>
 											</div>
 
-											<div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border-2 border-blue-200">
-												<p className="text-xs text-blue-600 uppercase font-semibold mb-1">
+											<div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg p-4 border-2 border-border">
+												<p className="text-xs text-primary uppercase font-semibold mb-1">
 													Estimated Total
 												</p>
-												<p className="text-2xl font-bold text-blue-900">
+												<p className="text-2xl font-bold text-primary">
 													${calculation.estimated_total.toFixed(2)}
 												</p>
-												<p className="text-xs text-blue-600 mt-1">/month</p>
+												<p className="text-xs text-primary mt-1">/month</p>
 											</div>
 										</div>
 									)}
@@ -330,15 +331,15 @@ export default function PlansPage() {
 										key={plan.id}
 										className={`relative transition-all duration-300 ${
 											isCurrent
-												? "ring-2 ring-green-500 border-green-200 bg-green-50"
+												? "ring-2 ring-green-500 border-green-200 bg-secondary"
 												: isSelected
-												? "ring-2 ring-blue-500 border-blue-200 bg-blue-50"
+												? "ring-2 ring-purple-500 border-border bg-primary/10"
 												: "hover:shadow-lg"
 										}`}
 									>
 										{/* Current Plan Badge */}
 										{isCurrent && (
-											<div className="absolute -top-3 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+											<div className="absolute -top-3 right-4 bg-secondary0 text-white px-3 py-1 rounded-full text-xs font-semibold">
 												Current Plan
 											</div>
 										)}
@@ -362,19 +363,19 @@ export default function PlansPage() {
 											{/* Pricing */}
 											<div>
 												<div className="flex items-baseline gap-1">
-													<span className="text-3xl font-bold text-slate-900">
+													<span className="text-3xl font-bold text-foreground">
 														${parseFloat(plan.base_price).toFixed(0)}
 													</span>
-													<span className="text-slate-600">/month</span>
+													<span className="text-muted-foreground">/month</span>
 												</div>
-												<p className="text-sm text-slate-600 mt-1">
+												<p className="text-sm text-muted-foreground mt-1">
 													Plus {plan.gmv_percentage}% of GMV
 												</p>
 											</div>
 
 											{/* Features */}
 											<div className="space-y-3">
-												<p className="text-sm font-semibold text-slate-900">
+												<p className="text-sm font-semibold text-foreground">
 													Key Features:
 												</p>
 												<ul className="space-y-2">
@@ -384,8 +385,8 @@ export default function PlansPage() {
 																key={idx}
 																className="flex items-start gap-2 text-sm"
 															>
-																<Check className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-																<span className="text-slate-700">
+																<Check className="h-4 w-4 text-secondary flex-shrink-0 mt-0.5" />
+																<span className="text-foreground">
 																	{feature}
 																</span>
 															</li>
@@ -420,9 +421,9 @@ export default function PlansPage() {
 
 						{/* Feature Comparison */}
 						<Card>
-							<CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100">
+							<CardHeader className="bg-gradient-to-r from-background to-muted">
 								<CardTitle className="flex items-center gap-2">
-									<TrendingUp className="h-5 w-5 text-slate-600" />
+									<TrendingUp className="h-5 w-5 text-muted-foreground" />
 									Feature Comparison
 								</CardTitle>
 							</CardHeader>
@@ -430,14 +431,14 @@ export default function PlansPage() {
 								<div className="overflow-x-auto">
 									<table className="w-full text-sm">
 										<thead>
-											<tr className="border-b-2 border-slate-200">
-												<th className="text-left py-3 px-4 font-semibold text-slate-900">
+											<tr className="border-b-2 border-border">
+												<th className="text-left py-3 px-4 font-semibold text-foreground">
 													Feature
 												</th>
 												{plans.map((plan) => (
 													<th
 														key={plan.id}
-														className="text-center py-3 px-4 font-semibold text-slate-900"
+														className="text-center py-3 px-4 font-semibold text-foreground"
 													>
 														{plan.display_name}
 													</th>
@@ -446,7 +447,7 @@ export default function PlansPage() {
 										</thead>
 										<tbody className="divide-y">
 											<tr>
-												<td className="py-3 px-4 font-semibold text-slate-900">
+												<td className="py-3 px-4 font-semibold text-foreground">
 													Base Price
 												</td>
 												{plans.map((plan) => (
@@ -457,7 +458,7 @@ export default function PlansPage() {
 											</tr>
 
 											<tr>
-												<td className="py-3 px-4 font-semibold text-slate-900">
+												<td className="py-3 px-4 font-semibold text-foreground">
 													GMV Fee
 												</td>
 												{plans.map((plan) => (
@@ -467,84 +468,84 @@ export default function PlansPage() {
 												))}
 											</tr>
 
-											<tr className="bg-slate-50">
-												<td className="py-3 px-4 font-semibold text-slate-900">
+											<tr className="bg-background">
+												<td className="py-3 px-4 font-semibold text-foreground">
 													Analytics
 												</td>
 												{plans.map((plan, idx) => (
 													<td key={plan.id} className="text-center py-3 px-4">
 														{idx === plans.length - 1 ? (
-															<span className="text-slate-900 font-semibold">
+															<span className="text-foreground font-semibold">
 																Real-time
 															</span>
 														) : idx === 0 ? (
-															<span className="text-slate-600">Basic</span>
+															<span className="text-muted-foreground">Basic</span>
 														) : (
-															<span className="text-slate-600">Advanced</span>
+															<span className="text-muted-foreground">Advanced</span>
 														)}
 													</td>
 												))}
 											</tr>
 
 											<tr>
-												<td className="py-3 px-4 font-semibold text-slate-900">
+												<td className="py-3 px-4 font-semibold text-foreground">
 													Support
 												</td>
 												{plans.map((plan, idx) => (
 													<td key={plan.id} className="text-center py-3 px-4">
 														{idx === plans.length - 1 ? (
-															<span className="text-slate-900 font-semibold">
+															<span className="text-foreground font-semibold">
 																24/7
 															</span>
 														) : idx <= 1 ? (
-															<span className="text-slate-600">Email</span>
+															<span className="text-muted-foreground">Email</span>
 														) : (
-															<span className="text-slate-600">Priority</span>
+															<span className="text-muted-foreground">Priority</span>
 														)}
 													</td>
 												))}
 											</tr>
 
-											<tr className="bg-slate-50">
-												<td className="py-3 px-4 font-semibold text-slate-900">
+											<tr className="bg-background">
+												<td className="py-3 px-4 font-semibold text-foreground">
 													Custom Integration
 												</td>
 												{plans.map((plan, idx) => (
 													<td key={plan.id} className="text-center py-3 px-4">
 														{idx === 0 ? (
-															<X className="h-5 w-5 text-slate-300 mx-auto" />
+															<X className="h-5 w-5 text-muted-foreground mx-auto" />
 														) : (
-															<Check className="h-5 w-5 text-green-600 mx-auto" />
+															<Check className="h-5 w-5 text-secondary mx-auto" />
 														)}
 													</td>
 												))}
 											</tr>
 
 											<tr>
-												<td className="py-3 px-4 font-semibold text-slate-900">
+												<td className="py-3 px-4 font-semibold text-foreground">
 													Dedicated Support
 												</td>
 												{plans.map((plan, idx) => (
 													<td key={plan.id} className="text-center py-3 px-4">
 														{idx === plans.length - 1 ? (
-															<Check className="h-5 w-5 text-green-600 mx-auto" />
+															<Check className="h-5 w-5 text-secondary mx-auto" />
 														) : (
-															<X className="h-5 w-5 text-slate-300 mx-auto" />
+															<X className="h-5 w-5 text-muted-foreground mx-auto" />
 														)}
 													</td>
 												))}
 											</tr>
 
-											<tr className="bg-slate-50">
-												<td className="py-3 px-4 font-semibold text-slate-900">
+											<tr className="bg-background">
+												<td className="py-3 px-4 font-semibold text-foreground">
 													SLA
 												</td>
 												{plans.map((plan, idx) => (
 													<td key={plan.id} className="text-center py-3 px-4">
 														{idx === plans.length - 1 ? (
-															<Check className="h-5 w-5 text-green-600 mx-auto" />
+															<Check className="h-5 w-5 text-secondary mx-auto" />
 														) : (
-															<X className="h-5 w-5 text-slate-300 mx-auto" />
+															<X className="h-5 w-5 text-muted-foreground mx-auto" />
 														)}
 													</td>
 												))}
@@ -556,8 +557,8 @@ export default function PlansPage() {
 						</Card>
 
 						{/* Info Banner */}
-						<Alert className="bg-blue-50 border-blue-200">
-							<Lock className="h-4 w-4 text-blue-600" />
+						<Alert className="bg-primary/10 border-border">
+							<Lock className="h-4 w-4 text-primary" />
 							<AlertTitle>Billing Changes</AlertTitle>
 							<AlertDescription>
 								Plan changes take effect immediately. Pricing is prorated based
@@ -585,26 +586,26 @@ export default function PlansPage() {
 
 					{selectedPlan && calculation && (
 						<div className="space-y-4">
-							<div className="bg-slate-50 rounded-lg p-4 space-y-2">
+							<div className="bg-background rounded-lg p-4 space-y-2">
 								<div className="flex justify-between">
-									<span className="text-slate-600">New Base Price:</span>
-									<span className="font-semibold text-slate-900">
+									<span className="text-muted-foreground">New Base Price:</span>
+									<span className="font-semibold text-foreground">
 										${calculation.base_fee.toFixed(2)}/mo
 									</span>
 								</div>
 								<div className="flex justify-between">
-									<span className="text-slate-600">
+									<span className="text-muted-foreground">
 										GMV Fee ({selectedPlan.gmv_percentage}%):
 									</span>
-									<span className="font-semibold text-slate-900">
+									<span className="font-semibold text-foreground">
 										${calculation.gmv_fee.toFixed(2)} (estimated)
 									</span>
 								</div>
 								<div className="flex justify-between pt-2 border-t">
-									<span className="text-slate-900 font-semibold">
+									<span className="text-foreground font-semibold">
 										Estimated Monthly:
 									</span>
-									<span className="text-lg font-bold text-blue-600">
+									<span className="text-lg font-bold text-primary">
 										${calculation.estimated_total.toFixed(2)}
 									</span>
 								</div>

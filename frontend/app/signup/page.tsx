@@ -129,27 +129,27 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100">
-      <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-muted">
+      <div className="bg-card p-8 rounded-2xl shadow-md w-full max-w-md">
         <h1 className="text-2xl font-semibold text-center mb-6">
-          Get started with <span className="text-blue-600">Affable Link</span>
+          Get started with <span className="text-primary">Affable Link</span>
         </h1>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/30 text-destructive rounded-lg text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               I am a:
             </label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+              className="w-full border border-border rounded-lg p-2 text-foreground"
             >
               <option value="partner">Affiliate / Partner</option>
               <option value="vendor">Founder / Vendor</option>
@@ -157,7 +157,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Email
             </label>
             <input
@@ -165,7 +165,7 @@ export default function SignupPage() {
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+              className="w-full border border-border rounded-lg p-2 text-foreground"
               required
               disabled={isLoading}
             />
@@ -174,7 +174,7 @@ export default function SignupPage() {
           {role === "vendor" && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Company Name
                 </label>
                 <input
@@ -182,13 +182,13 @@ export default function SignupPage() {
                   placeholder="Your company name"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+                  className="w-full border border-border rounded-lg p-2 text-foreground"
                   disabled={isLoading}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Website URL
                 </label>
                 <input
@@ -196,7 +196,7 @@ export default function SignupPage() {
                   placeholder="https://example.com"
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+                  className="w-full border border-border rounded-lg p-2 text-foreground"
                   required
                   disabled={isLoading}
                 />
@@ -205,7 +205,7 @@ export default function SignupPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Password
             </label>
             <input
@@ -213,18 +213,18 @@ export default function SignupPage() {
               placeholder="Min 8 chars, 1 uppercase, 1 number"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+              className="w-full border border-border rounded-lg p-2 text-foreground"
               required
               disabled={isLoading}
               minLength={8}
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Must contain: at least 8 characters, 1 uppercase letter, 1 number
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Confirm Password
             </label>
             <input
@@ -232,7 +232,7 @@ export default function SignupPage() {
               placeholder="Confirm your password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+              className="w-full border border-border rounded-lg p-2 text-foreground"
               required
               disabled={isLoading}
               minLength={8}
@@ -242,15 +242,15 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary/100 text-white rounded-lg py-2 hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed border-2 border-blueberry"
           >
             {isLoading ? "Creating account..." : "Create Account"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           Already have an account?{" "}
-          <Link href="/login" className="text-blue-600 hover:underline font-medium">
+          <Link href="/login" className="text-primary hover:underline font-medium">
             Log in
           </Link>
         </p>

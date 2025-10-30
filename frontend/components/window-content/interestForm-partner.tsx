@@ -61,39 +61,39 @@ export default function PartnerInterestForm() {
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Partner Interest Form</h2>
+      <h2 className="text-2xl font-bold text-foreground mb-4">Partner Interest Form</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Company Info */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Company Name *</label>
+          <label className="block text-sm font-medium text-foreground">Company Name *</label>
           <input
             type="text"
             required
             value={formData.companyName}
             onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="mt-1 w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Website *</label>
+          <label className="block text-sm font-medium text-foreground">Website *</label>
           <input
             type="url"
             required
             value={formData.website}
             onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="mt-1 w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="https://example.com"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Industry / Sector</label>
+            <label className="block text-sm font-medium text-foreground">Industry / Sector</label>
             <select
               value={formData.industry}
               onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="mt-1 w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Select industry</option>
               {industryOptions.map((ind) => (
@@ -105,11 +105,11 @@ export default function PartnerInterestForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Monthly Revenue (MMR)</label>
+            <label className="block text-sm font-medium text-foreground">Monthly Revenue (MMR)</label>
             <select
               value={formData.monthlyRevenue}
               onChange={(e) => setFormData({ ...formData, monthlyRevenue: e.target.value })}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="mt-1 w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Select MMR</option>
               {mmrOptions.map((opt) => (
@@ -122,12 +122,12 @@ export default function PartnerInterestForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Target Customer / Market</label>
+          <label className="block text-sm font-medium text-foreground">Target Customer / Market</label>
           <input
             type="text"
             value={formData.targetMarket}
             onChange={(e) => setFormData({ ...formData, targetMarket: e.target.value })}
-            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="mt-1 w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="e.g., SMB SaaS companies"
           />
         </div>
@@ -135,65 +135,65 @@ export default function PartnerInterestForm() {
         {/* Contact Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Primary Contact Name *</label>
+            <label className="block text-sm font-medium text-foreground">Primary Contact Name *</label>
             <input
               type="text"
               required
               value={formData.contactName}
               onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="mt-1 w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email *</label>
+            <label className="block text-sm font-medium text-foreground">Email *</label>
             <input
               type="email"
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="mt-1 w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+          <label className="block text-sm font-medium text-foreground">Phone Number</label>
           <input
             type="tel"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="mt-1 w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Optional"
           />
         </div>
 
         {/* Partnership Info */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Existing External Partners</label>
+          <label className="block text-sm font-medium text-foreground">Existing External Partners</label>
           <input
             type="number"
             min={0}
             value={formData.existingPartners}
             onChange={(e) => setFormData({ ...formData, existingPartners: e.target.value })}
-            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="mt-1 w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Optional"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Goals in Joining</label>
+          <label className="block text-sm font-medium text-foreground">Goals in Joining</label>
           <input
             type="text"
             value={formData.goals}
             onChange={(e) => setFormData({ ...formData, goals: e.target.value })}
-            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="mt-1 w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="e.g., increase sales, co-marketing"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Type of Partnership Interested In</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Type of Partnership Interested In</label>
           <div className="flex flex-col gap-2">
             {["Referral / Affiliate", "Reseller / Channel", "Co-marketing / Campaigns"].map((type) => (
               <label key={type} className="flex items-center gap-2">
@@ -201,21 +201,21 @@ export default function PartnerInterestForm() {
                   type="checkbox"
                   checked={formData.partnershipTypes.includes(type as PartnershipType)}
                   onChange={() => handleCheckboxChange(type as PartnershipType)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-primary border-border rounded focus:ring-blue-500"
                 />
-                <span className="text-gray-700 text-sm">{type}</span>
+                <span className="text-foreground text-sm">{type}</span>
               </label>
             ))}
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">How did you hear about us?</label>
+          <label className="block text-sm font-medium text-foreground">How did you hear about us?</label>
           <input
             type="text"
             value={formData.referralSource}
             onChange={(e) => setFormData({ ...formData, referralSource: e.target.value })}
-            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="mt-1 w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Optional"
           />
         </div>

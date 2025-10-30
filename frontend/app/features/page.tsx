@@ -18,8 +18,8 @@ export default function FeaturesPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8">
       {/* SEO Header */}
       <header className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Features</h1>
-        <p className="text-xl text-gray-700 max-w-3xl">
+        <h1 className="text-4xl font-bold text-foreground mb-4">Features</h1>
+        <p className="text-xl text-foreground max-w-3xl">
           Powerful, founder-friendly affiliate platform features. Everything you need, nothing you don't.
         </p>
       </header>
@@ -28,8 +28,8 @@ export default function FeaturesPage() {
       <main className="max-w-6xl mx-auto">
         <article className="bg-white rounded-2xl shadow-lg p-8 mb-8">
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Everything Included</h2>
-            <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            <h2 className="text-3xl font-bold text-foreground mb-6">Everything Included</h2>
+            <p className="text-lg text-foreground mb-8 leading-relaxed">
               We don't believe in feature gatekeeping. Every plan includes all premium features from day one.
             </p>
 
@@ -44,20 +44,20 @@ export default function FeaturesPage() {
                 { title: 'Multi-Currency Support', desc: 'Accept partners and pay in multiple currencies' },
                 { title: 'API & Webhooks', desc: 'Full REST API for custom integrations' },
               ].map((feature) => (
-                <div key={feature.title} className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.desc}</p>
+                <div key={feature.title} className="bg-muted rounded-lg p-6 border border-border">
+                  <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground">{feature.desc}</p>
                 </div>
               ))}
             </div>
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Built for Both Sides</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-6">Built for Both Sides</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">For Vendors</h3>
-                <ul className="space-y-3 text-gray-700">
+                <h3 className="text-2xl font-bold text-foreground mb-4">For Vendors</h3>
+                <ul className="space-y-3 text-foreground">
                   <li className="flex gap-3"><span>✓</span> Campaign management & versioning</li>
                   <li className="flex gap-3"><span>✓</span> Partner approval workflows</li>
                   <li className="flex gap-3"><span>✓</span> Real-time performance tracking</li>
@@ -68,8 +68,8 @@ export default function FeaturesPage() {
                 </ul>
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">For Partners</h3>
-                <ul className="space-y-3 text-gray-700">
+                <h3 className="text-2xl font-bold text-foreground mb-4">For Partners</h3>
+                <ul className="space-y-3 text-foreground">
                   <li className="flex gap-3"><span>✓</span> Partner dashboard & analytics</li>
                   <li className="flex gap-3"><span>✓</span> Real-time earnings tracking</li>
                   <li className="flex gap-3"><span>✓</span> Flexible link generation</li>
@@ -84,11 +84,11 @@ export default function FeaturesPage() {
         </article>
 
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Interactive Feature Explorer</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-6">Interactive Feature Explorer</h2>
+          <p className="text-muted-foreground mb-6">
             Click the Features window icon on the left to explore all features in our interactive desktop interface.
           </p>
-          <div className="bg-slate-100 rounded-lg p-8 min-h-[400px] flex items-center justify-center text-center text-gray-500">
+          <div className="bg-muted rounded-lg p-8 min-h-[400px] flex items-center justify-center text-center text-muted-foreground">
             <p className="text-lg font-medium">Open the interactive Features window for the full experience</p>
           </div>
         </div>

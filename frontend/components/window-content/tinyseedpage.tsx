@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function TinySeedPage() {
 	return (
-		<main className="min-h-screen bg-slate-50 text-slate-900 p-6 lg:p-12">
+		<main className="min-h-screen bg-muted text-slate-900 p-6 lg:p-12">
 			<header className="max-w-5xl mx-auto">
 				<div className="flex items-center justify-between">
 					<h1 className="text-3xl lg:text-4xl font-extrabold">
@@ -67,10 +67,10 @@ export default function TinySeedPage() {
 								Tiny SaaS Alpha
 							</p>
 							<div className="mt-4 grid grid-cols-2 gap-3">
-								<div className="p-3 bg-slate-100 rounded">+24% signups</div>
-								<div className="p-3 bg-slate-100 rounded">4 affiliates</div>
-								<div className="p-3 bg-slate-100 rounded">60 days</div>
-								<div className="p-3 bg-slate-100 rounded">No dev time</div>
+								<div className="p-3 bg-muted rounded">+24% signups</div>
+								<div className="p-3 bg-muted rounded">4 affiliates</div>
+								<div className="p-3 bg-muted rounded">60 days</div>
+								<div className="p-3 bg-muted rounded">No dev time</div>
 							</div>
 						</CardContent>
 					</Card>
@@ -122,7 +122,7 @@ export default function TinySeedPage() {
 				</aside>
 			</section>
 
-			<footer className="max-w-5xl mx-auto mt-12 text-sm text-slate-500">
+			<footer className="max-w-5xl mx-auto mt-12 text-sm text-muted-foreground">
 				<p>
 					Designed for post-product/market fit SaaS founders who want
 					predictable, low-cost growth.

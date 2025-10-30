@@ -48,16 +48,16 @@ export default function DemoVendorDashboard() {
   const conversionRate = vendorData.conversionRate;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       {/* Header */}
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                <TrendingUp size={32} className="text-blue-600" /> Dashboard
+              <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+                <TrendingUp size={32} className="text-primary" /> Dashboard
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-muted-foreground mt-1">
                 Overview of your partner program performance
               </p>
             </div>
@@ -67,7 +67,7 @@ export default function DemoVendorDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Campaign Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Campaign
               </label>
               <select
@@ -76,7 +76,7 @@ export default function DemoVendorDashboard() {
                   setCampaignId(e.target.value ? parseInt(e.target.value) : null);
                   setSelectedPartnerId(null);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Campaigns</option>
                 {vendorData.availableCampaigns?.map((campaign) => (
@@ -89,13 +89,13 @@ export default function DemoVendorDashboard() {
 
             {/* Partner Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Partner
               </label>
               <select
                 value={selectedPartnerId || ''}
                 onChange={(e) => setSelectedPartnerId(e.target.value ? parseInt(e.target.value) : null)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Partners</option>
                 {vendorData.topPartners?.map((partner) => (
@@ -108,13 +108,13 @@ export default function DemoVendorDashboard() {
 
             {/* UTM Source */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 UTM Source
               </label>
               <select
                 value={utmSource}
                 onChange={(e) => setUtmSource(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Sources</option>
                 {vendorData.availableUtmSources?.map((source) => (
@@ -127,13 +127,13 @@ export default function DemoVendorDashboard() {
 
             {/* UTM Medium */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 UTM Medium
               </label>
               <select
                 value={utmMedium}
                 onChange={(e) => setUtmMedium(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Mediums</option>
                 {vendorData.availableUtmMediums?.map((medium) => (
@@ -146,13 +146,13 @@ export default function DemoVendorDashboard() {
 
             {/* UTM Campaign */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 UTM Campaign
               </label>
               <select
                 value={utmCampaign}
                 onChange={(e) => setUtmCampaign(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Campaigns</option>
                 {vendorData.availableUtmCampaigns?.map((campaign) => (
@@ -173,13 +173,13 @@ export default function DemoVendorDashboard() {
                   setUtmMedium('');
                   setUtmCampaign('');
                 }}
-                className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
+                className="w-full px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-gray-300 transition font-medium"
               >
                 Clear Filters
               </button>
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
+          <p className="text-sm text-muted-foreground mt-4">
             Note: Filters are preserved but data is static in demo mode
           </p>
         </div>
@@ -189,10 +189,10 @@ export default function DemoVendorDashboard() {
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
-            icon={<Activity className="text-blue-600" />}
+            icon={<Activity className="text-primary" />}
             label="Total Campaigns"
             value={stats.total_campaigns || 0}
-            bgColor="bg-blue-50"
+            bgColor="bg-primary/10"
           />
           <StatCard
             icon={<Users className="text-green-600" />}
@@ -235,7 +235,7 @@ export default function DemoVendorDashboard() {
 
         {/* Performance Chart */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-foreground mb-4">
             Performance Over Time
           </h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -276,37 +276,37 @@ export default function DemoVendorDashboard() {
 
         {/* Top Partners */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-foreground mb-4">
             Top Performing Partners
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                     Partner Name
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                     Clicks
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                     Conversions
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                     Revenue
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {vendorData.topPartners?.map((partner) => (
-                  <tr key={partner.partner_id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                  <tr key={partner.partner_id} className="hover:bg-muted">
+                    <td className="px-6 py-4 text-sm text-foreground font-medium">
                       {partner.name}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
                       {partner.clicks.toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
                       {partner.conversions.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-sm font-semibold text-green-600">
@@ -341,8 +341,8 @@ function StatCard({
     <div className={`${bgColor} rounded-lg p-6 shadow`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-600 text-sm font-medium">{label}</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
+          <p className="text-muted-foreground text-sm font-medium">{label}</p>
+          <p className="text-3xl font-bold text-foreground mt-2">{value}</p>
         </div>
         <div className="text-3xl">{icon}</div>
       </div>
@@ -361,9 +361,9 @@ function MetricCard({
 }) {
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <p className="text-gray-600 text-sm font-medium">{label}</p>
-      <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
-      <p className="text-xs text-gray-500 mt-1">{subtext}</p>
+      <p className="text-muted-foreground text-sm font-medium">{label}</p>
+      <p className="text-3xl font-bold text-foreground mt-2">{value}</p>
+      <p className="text-xs text-muted-foreground mt-1">{subtext}</p>
     </div>
   );
 }

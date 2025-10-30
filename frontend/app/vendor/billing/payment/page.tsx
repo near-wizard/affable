@@ -159,12 +159,12 @@ export default function PaymentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-muted">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 mb-8 transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground mb-8 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Billing
@@ -174,8 +174,8 @@ export default function PaymentPage() {
         <div className="mb-12">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h1 className="text-4xl font-bold text-slate-900 mb-3">Add Payment Method</h1>
-              <p className="text-lg text-slate-600 max-w-xl">
+              <h1 className="text-4xl font-bold text-foreground mb-3">Add Payment Method</h1>
+              <p className="text-lg text-muted-foreground max-w-xl">
                 Set up your credit card for automatic billing. Your payment information is secure and never stored by us.
               </p>
             </div>
@@ -187,11 +187,11 @@ export default function PaymentPage() {
 
         {/* Test Mode Banner */}
         {isStripeTestMode() && (
-          <Alert className="mb-8 border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
-            <Info className="h-4 w-4 text-blue-600" />
+          <Alert className="mb-8 border-border bg-gradient-to-r from-purple-50 to-purple-100">
+            <Info className="h-4 w-4 text-primary" />
             <AlertTitle className="font-semibold">Test Mode Active</AlertTitle>
             <AlertDescription>
-              Use test card <code className="font-mono font-bold bg-blue-200 px-3 py-1 rounded-md">4242 4242 4242 4242</code> with any future date and CVC code to test the checkout.
+              Use test card <code className="font-mono font-bold bg-purple-200 px-3 py-1 rounded-md">4242 4242 4242 4242</code> with any future date and CVC code to test the checkout.
             </AlertDescription>
           </Alert>
         )}
@@ -199,7 +199,7 @@ export default function PaymentPage() {
         {/* Success Alert */}
         {success && (
           <Alert className="mb-8 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-secondary" />
             <AlertTitle className="font-semibold">Payment Method Saved</AlertTitle>
             <AlertDescription>
               Your payment method has been saved successfully. Redirecting you back...
@@ -236,7 +236,7 @@ export default function PaymentPage() {
                   <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Cardholder Name */}
                     <div>
-                      <label className="block text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide">
+                      <label className="block text-sm font-bold text-foreground mb-3 uppercase tracking-wide">
                         Cardholder Name
                       </label>
                       <input
@@ -245,14 +245,14 @@ export default function PaymentPage() {
                         value={formData.cardholderName}
                         onChange={handleInputChange}
                         placeholder="John Doe"
-                        className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent hover:border-slate-300"
+                        className="w-full px-5 py-3 bg-background border border-border rounded-xl text-foreground placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent hover:border-slate-300"
                         required
                       />
                     </div>
 
                     {/* Email */}
                     <div>
-                      <label className="block text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide">
+                      <label className="block text-sm font-bold text-foreground mb-3 uppercase tracking-wide">
                         Billing Email
                       </label>
                       <input
@@ -261,23 +261,23 @@ export default function PaymentPage() {
                         value={formData.email}
                         onChange={handleInputChange}
                         placeholder="john@example.com"
-                        className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 cursor-not-allowed transition-all focus:outline-none hover:border-slate-300"
+                        className="w-full px-5 py-3 bg-background border border-border rounded-xl text-foreground placeholder-slate-400 cursor-not-allowed transition-all focus:outline-none hover:border-slate-300"
                         disabled
                       />
-                      <p className="text-xs text-slate-500 mt-2 font-medium">
+                      <p className="text-xs text-muted-foreground mt-2 font-medium">
                         From your account profile
                       </p>
                     </div>
 
                     {/* Card Element */}
                     <div>
-                      <label className="block text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide">
+                      <label className="block text-sm font-bold text-foreground mb-3 uppercase tracking-wide">
                         Card Details
                       </label>
                       <div
                         id="card-element"
                         ref={cardElementRef}
-                        className="p-5 bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-transparent transition-all"
+                        className="p-5 bg-background border border-border rounded-xl focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-transparent transition-all"
                       />
                     </div>
 
@@ -318,11 +318,11 @@ export default function PaymentPage() {
             {/* Sidebar - Info Cards */}
             <div className="lg:col-span-2 space-y-6">
               {/* Security Features */}
-              <Card className="border-0 shadow-lg rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100">
+              <Card className="border-0 shadow-lg rounded-2xl overflow-hidden bg-gradient-to-br from-purple-50 to-indigo-50 border-border">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-blue-600" />
-                    <span className="text-slate-900">Security First</span>
+                    <Shield className="h-5 w-5 text-primary" />
+                    <span className="text-foreground">Security First</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -333,8 +333,8 @@ export default function PaymentPage() {
                     'Fraud Protected',
                   ].map((feature) => (
                     <div key={feature} className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0" />
-                      <span className="text-sm font-medium text-slate-700">{feature}</span>
+                      <div className="w-2 h-2 rounded-full bg-primary/100 flex-shrink-0" />
+                      <span className="text-sm font-medium text-foreground">{feature}</span>
                     </div>
                   ))}
                 </CardContent>
@@ -343,14 +343,14 @@ export default function PaymentPage() {
               {/* Accepted Cards */}
               <Card className="border-0 shadow-lg rounded-2xl">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-lg text-slate-900">Accepted Cards</CardTitle>
+                  <CardTitle className="text-lg text-foreground">Accepted Cards</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { name: 'Visa', color: 'from-blue-500 to-blue-600' },
+                      { name: 'Visa', color: 'from-purple-500 to-primary' },
                       { name: 'Mastercard', color: 'from-red-500 to-orange-500' },
-                      { name: 'Amex', color: 'from-cyan-500 to-blue-500' },
+                      { name: 'Amex', color: 'from-cyan-500 to-primary/100' },
                       { name: 'Discover', color: 'from-orange-500 to-yellow-500' },
                     ].map((card) => (
                       <div
@@ -367,16 +367,16 @@ export default function PaymentPage() {
               {/* Quick Tips */}
               <Card className="border-0 shadow-lg rounded-2xl bg-amber-50 border-amber-100">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-lg text-slate-900">Quick Tips</CardTitle>
+                  <CardTitle className="text-lg text-foreground">Quick Tips</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   <div>
-                    <p className="font-semibold text-slate-900 mb-1">No charges today</p>
-                    <p className="text-slate-600">We only charge on your billing date</p>
+                    <p className="font-semibold text-foreground mb-1">No charges today</p>
+                    <p className="text-muted-foreground">We only charge on your billing date</p>
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900 mb-1">Update anytime</p>
-                    <p className="text-slate-600">Change your card whenever needed</p>
+                    <p className="font-semibold text-foreground mb-1">Update anytime</p>
+                    <p className="text-muted-foreground">Change your card whenever needed</p>
                   </div>
                 </CardContent>
               </Card>

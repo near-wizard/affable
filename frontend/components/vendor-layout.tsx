@@ -97,23 +97,23 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 bottom-0 w-64 bg-white shadow-md z-50
+          fixed top-0 left-0 bottom-0 w-64 bg-card shadow-md z-50
           transform transition-transform duration-300
           ${isOpen ? "translate-x-0" : "-translate-x-64"}
         `}
       >
-        <div className="flex flex-col gap-3 p-4 border-b border-gray-200">
+        <div className="flex flex-col gap-3 p-4 border-b border-border">
           <div className="flex justify-between items-start">
             <h2 className="font-bold text-lg">Vendor Menu</h2>
             <button
-              className="text-gray-600 hover:text-gray-900"
+              className="text-muted-foreground hover:text-foreground"
               onClick={() => setIsOpen(false)}
             >
               ✕
             </button>
           </div>
           {userEmail && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <User size={16} />
               <span className="truncate">{userEmail}</span>
             </div>
@@ -129,8 +129,8 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
                 <div key={link.name}>
                   <button
                     onClick={() => toggleSubmenu(link.name)}
-                    className={`w-full flex items-center justify-between p-2 rounded hover:bg-gray-100 transition-colors ${
-                      isActive ? "bg-blue-50 font-semibold text-blue-900" : ""
+                    className={`w-full flex items-center justify-between p-2 rounded hover:bg-muted transition-colors ${
+                      isActive ? "bg-primary/10 font-semibold text-primary" : ""
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -145,15 +145,15 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
                     />
                   </button>
                   {expandedMenu === link.name && (
-                    <div className="ml-4 mt-2 space-y-2 border-l-2 border-gray-300 pl-2">
+                    <div className="ml-4 mt-2 space-y-2 border-l-2 border-border pl-2">
                       {link.children.map((child) => (
                         <Link
                           key={child.path}
                           href={child.path!}
-                          className={`block p-2 rounded hover:bg-gray-100 text-sm transition-colors ${
+                          className={`block p-2 rounded hover:bg-muted text-sm transition-colors ${
                             pathname === child.path
-                              ? "bg-blue-50 font-semibold text-blue-900"
-                              : "text-gray-700"
+                              ? "bg-primary/10 font-semibold text-primary"
+                              : "text-foreground"
                           }`}
                           onClick={() => setIsOpen(false)}
                         >
@@ -170,8 +170,8 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
               <Link
                 key={link.path}
                 href={link.path!}
-                className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-                  isActive ? "bg-blue-50 font-semibold text-blue-900" : ""
+                className={`p-2 rounded hover:bg-muted transition-colors ${
+                  isActive ? "bg-primary/10 font-semibold text-primary" : ""
                 }`}
                 onClick={() => setIsOpen(false)}
               >
@@ -184,10 +184,10 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
           <div className="flex-1"></div>
 
           {/* Settings and Sign Out buttons */}
-          <div className="border-t border-gray-200 pt-4 space-y-2">
+          <div className="border-t border-border pt-4 space-y-2">
             <Link
               href="/vendor/settings"
-              className="w-full flex items-center gap-2 p-2 rounded hover:bg-gray-100 transition-colors text-gray-700"
+              className="w-full flex items-center gap-2 p-2 rounded hover:bg-muted transition-colors text-foreground"
               onClick={() => setIsOpen(false)}
             >
               <Settings size={18} />
@@ -195,7 +195,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
             </Link>
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-2 p-2 rounded hover:bg-red-100 transition-colors text-red-600 hover:text-red-700"
+              className="w-full flex items-center gap-2 p-2 rounded hover:bg-destructive/10 transition-colors text-destructive hover:text-destructive/80"
             >
               <LogOut size={18} />
               <span>Sign Out</span>
@@ -211,31 +211,31 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
         }`}
       >
         {/* Top bar */}
-        <header className="p-4 bg-white border-b border-gray-300 flex items-center justify-between">
+        <header className="p-4 bg-card border-b border-border flex items-center justify-between">
           <div className="flex items-center">
             <button
-              className="p-2 mr-4 rounded hover:bg-gray-200"
+              className="p-2 mr-4 rounded hover:bg-muted"
               onClick={() => setIsOpen(true)}
             >
               <Menu size={24} />
             </button>
             <div className="flex flex-col">
-              <h1 className="text-xl font-bold">Vendor Page</h1>
+              <h1 className="text-xl font-bold text-foreground">Vendor Page</h1>
               {userEmail && (
-                <p className="text-sm text-gray-600">Welcome, {userEmail}</p>
+                <p className="text-sm text-muted-foreground">Welcome, {userEmail}</p>
               )}
             </div>
           </div>
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-2 px-4 py-2 rounded hover:bg-red-100 transition-colors text-red-600 hover:text-red-700 font-medium"
+            className="flex items-center gap-2 px-4 py-2 rounded hover:bg-destructive/10 transition-colors text-destructive hover:text-destructive/80 font-medium"
           >
             <LogOut size={20} />
             <span>Sign Out</span>
           </button>
         </header>
 
-        <main className="flex-1 overflow-auto pb-20 md:pb-0">{children}</main>
+        <main className="flex-1 overflow-auto pb-20 md:pb-0 bg-background">{children}</main>
       </div>
     </div>
   )

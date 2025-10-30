@@ -68,7 +68,7 @@ export default function UtmDropdown({
   return (
     <div ref={containerRef} className="relative w-full">
       {label && (
-        <label className="text-xs text-gray-600 mb-1 block">{label}</label>
+        <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
       )}
 
       {/* Main button */}
@@ -82,7 +82,7 @@ export default function UtmDropdown({
           }
         }}
         disabled={disabled}
-        className="w-full text-sm border border-gray-300 rounded-lg p-2 text-gray-900 flex items-center justify-between bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full text-sm border border-border rounded-lg p-2 text-foreground flex items-center justify-between bg-white hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <span>
           {selectedOption
@@ -91,7 +91,7 @@ export default function UtmDropdown({
         </span>
         <ChevronDown
           size={16}
-          className={`text-gray-600 transition-transform ${
+          className={`text-muted-foreground transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         />
@@ -99,9 +99,9 @@ export default function UtmDropdown({
 
       {/* Dropdown menu */}
       {isOpen && !disabled && (
-        <div className="absolute z-40 top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-40 top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {options.length === 0 ? (
-            <div className="p-2 text-sm text-gray-500">No options</div>
+            <div className="p-2 text-sm text-muted-foreground">No options</div>
           ) : (
             options.map((option, index) => (
               <div
@@ -128,10 +128,10 @@ export default function UtmDropdown({
                 }}
                 className={`p-2 cursor-pointer text-sm transition-colors ${
                   value === option.value
-                    ? "bg-blue-50 text-blue-700 font-semibold"
+                    ? "bg-primary/10 text-primary font-semibold"
                     : hoveredValue === option.value
-                      ? "bg-gray-100"
-                      : "text-gray-900 hover:bg-gray-50"
+                      ? "bg-muted"
+                      : "text-foreground hover:bg-muted"
                 }`}
               >
                 {option.label}

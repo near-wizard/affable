@@ -225,3 +225,53 @@ class CampaignPartnerListResponse(BaseModel):
     page: int
     limit: int
     total_pages: int
+
+
+class PartnerInvitationBase(BaseModel):
+    """Base partner invitation schema."""
+    invitation_message: Optional[str] = None
+
+
+class PartnerInvitationCreate(PartnerInvitationBase):
+    """Create partner invitation request."""
+    campaign_id: int
+    partner_id: int
+
+
+class PartnerInvitationResponse(PartnerInvitationBase):
+    """Partner invitation response."""
+    partner_invitation_id: int
+    campaign_id: int
+    partner_id: int
+    partner_name: str
+    partner_email: str
+    campaign_name: str
+    status: str
+    invited_at: datetime
+    accepted_at: Optional[datetime] = None
+    declined_at: Optional[datetime] = None
+    declined_reason: Optional[str] = None
+    expires_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class PartnerInvitationAccept(BaseModel):
+    """Accept partner invitation request."""
+    invitation_id: int
+
+
+class PartnerInvitationDecline(BaseModel):
+    """Decline partner invitation request."""
+    invitation_id: int
+    reason: Optional[str] = None
+
+
+class PartnerInvitationListResponse(BaseModel):
+    """Paginated partner invitations list response."""
+    data: List[PartnerInvitationResponse]
+    total: int
+    page: int
+    limit: int
+    total_pages: int

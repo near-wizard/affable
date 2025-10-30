@@ -34,7 +34,7 @@ function DemoLayoutContent({ children }: { children: React.ReactNode }) {
             </div>
             <button
               onClick={handleRoleToggle}
-              className="bg-white text-blue-600 px-6 py-2 rounded-lg font-medium hover:bg-blue-50 transition"
+              className="bg-white text-primary px-6 py-2 rounded-lg font-medium hover:bg-primary/10 transition"
             >
               Switch to {userRole === 'partner' ? 'Vendor' : 'Partner'} View
             </button>

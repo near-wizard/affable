@@ -115,13 +115,13 @@ export default function PartnerPayoutsPage() {
       case 'completed':
         return 'bg-green-100 text-green-800';
       case 'processing':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-purple-100 text-blue-800';
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
       case 'failed':
         return 'bg-red-100 text-red-800';
       default:
-        return 'bg-slate-100 text-slate-800';
+        return 'bg-muted text-slate-800';
     }
   };
 
@@ -142,8 +142,8 @@ export default function PartnerPayoutsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-        <Card className="border-red-200 bg-red-50">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted p-6">
+        <Card className="border-red-200 bg-destructive/10">
           <CardHeader>
             <CardTitle className="text-red-900">Error</CardTitle>
           </CardHeader>
@@ -156,15 +156,15 @@ export default function PartnerPayoutsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
-            <DollarSign className="h-8 w-8 text-green-600" />
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+            <DollarSign className="h-8 w-8 text-secondary" />
             Payout History
           </h1>
-          <p className="text-slate-600 mt-1">
+          <p className="text-muted-foreground mt-1">
             Track your payouts and payment history
           </p>
         </div>
@@ -183,30 +183,30 @@ export default function PartnerPayoutsPage() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-slate-600 mb-1">Total Payouts (90d)</p>
-                    <p className="text-2xl font-bold text-slate-900">
+                    <p className="text-sm text-muted-foreground mb-1">Total Payouts (90d)</p>
+                    <p className="text-2xl font-bold text-foreground">
                       ${summary.totals.total_amount.toFixed(2)}
                     </p>
                   </div>
-                  <DollarSign className="h-8 w-8 text-green-600 opacity-20" />
+                  <DollarSign className="h-8 w-8 text-secondary opacity-20" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Completed */}
-            <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+            <Card className="border-border bg-gradient-to-br from-purple-50 to-cyan-50">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-slate-600 mb-1">Completed</p>
-                    <p className="text-2xl font-bold text-slate-900">
+                    <p className="text-sm text-muted-foreground mb-1">Completed</p>
+                    <p className="text-2xl font-bold text-foreground">
                       ${summary.by_status.completed.amount.toFixed(2)}
                     </p>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {summary.by_status.completed.count} payouts
                     </p>
                   </div>
-                  <CheckCircle className="h-8 w-8 text-blue-600 opacity-20" />
+                  <CheckCircle className="h-8 w-8 text-primary opacity-20" />
                 </div>
               </CardContent>
             </Card>
@@ -216,11 +216,11 @@ export default function PartnerPayoutsPage() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-slate-600 mb-1">Outstanding</p>
-                    <p className="text-2xl font-bold text-slate-900">
+                    <p className="text-sm text-muted-foreground mb-1">Outstanding</p>
+                    <p className="text-2xl font-bold text-foreground">
                       ${(summary.by_status.pending.amount + summary.by_status.processing.amount).toFixed(2)}
                     </p>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {summary.by_status.pending.count + summary.by_status.processing.count} payouts
                     </p>
                   </div>
@@ -234,15 +234,15 @@ export default function PartnerPayoutsPage() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-slate-600 mb-1">Average Payout</p>
-                    <p className="text-2xl font-bold text-slate-900">
+                    <p className="text-sm text-muted-foreground mb-1">Average Payout</p>
+                    <p className="text-2xl font-bold text-foreground">
                       ${summary.insights.average_payout.toFixed(2)}
                     </p>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {summary.totals.all_payouts} total
                     </p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-purple-600 opacity-20" />
+                  <TrendingUp className="h-8 w-8 text-primary opacity-20" />
                 </div>
               </CardContent>
             </Card>
@@ -281,10 +281,10 @@ export default function PartnerPayoutsPage() {
                           {upcomingPayouts.pending.payouts.map((p) => (
                             <div key={p.payout_id} className="flex items-center justify-between p-4 border border-yellow-200 rounded-lg bg-yellow-50">
                               <div>
-                                <p className="font-semibold text-slate-900">
+                                <p className="font-semibold text-foreground">
                                   ${p.amount.toFixed(2)}
                                 </p>
-                                <p className="text-sm text-slate-600">
+                                <p className="text-sm text-muted-foreground">
                                   Period ending {new Date(p.period_end).toLocaleDateString()}
                                 </p>
                               </div>
@@ -303,7 +303,7 @@ export default function PartnerPayoutsPage() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <TrendingUp className="h-5 w-5 text-blue-600" />
+                          <TrendingUp className="h-5 w-5 text-primary" />
                           Processing Payouts
                         </CardTitle>
                         <CardDescription>
@@ -313,16 +313,16 @@ export default function PartnerPayoutsPage() {
                       <CardContent>
                         <div className="space-y-3">
                           {upcomingPayouts.processing.payouts.map((p) => (
-                            <div key={p.payout_id} className="flex items-center justify-between p-4 border border-blue-200 rounded-lg bg-blue-50">
+                            <div key={p.payout_id} className="flex items-center justify-between p-4 border border-border rounded-lg bg-primary/10">
                               <div>
-                                <p className="font-semibold text-slate-900">
+                                <p className="font-semibold text-foreground">
                                   ${p.amount.toFixed(2)}
                                 </p>
-                                <p className="text-sm text-slate-600">
+                                <p className="text-sm text-muted-foreground">
                                   Started {new Date(p.processing_started).toLocaleDateString()}
                                 </p>
                               </div>
-                              <span className="text-xs text-blue-700 font-semibold px-3 py-1 bg-blue-100 rounded-full">
+                              <span className="text-xs text-primary font-semibold px-3 py-1 bg-purple-100 rounded-full">
                                 PROCESSING
                               </span>
                             </div>
@@ -335,8 +335,8 @@ export default function PartnerPayoutsPage() {
               ) : (
                 <Card>
                   <CardContent className="pt-12 text-center">
-                    <Wallet className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-600">No upcoming payouts</p>
+                    <Wallet className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No upcoming payouts</p>
                   </CardContent>
                 </Card>
               )}
@@ -353,36 +353,36 @@ export default function PartnerPayoutsPage() {
                   {payouts.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="w-full">
-                        <thead className="bg-slate-50 border-b">
+                        <thead className="bg-background border-b">
                           <tr>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
                               Amount
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
                               Period
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
                               Payment Method
                             </th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-900">
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
                               Status
                             </th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-900">
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
                               Date
                             </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y">
                           {payouts.map((payout) => (
-                            <tr key={payout.payout_id} className="hover:bg-slate-50 transition">
-                              <td className="px-4 py-3 text-sm font-semibold text-slate-900">
+                            <tr key={payout.payout_id} className="hover:bg-background transition">
+                              <td className="px-4 py-3 text-sm font-semibold text-foreground">
                                 {payout.currency} ${payout.amount.toFixed(2)}
                               </td>
-                              <td className="px-4 py-3 text-sm text-slate-600">
+                              <td className="px-4 py-3 text-sm text-muted-foreground">
                                 {new Date(payout.period_start).toLocaleDateString()} -{' '}
                                 {new Date(payout.period_end).toLocaleDateString()}
                               </td>
-                              <td className="px-4 py-3 text-sm text-slate-600">
+                              <td className="px-4 py-3 text-sm text-muted-foreground">
                                 {payout.payment_method}
                               </td>
                               <td className="px-4 py-3 text-center">
@@ -391,7 +391,7 @@ export default function PartnerPayoutsPage() {
                                   {payout.status.charAt(0).toUpperCase() + payout.status.slice(1)}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-center text-sm text-slate-600">
+                              <td className="px-4 py-3 text-center text-sm text-muted-foreground">
                                 {payout.completed_at
                                   ? new Date(payout.completed_at).toLocaleDateString()
                                   : payout.processed_at
@@ -405,8 +405,8 @@ export default function PartnerPayoutsPage() {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <Wallet className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                      <p className="text-slate-600">No payout history yet</p>
+                      <Wallet className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No payout history yet</p>
                     </div>
                   )}
                 </CardContent>
@@ -427,15 +427,15 @@ export default function PartnerPayoutsPage() {
                   <CardContent className="space-y-6">
                     {/* Status Breakdown */}
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-4">Payouts by Status</h3>
+                      <h3 className="font-semibold text-foreground mb-4">Payouts by Status</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[
                           { label: 'Completed', status: 'completed', color: 'bg-green-100 text-green-800' },
-                          { label: 'Processing', status: 'processing', color: 'bg-blue-100 text-blue-800' },
+                          { label: 'Processing', status: 'processing', color: 'bg-purple-100 text-blue-800' },
                           { label: 'Pending', status: 'pending', color: 'bg-yellow-100 text-yellow-800' },
                           { label: 'Failed', status: 'failed', color: 'bg-red-100 text-red-800' },
                         ].map(({ label, status, color }) => (
-                          <div key={status} className={`p-4 rounded-lg ${color} ${color === 'bg-green-100 text-green-800' ? 'bg-green-50 border border-green-200' : color === 'bg-blue-100 text-blue-800' ? 'bg-blue-50 border border-blue-200' : color === 'bg-yellow-100 text-yellow-800' ? 'bg-yellow-50 border border-yellow-200' : 'bg-red-50 border border-red-200'}`}>
+                          <div key={status} className={`p-4 rounded-lg ${color} ${color === 'bg-green-100 text-green-800' ? 'bg-secondary border border-green-200' : color === 'bg-purple-100 text-blue-800' ? 'bg-primary/10 border border-border' : color === 'bg-yellow-100 text-yellow-800' ? 'bg-yellow-50 border border-yellow-200' : 'bg-destructive/10 border border-red-200'}`}>
                             <p className="text-sm font-semibold mb-1">{label}</p>
                             <p className="text-2xl font-bold">
                               ${summary.by_status[status as keyof typeof summary.by_status].amount.toFixed(2)}
@@ -451,24 +451,24 @@ export default function PartnerPayoutsPage() {
 
                     {/* Insights */}
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-4">Key Insights</h3>
+                      <h3 className="font-semibold text-foreground mb-4">Key Insights</h3>
                       <div className="space-y-3">
-                        <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                          <span className="text-slate-600">Average Payout</span>
-                          <span className="font-semibold text-slate-900">
+                        <div className="flex justify-between items-center p-3 bg-background rounded-lg">
+                          <span className="text-muted-foreground">Average Payout</span>
+                          <span className="font-semibold text-foreground">
                             ${summary.insights.average_payout.toFixed(2)}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                          <span className="text-slate-600">Largest Payout</span>
-                          <span className="font-semibold text-slate-900">
+                        <div className="flex justify-between items-center p-3 bg-background rounded-lg">
+                          <span className="text-muted-foreground">Largest Payout</span>
+                          <span className="font-semibold text-foreground">
                             ${summary.insights.largest_payout.toFixed(2)}
                           </span>
                         </div>
                         {summary.insights.days_since_last_payout !== null && (
-                          <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                            <span className="text-slate-600">Days Since Last Payout</span>
-                            <span className="font-semibold text-slate-900">
+                          <div className="flex justify-between items-center p-3 bg-background rounded-lg">
+                            <span className="text-muted-foreground">Days Since Last Payout</span>
+                            <span className="font-semibold text-foreground">
                               {summary.insights.days_since_last_payout} days
                             </span>
                           </div>

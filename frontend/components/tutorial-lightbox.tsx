@@ -37,12 +37,12 @@ export function TutorialLightbox({ step, onNext, onSkip }: { step: number; onNex
       <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6 relative">
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-500">Step {step + 1} of {tutorials.length}</span>
-            <button onClick={onSkip} className="text-sm text-gray-500 hover:text-gray-700">
+            <span className="text-sm text-muted-foreground">Step {step + 1} of {tutorials.length}</span>
+            <button onClick={onSkip} className="text-sm text-muted-foreground hover:text-foreground">
               Skip tutorial
             </button>
           </div>
-          <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-1 bg-muted rounded-full overflow-hidden">
             <div 
               className="h-full bg-blue-600 transition-all duration-300"
               style={{ width: `${((step + 1) / tutorials.length) * 100}%` }}
@@ -51,7 +51,7 @@ export function TutorialLightbox({ step, onNext, onSkip }: { step: number; onNex
         </div>
 
         <h2 className="text-2xl font-bold mb-3">{current.title}</h2>
-        <p className="text-gray-600 mb-6">{current.description}</p>
+        <p className="text-muted-foreground mb-6">{current.description}</p>
 
         <div className="flex gap-3">
           {step < tutorials.length - 1 ? (

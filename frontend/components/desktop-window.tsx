@@ -270,28 +270,28 @@ export function DesktopWindow({
       {/* Resize Handles - Edges */}
       {/* Top */}
       <div
-        className="absolute top-0 left-0 right-0 cursor-n-resize hover:bg-blue-500/20 active:bg-blue-500/30"
+        className="absolute top-0 left-0 right-0 cursor-n-resize hover:bg-primary/100/20 active:bg-primary/100/30"
         style={{ height: `${resizeHandleSize*.5}px` }}
         onMouseDown={(e) => handleMouseResizeStart(e, 'n')}
         onTouchStart={(e) => handleTouchResizeStart(e, 'n')}
       />
       {/* Bottom */}
       <div
-        className="absolute bottom-0 left-0 right-0 cursor-s-resize hover:bg-blue-500/20 active:bg-blue-500/30"
+        className="absolute bottom-0 left-0 right-0 cursor-s-resize hover:bg-primary/100/20 active:bg-primary/100/30"
         style={{ height: `${resizeHandleSize}px` }}
         onMouseDown={(e) => handleMouseResizeStart(e, 's')}
         onTouchStart={(e) => handleTouchResizeStart(e, 's')}
       />
       {/* Left */}
       <div
-        className="absolute top-0 left-0 bottom-0 cursor-w-resize hover:bg-blue-500/20 active:bg-blue-500/30"
+        className="absolute top-0 left-0 bottom-0 cursor-w-resize hover:bg-primary/100/20 active:bg-primary/100/30"
         style={{ width: `${resizeHandleSize}px` }}
         onMouseDown={(e) => handleMouseResizeStart(e, 'w')}
         onTouchStart={(e) => handleTouchResizeStart(e, 'w')}
       />
       {/* Right */}
       <div
-        className="absolute top-0 right-0 bottom-0 cursor-e-resize hover:bg-blue-500/20 active:bg-blue-500/30"
+        className="absolute top-0 right-0 bottom-0 cursor-e-resize hover:bg-primary/100/20 active:bg-primary/100/30"
         style={{ width: `${resizeHandleSize * 0.3}px` }}
         onMouseDown={(e) => handleMouseResizeStart(e, 'e')}
         onTouchStart={(e) => handleTouchResizeStart(e, 'e')}
@@ -300,7 +300,7 @@ export function DesktopWindow({
       {/* Resize Handles - Corners */}
       {/* Top Left */}
       <div
-        className="absolute top-0 left-0 cursor-nw-resize hover:bg-blue-500/30 active:bg-blue-500/40"
+        className="absolute top-0 left-0 cursor-nw-resize hover:bg-primary/100/30 active:bg-primary/100/40"
         style={{ 
           width: `${resizeHandleSize}px`, 
           height: `${resizeHandleSize}px` 
@@ -310,7 +310,7 @@ export function DesktopWindow({
       />
       {/* Top Right */}
       <div
-        className="absolute top-0 right-0 cursor-ne-resize hover:bg-blue-500/30 active:bg-blue-500/40"
+        className="absolute top-0 right-0 cursor-ne-resize hover:bg-primary/100/30 active:bg-primary/100/40"
         style={{ 
           width: `${resizeHandleSize}px`, 
           height: `${resizeHandleSize}px` 
@@ -320,7 +320,7 @@ export function DesktopWindow({
       />
       {/* Bottom Left */}
       <div
-        className="absolute bottom-0 left-0 cursor-sw-resize hover:bg-blue-500/30 active:bg-blue-500/40"
+        className="absolute bottom-0 left-0 cursor-sw-resize hover:bg-primary/100/30 active:bg-primary/100/40"
         style={{ 
           width: `${resizeHandleSize}px`, 
           height: `${resizeHandleSize}px` 
@@ -330,7 +330,7 @@ export function DesktopWindow({
       />
       {/* Bottom Right */}
       <div
-        className="absolute bottom-0 right-0 cursor-se-resize hover:bg-blue-500/30 active:bg-blue-500/40"
+        className="absolute bottom-0 right-0 cursor-se-resize hover:bg-primary/100/30 active:bg-primary/100/40"
         style={{ 
           width: `${resizeHandleSize}px`, 
           height: `${resizeHandleSize}px`,

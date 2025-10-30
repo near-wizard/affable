@@ -296,11 +296,40 @@ def seed_database():
                     partner_id=partners[1].partner_id,
                     status="approved"
                 ),
-                # Fitness Influencer Jane enrolls in campaign 2
+                # Fitness Influencer Jane enrolls in campaign 2 (APPROVED) and campaign 0 (PENDING)
                 CampaignPartner(
                     campaign_version_id=campaign_versions[2].campaign_version_id,
                     partner_id=partners[2].partner_id,
                     status="approved"
+                ),
+                CampaignPartner(
+                    campaign_version_id=campaign_versions[0].campaign_version_id,
+                    partner_id=partners[2].partner_id,
+                    status="pending",
+                    applied_at=datetime.utcnow()
+                ),
+                # StartupBlogger enrolls in campaign 0 (PENDING)
+                CampaignPartner(
+                    campaign_version_id=campaign_versions[0].campaign_version_id,
+                    partner_id=partners[3].partner_id,
+                    status="pending",
+                    applied_at=datetime.utcnow()
+                ),
+                # EduTech Reviews enrolls in campaign 0 (PENDING)
+                CampaignPartner(
+                    campaign_version_id=campaign_versions[0].campaign_version_id,
+                    partner_id=partners[5].partner_id,
+                    status="pending",
+                    applied_at=datetime.utcnow()
+                ),
+                # Marketing Maven enrolls in campaign 0 (REJECTED)
+                CampaignPartner(
+                    campaign_version_id=campaign_versions[0].campaign_version_id,
+                    partner_id=partners[1].partner_id,
+                    status="rejected",
+                    applied_at=datetime.utcnow() - timedelta(days=5),
+                    rejected_at=datetime.utcnow() - timedelta(days=4),
+                    rejection_reason="Does not meet audience quality requirements"
                 ),
                 # YouTube Tech Channel enrolls in campaigns 0 and 3
                 CampaignPartner(

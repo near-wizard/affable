@@ -23,7 +23,7 @@ export default function AboutFounder() {
       description: 'Clear pricing. No hidden fees. No dark patterns. What you see is what you get.'
     },
     {
-      icon: <Zap className="text-blue-500" />,
+      icon: <Zap className="text-primary" />,
       title: 'Ship Fast',
       description: 'I ship features in days, not quarters. Your feedback becomes reality quickly.'
     },
@@ -98,7 +98,7 @@ export default function AboutFounder() {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-sm">
+      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-lg border-b border-border shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-2 overflow-x-auto py-4">
             {['story', 'why-me', 'vision', 'connect'].map((tab) => (
@@ -108,7 +108,7 @@ export default function AboutFounder() {
                 className={`px-6 py-3 rounded-full font-semibold whitespace-nowrap transition-all ${
                   activeTab === tab
                     ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg scale-105'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-muted text-muted-foreground hover:bg-muted'
                 }`}
               >
                 {tab === 'story' && '📖 The Story'}
@@ -126,10 +126,10 @@ export default function AboutFounder() {
         {activeTab === 'story' && (
           <div className="space-y-12 animate-fadeIn">
             <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+              <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4">
                 From Frustrated Marketer to Builder
               </h2>
-              <p className="text-xl text-gray-600">
+              <p className="text-xl text-muted-foreground">
                 This platform exists because I lived the pain.
               </p>
             </div>
@@ -143,9 +143,9 @@ export default function AboutFounder() {
                     <div className="absolute left-0 w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-purple-600/40 transform hover:rotate-12 transition-transform cursor-pointer">
                       {milestone.icon}
                     </div>
-                    <div className="bg-white rounded-2xl p-6 shadow-lg shadow-purple-100/40 border-2 border-gray-100 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-200/50 transition-all hover:-translate-y-1 cursor-pointer">
+                    <div className="bg-white rounded-2xl p-6 shadow-lg shadow-purple-100/40 border-2 border-border hover:border-purple-300 hover:shadow-lg hover:shadow-purple-200/50 transition-all hover:-translate-y-1 cursor-pointer">
                       <div className="text-sm font-bold text-purple-600 mb-2">{milestone.year}</div>
-                      <p className="text-lg text-gray-700">{milestone.text}</p>
+                      <p className="text-lg text-foreground">{milestone.text}</p>
                     </div>
                   </div>
                 ))}
@@ -157,30 +157,30 @@ export default function AboutFounder() {
               <div className="flex items-start gap-4">
                 <div className="text-4xl">🔥</div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">Why This Matters to You</h3>
+                  <h3 className="text-2xl font-bold text-foreground mb-3">Why This Matters to You</h3>
                   
                   <div className="mb-6">
-                    <p className="text-gray-700 leading-relaxed mb-2 font-semibold">
+                    <p className="text-foreground leading-relaxed mb-2 font-semibold">
                       <span className="text-purple-600">If you're a vendor:</span>
                     </p>
-                    <p className="text-gray-700 leading-relaxed mb-4">
+                    <p className="text-foreground leading-relaxed mb-4">
                       I know what makes partners actually perform. I've been the partner who broke records, 
                       so I built the tools that attract and retain top performers. No guessing what partners need—I lived it.
                     </p>
                   </div>
 
                   <div className="mb-6">
-                    <p className="text-gray-700 leading-relaxed mb-2 font-semibold">
-                      <span className="text-blue-600">If you're a partner:</span>
+                    <p className="text-foreground leading-relaxed mb-2 font-semibold">
+                      <span className="text-primary">If you're a partner:</span>
                     </p>
-                    <p className="text-gray-700 leading-relaxed mb-4">
+                    <p className="text-foreground leading-relaxed mb-4">
                       I've dealt with every platform headache you can imagine. Lost commissions, confusing dashboards, 
                       slow payouts. This platform exists because I built exactly what I wished existed.
                     </p>
                   </div>
 
                   <div className="p-4 bg-white rounded-lg border-2 border-orange-300">
-                    <p className="text-gray-700 leading-relaxed font-semibold">
+                    <p className="text-foreground leading-relaxed font-semibold">
                       Natural salesperson + 10 years as a top partner + software engineering = 
                       a platform that actually works for both sides.
                     </p>
@@ -191,23 +191,23 @@ export default function AboutFounder() {
 
             {/* Credibility Proof */}
             <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-6 text-center hover:shadow-lg hover:shadow-blue-200/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-primary/30 rounded-2xl p-6 text-center hover:shadow-lg hover:shadow-blue-200/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
                 <div className="text-4xl mb-3">🎯</div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">Born to Sell</div>
-                <div className="text-gray-700">Top seller since high school fundraisers</div>
-                <div className="text-xs text-gray-600 mt-2">Vendors: I know what drives performance</div>
+                <div className="text-3xl font-bold text-foreground mb-2">Born to Sell</div>
+                <div className="text-foreground">Top seller since high school fundraisers</div>
+                <div className="text-xs text-muted-foreground mt-2">Vendors: I know what drives performance</div>
               </div>
               <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-2xl p-6 text-center hover:shadow-lg hover:shadow-purple-200/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
                 <div className="text-4xl mb-3">📈</div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">Record Breaker</div>
-                <div className="text-gray-700">10 years breaking referral records as a partner</div>
-                <div className="text-xs text-gray-600 mt-2">Partners: I've been in your shoes</div>
+                <div className="text-3xl font-bold text-foreground mb-2">Record Breaker</div>
+                <div className="text-foreground">10 years breaking referral records as a partner</div>
+                <div className="text-xs text-muted-foreground mt-2">Partners: I've been in your shoes</div>
               </div>
               <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-2xl p-6 text-center hover:shadow-lg hover:shadow-green-200/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
                 <div className="text-4xl mb-3">💻</div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">Builder</div>
-                <div className="text-gray-700">Engineer who codes the solution</div>
-                <div className="text-xs text-gray-600 mt-2">Both: Fast, reliable tech</div>
+                <div className="text-3xl font-bold text-foreground mb-2">Builder</div>
+                <div className="text-foreground">Engineer who codes the solution</div>
+                <div className="text-xs text-muted-foreground mt-2">Both: Fast, reliable tech</div>
               </div>
             </div>
           </div>
@@ -217,10 +217,10 @@ export default function AboutFounder() {
         {activeTab === 'why-me' && (
           <div className="space-y-12 animate-fadeIn">
             <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+              <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4">
                 Why Trust a Solo Founder?
               </h2>
-              <p className="text-xl text-gray-600">
+              <p className="text-xl text-muted-foreground">
                 Because it's actually better for you.
               </p>
             </div>
@@ -229,13 +229,13 @@ export default function AboutFounder() {
               {principles.map((principle, index) => (
                 <div
                   key={index}
-                  className="group bg-gradient-to-br from-white to-gray-50 rounded-3xl p-8 border-2 border-gray-200 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-200/30 transition-all duration-300 hover:-translate-y-2 cursor-pointer"
+                  className="group bg-gradient-to-br from-white to-gray-50 rounded-3xl p-8 border-2 border-border hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-200/30 transition-all duration-300 hover:-translate-y-2 cursor-pointer"
                 >
                   <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     {principle.icon}
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">{principle.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{principle.description}</p>
+                  <h3 className="text-2xl font-bold text-foreground mb-3">{principle.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{principle.description}</p>
                 </div>
               ))}
             </div>
@@ -268,8 +268,8 @@ export default function AboutFounder() {
             </div>
 
             {/* What You Get Section */}
-            <div className="bg-white rounded-3xl p-8 border-2 border-gray-200 shadow-lg hover:shadow-xl hover:shadow-purple-200/30 transition-all duration-300">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">What Working With Me Means:</h3>
+            <div className="bg-white rounded-3xl p-8 border-2 border-border shadow-lg hover:shadow-xl hover:shadow-purple-200/30 transition-all duration-300">
+              <h3 className="text-2xl font-bold text-foreground mb-6">What Working With Me Means:</h3>
               <div className="space-y-4">
                 {[
                   'I\'ve actually lived as a partner - I know what frustrates you',
@@ -283,7 +283,7 @@ export default function AboutFounder() {
                     <div className="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mt-1">
                       <Check className="text-white" size={16} />
                     </div>
-                    <p className="text-gray-700 text-lg">{item}</p>
+                    <p className="text-foreground text-lg">{item}</p>
                   </div>
                 ))}
               </div>
@@ -295,60 +295,60 @@ export default function AboutFounder() {
         {activeTab === 'vision' && (
           <div className="space-y-12 animate-fadeIn">
             <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+              <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4">
                 Where We're Going
               </h2>
-              <p className="text-xl text-gray-600">
+              <p className="text-xl text-muted-foreground">
                 The future of partner marketing, minus the BS.
               </p>
             </div>
 
             {/* Current Status */}
-            <div className="bg-white rounded-3xl p-8 border-2 border-gray-200 shadow-lg hover:shadow-xl hover:shadow-purple-200/30 transition-all duration-300">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <div className="bg-white rounded-3xl p-8 border-2 border-border shadow-lg hover:shadow-xl hover:shadow-purple-200/30 transition-all duration-300">
+              <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                 Current Status
               </h3>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center p-6 bg-green-50 rounded-2xl border-2 border-green-200 hover:shadow-lg hover:shadow-green-200/40 transition-all duration-300 cursor-pointer">
                   <div className="text-3xl mb-3">✅</div>
-                  <div className="font-bold text-gray-900 mb-2">Core Platform</div>
-                  <div className="text-sm text-gray-600">Gathering Initial Interest, Dashboard <Link href="/vendor/dashboard" className="text-blue-600 hover:underline">Mocks for Vendors</Link> and <Link href="/partner/dashboard" className="text-blue-600 hover:underline">For Partner Sellers</Link></div>
+                  <div className="font-bold text-foreground mb-2">Core Platform</div>
+                  <div className="text-sm text-muted-foreground">Gathering Initial Interest, Dashboard <Link href="/vendor/dashboard" className="text-primary hover:underline">Mocks for Vendors</Link> and <Link href="/partner/dashboard" className="text-primary hover:underline">For Partner Sellers</Link></div>
                 </div>
                 <div className="text-center p-6 bg-yellow-50 rounded-2xl border-2 border-yellow-200 hover:shadow-lg hover:shadow-yellow-200/40 transition-all duration-300 cursor-pointer">
                   <div className="text-3xl mb-3">🚧</div>
-                  <div className="font-bold text-gray-900 mb-2">In Progress</div>
-                  <div className="text-sm text-gray-600">Tracking, attribution, payouts all working </div>
+                  <div className="font-bold text-foreground mb-2">In Progress</div>
+                  <div className="text-sm text-muted-foreground">Tracking, attribution, payouts all working </div>
                 </div>
-                <div className="text-center p-6 bg-blue-50 rounded-2xl border-2 border-blue-200 hover:shadow-lg hover:shadow-blue-200/40 transition-all duration-300 cursor-pointer">
+                <div className="text-center p-6 bg-primary/10 rounded-2xl border-2 border-primary/30 hover:shadow-lg hover:shadow-blue-200/40 transition-all duration-300 cursor-pointer">
                   <div className="text-3xl mb-3">🔮</div>
-                  <div className="font-bold text-gray-900 mb-2">Coming Soon</div>
-                  <div className="text-sm text-gray-600">Integrations, Advanced analytics, multi-currency</div>
+                  <div className="font-bold text-foreground mb-2">Coming Soon</div>
+                  <div className="text-sm text-muted-foreground">Integrations, Advanced analytics, multi-currency</div>
                 </div>
               </div>
             </div>
 
             {/* Roadmap */}
             <div className="space-y-6">
-              <h3 className="text-3xl font-bold text-gray-900">Roadmap (Your Input Shapes This)</h3>
+              <h3 className="text-3xl font-bold text-foreground">Roadmap (Your Input Shapes This)</h3>
               
               {[
                 { phase: 'Q4 2024', items: ['Multi-stage funnel tracking', 'PayPal & Paddle integration', 'Email automation'], status: 'active' },
                 { phase: 'Q1 2025', items: ['Mobile app', 'API for custom integrations', 'Multi-language support'], status: 'planned' },
                 { phase: 'Q2 2025', items: ['AI-powered insights', 'White-label options', 'Enterprise features'], status: 'planned' },
               ].map((phase, index) => (
-                <div key={index} className="bg-white rounded-2xl p-6 border-2 border-gray-200 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-200/30 transition-all cursor-pointer">
+                <div key={index} className="bg-white rounded-2xl p-6 border-2 border-border hover:border-purple-300 hover:shadow-lg hover:shadow-purple-200/30 transition-all cursor-pointer">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-xl font-bold text-gray-900">{phase.phase}</h4>
+                    <h4 className="text-xl font-bold text-foreground">{phase.phase}</h4>
                     <span className={`px-4 py-1 rounded-full text-sm font-semibold ${
-                      phase.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                      phase.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground'
                     }`}>
                       {phase.status === 'active' ? 'In Progress' : 'Planned'}
                     </span>
                   </div>
                   <ul className="space-y-2">
                     {phase.items.map((item, i) => (
-                      <li key={i} className="flex items-center gap-2 text-gray-600">
+                      <li key={i} className="flex items-center gap-2 text-muted-foreground">
                         <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
                         {item}
                       </li>
@@ -374,10 +374,10 @@ export default function AboutFounder() {
         {activeTab === 'connect' && (
           <div className="space-y-12 animate-fadeIn">
             <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+              <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4">
                 Let's Connect
               </h2>
-              <p className="text-xl text-gray-600">
+              <p className="text-xl text-muted-foreground">
                 Seriously, I actually want to talk to you.
               </p>
             </div>
@@ -408,22 +408,22 @@ export default function AboutFounder() {
             </div>
 
             {/* Social Links */}
-            <div className="bg-white rounded-3xl p-8 border-2 border-gray-200 shadow-lg hover:shadow-xl hover:shadow-purple-200/30 transition-all duration-300">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Find Me On</h3>
+            <div className="bg-white rounded-3xl p-8 border-2 border-border shadow-lg hover:shadow-xl hover:shadow-purple-200/30 transition-all duration-300">
+              <h3 className="text-2xl font-bold text-foreground mb-6">Find Me On</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { icon: <Linkedin />, name: 'LinkedIn', url: '#', color: 'hover:bg-blue-50 hover:border-blue-400' },
+                  { icon: <Linkedin />, name: 'LinkedIn', url: '#', color: 'hover:bg-primary/10 hover:border-blue-400' },
                   { icon: <Twitter />, name: 'Twitter', url: '#', color: 'hover:bg-sky-50 hover:border-sky-400' },
-                  { icon: <Github />, name: 'GitHub', url: '#', color: 'hover:bg-gray-50 hover:border-gray-400' },
+                  { icon: <Github />, name: 'GitHub', url: '#', color: 'hover:bg-muted hover:border-border' },
                   { icon: <Code />, name: 'Dev.to', url: '#', color: 'hover:bg-purple-50 hover:border-purple-400' },
                 ].map((social, index) => (
                   <a
                     key={index}
                     href={social.url}
-                    className={`flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-2xl transition-all hover:shadow-lg cursor-pointer ${social.color}`}
+                    className={`flex flex-col items-center justify-center p-6 border-2 border-border rounded-2xl transition-all hover:shadow-lg cursor-pointer ${social.color}`}
                   >
-                    <div className="text-gray-700 mb-2">{social.icon}</div>
-                    <div className="text-sm font-semibold text-gray-900">{social.name}</div>
+                    <div className="text-foreground mb-2">{social.icon}</div>
+                    <div className="text-sm font-semibold text-foreground">{social.name}</div>
                   </a>
                 ))}
               </div>

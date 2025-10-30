@@ -40,6 +40,7 @@ class Partner(BaseModel):
     payment_methods = relationship("PartnerPaymentMethod", back_populates="partner")
     conversion_events = relationship("ConversionEvent", back_populates="partner")
     payouts = relationship("Payout", back_populates="partner")
+    payout_schedules = relationship("PayoutSchedule", back_populates="partner")
     
     def __repr__(self):
         return f"<Partner {self.name} ({self.email}) - {self.tier}>"

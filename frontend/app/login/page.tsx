@@ -66,27 +66,27 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-			<div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
+		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
+			<div className="bg-card p-8 rounded-2xl shadow-md w-full max-w-md">
 				<h1 className="text-2xl font-semibold text-center mb-6">
-					Welcome back to <span className="text-blue-600">Affable Link</span>
+					Welcome back to <span className="text-primary">Affable Link</span>
 				</h1>
 
 				{error && (
-					<div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+					<div className="mb-4 p-3 bg-destructive/10 border border-destructive/30 text-destructive rounded-lg text-sm">
 						{error}
 					</div>
 				)}
 
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-2">
+						<label className="block text-sm font-medium text-foreground mb-2">
 							I am a:
 						</label>
 						<select
 							value={role}
 							onChange={(e) => setRole(e.target.value)}
-							className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+							className="w-full border border-border rounded-lg p-2 text-foreground"
 						>
 							<option value="partner">Affiliate / Partner</option>
 							<option value="vendor">Founder / Vendor</option>
@@ -94,7 +94,7 @@ export default function LoginPage() {
 					</div>
 
 					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-1">
+						<label className="block text-sm font-medium text-foreground mb-1">
 							Email
 						</label>
 						<input
@@ -102,14 +102,14 @@ export default function LoginPage() {
 							placeholder="your@email.com"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
-							className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+							className="w-full border border-border rounded-lg p-2 text-foreground"
 							required
 							disabled={isLoading}
 						/>
 					</div>
 
 					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-1">
+						<label className="block text-sm font-medium text-foreground mb-1">
 							Password
 						</label>
 						<input
@@ -117,7 +117,7 @@ export default function LoginPage() {
 							placeholder="Enter your password"
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
-							className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+							className="w-full border border-border rounded-lg p-2 text-foreground"
 							required
 							disabled={isLoading}
 						/>
@@ -126,17 +126,17 @@ export default function LoginPage() {
 					<button
 						type="submit"
 						disabled={isLoading}
-						className="w-full bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+						className="w-full bg-primary/100 text-white rounded-lg py-2 hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed border-2 border-blueberry"
 					>
 						{isLoading ? "Logging in..." : "Log In"}
 					</button>
 				</form>
 
-				<p className="text-center text-sm text-gray-600 mt-6">
+				<p className="text-center text-sm text-muted-foreground mt-6">
 					New here?{" "}
 					<Link
 						href="/signup"
-						className="text-blue-600 hover:underline font-medium"
+						className="text-primary hover:underline font-medium"
 					>
 						Create an account
 					</Link>

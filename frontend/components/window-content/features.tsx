@@ -201,7 +201,7 @@ export function FeaturesContent() {
         <p className="text-white/90 mb-6 leading-relaxed">
           Get started in less than 24 hours with all these features included. No credit card required.
         </p>
-        <button className="bg-white text-primary px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg shadow-white/30">
+        <button className="bg-white text-primary px-8 py-3 rounded-full font-bold hover:bg-muted transition-all transform hover:scale-105 shadow-lg shadow-white/30">
           Start Free Today
         </button>
       </div>

@@ -121,10 +121,10 @@ export default function PartnerDashboard() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+			<div className="min-h-screen bg-background flex items-center justify-center">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-					<p className="mt-4 text-gray-600">Loading dashboard...</p>
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+					<p className="mt-4 text-muted-foreground">Loading dashboard...</p>
 				</div>
 			</div>
 		);
@@ -221,16 +221,16 @@ export default function PartnerDashboard() {
 	).length;
 
 	return (
-		<div className="min-h-screen bg-gray-50">
+		<div className="min-h-screen bg-background">
 			{/* Header */}
-			<div className="bg-white shadow">
+			<div className="bg-background shadow">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 					<div className="flex items-center justify-between">
 						<div>
-							<h1 className="text-3xl font-bold text-gray-900">
+							<h1 className="text-3xl font-bold text-foreground">
 								Partner Dashboard
 							</h1>
-							<p className="text-gray-600 mt-1">
+							<p className="text-muted-foreground mt-1">
 								Track your performance and earnings
 							</p>
 						</div>
@@ -240,35 +240,35 @@ export default function PartnerDashboard() {
 
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				{/* Earnings Banner */}
-				<div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-8 mb-8 text-white">
+				<div className="bg-gradient-to-r from-primary to-primary rounded-lg shadow-lg p-8 mb-8 text-white">
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 						<div>
 							<div className="flex items-center gap-2 mb-2">
 								<DollarSign size={24} />
-								<span className="text-blue-100">Total Earnings</span>
+								<span className="text-purple-100">Total Earnings</span>
 							</div>
 							<div className="text-4xl font-bold">
 								${(stats.total_earnings || 0).toFixed(2)}
 							</div>
-							<div className="text-blue-100 mt-1">All time</div>
+							<div className="text-purple-100 mt-1">All time</div>
 						</div>
 						<div>
 							<div className="flex items-center gap-2 mb-2">
 								<Clock size={24} />
-								<span className="text-blue-100">Pending</span>
+								<span className="text-purple-100">Pending</span>
 							</div>
 							<div className="text-4xl font-bold">
 								${(stats.pending_earnings || 0).toFixed(2)}
 							</div>
-							<div className="text-blue-100 mt-1">Awaiting approval</div>
+							<div className="text-purple-100 mt-1">Awaiting approval</div>
 						</div>
 						<div>
 							<div className="flex items-center gap-2 mb-2">
 								<TrendingUp size={24} />
-								<span className="text-blue-100">Conversion Rate</span>
+								<span className="text-purple-100">Conversion Rate</span>
 							</div>
 							<div className="text-4xl font-bold">{conversionRate}%</div>
-							<div className="text-blue-100 mt-1">of clicks converting</div>
+							<div className="text-purple-100 mt-1">of clicks converting</div>
 						</div>
 					</div>
 				</div>
@@ -276,19 +276,19 @@ export default function PartnerDashboard() {
 				{/* KPI Cards */}
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 					<StatCard
-						icon={<MousePointerClick className="text-blue-600" />}
+						icon={<MousePointerClick className="text-primary" />}
 						label="Total Clicks"
 						value={(stats.total_clicks || 0).toLocaleString()}
-						bgColor="bg-blue-50"
+						bgColor="bg-primary/10"
 					/>
 					<StatCard
-						icon={<CheckCircle className="text-green-600" />}
+						icon={<CheckCircle className="text-secondary" />}
 						label="Conversions"
 						value={(stats.total_conversions || 0).toLocaleString()}
-						bgColor="bg-green-50"
+						bgColor="bg-secondary"
 					/>
 					<StatCard
-						icon={<Link2 className="text-purple-600" />}
+						icon={<Link2 className="text-primary" />}
 						label="Active Campaigns"
 						value={activeCampaignsCount.toLocaleString()}
 						bgColor="bg-purple-50"
@@ -296,9 +296,9 @@ export default function PartnerDashboard() {
 				</div>
 
 				{/* Analytics Filters */}
-				<div className="bg-white rounded-lg shadow p-6 mb-8">
+				<div className="bg-background rounded-lg shadow p-6 mb-8">
 					<div className="flex items-center justify-between mb-6">
-						<h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+						<h2 className="text-xl font-bold text-foreground flex items-center gap-2">
 							<Filter size={20} />
 							Analytics Filters
 						</h2>
@@ -315,7 +315,7 @@ export default function PartnerDashboard() {
 									setSelectedUTMmedium("");
 									setSelectedUTMCampaign("");
 								}}
-								className="text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
+								className="text-sm text-destructive hover:text-red-700 flex items-center gap-1"
 							>
 								<X size={16} />
 								Clear Filters
@@ -326,37 +326,37 @@ export default function PartnerDashboard() {
 					<div className="grid grid-cols-1 md:grid-cols-5 gap-4">
 						{/* Date Range */}
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
+							<label className="block text-sm font-medium text-foreground mb-1">
 								Start Date
 							</label>
 							<input
 								type="date"
 								value={startDate}
 								onChange={(e) => setStartDate(e.target.value)}
-								className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+								className="w-full border border-border rounded-lg p-2 text-foreground"
 							/>
 						</div>
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
+							<label className="block text-sm font-medium text-foreground mb-1">
 								End Date
 							</label>
 							<input
 								type="date"
 								value={endDate}
 								onChange={(e) => setEndDate(e.target.value)}
-								className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+								className="w-full border border-border rounded-lg p-2 text-foreground"
 							/>
 						</div>
 
 						{/* UTM Filters */}
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
+							<label className="block text-sm font-medium text-foreground mb-1">
 								UTM Source
 							</label>
 							<select
 								value={selectedUTMSource}
 								onChange={(e) => setSelectedUTMSource(e.target.value)}
-								className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+								className="w-full border border-border rounded-lg p-2 text-foreground"
 							>
 								<option value="">All Sources</option>
 								{analyticsData?.utm_sources?.map((source) => (
@@ -367,13 +367,13 @@ export default function PartnerDashboard() {
 							</select>
 						</div>
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
+							<label className="block text-sm font-medium text-foreground mb-1">
 								UTM Medium
 							</label>
 							<select
 								value={selectedUTMmedium}
 								onChange={(e) => setSelectedUTMmedium(e.target.value)}
-								className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+								className="w-full border border-border rounded-lg p-2 text-foreground"
 							>
 								<option value="">All Mediums</option>
 								{analyticsData?.utm_mediums?.map((medium) => (
@@ -384,13 +384,13 @@ export default function PartnerDashboard() {
 							</select>
 						</div>
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
+							<label className="block text-sm font-medium text-foreground mb-1">
 								UTM Campaign
 							</label>
 							<select
 								value={selectedUTMCampaign}
 								onChange={(e) => setSelectedUTMCampaign(e.target.value)}
-								className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+								className="w-full border border-border rounded-lg p-2 text-foreground"
 							>
 								<option value="">All Campaigns</option>
 								{analyticsData?.utm_campaigns?.map((campaign) => (
@@ -404,29 +404,29 @@ export default function PartnerDashboard() {
 				</div>
 
 				{/* Performance Chart */}
-				<div className="bg-white rounded-lg shadow p-6 mb-8">
+				<div className="bg-background rounded-lg shadow p-6 mb-8">
 					<div className="flex items-center justify-between mb-6">
-						<h2 className="text-xl font-bold text-gray-900">
+						<h2 className="text-xl font-bold text-foreground">
 							Performance Overview
 						</h2>
 						{analyticsLoading && (
-							<div className="text-sm text-gray-500 flex items-center gap-2">
-								<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+							<div className="text-sm text-muted-foreground flex items-center gap-2">
+								<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
 								Loading...
 							</div>
 						)}
 					</div>
 					{analyticsError ? (
-						<div className="flex items-center justify-center h-64 bg-red-50 rounded text-red-700">
+						<div className="flex items-center justify-center h-64 bg-destructive/10 rounded text-red-700">
 							<div className="text-center">
 								<p className="font-semibold mb-2">Error loading analytics</p>
 								<p className="text-sm">{analyticsError.message}</p>
 							</div>
 						</div>
 					) : analyticsLoading && !performanceData.length ? (
-						<div className="flex items-center justify-center h-64 text-gray-500">
+						<div className="flex items-center justify-center h-64 text-muted-foreground">
 							<div className="text-center">
-								<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+								<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
 								<p>Loading analytics data...</p>
 							</div>
 						</div>
@@ -457,7 +457,7 @@ export default function PartnerDashboard() {
 							</LineChart>
 						</ResponsiveContainer>
 					) : (
-						<div className="text-center py-12 text-gray-500">
+						<div className="text-center py-12 text-muted-foreground">
 							<p>
 								No click data available for the selected date range and filters.
 							</p>
@@ -467,14 +467,14 @@ export default function PartnerDashboard() {
 
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 					{/* Top Performing Links */}
-					<div className="bg-white rounded-lg shadow p-6">
+					<div className="bg-background rounded-lg shadow p-6">
 						<div className="flex items-center justify-between mb-6">
-							<h2 className="text-xl font-bold text-gray-900">
+							<h2 className="text-xl font-bold text-foreground">
 								Top Performing Links
 							</h2>
 							<a
 								href="/partner/links"
-								className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+								className="text-primary hover:text-primary text-sm font-medium"
 							>
 								View All →
 							</a>
@@ -482,26 +482,26 @@ export default function PartnerDashboard() {
 						<div className="space-y-4">
 							{topLinks.length > 0 ? (
 								topLinks.map((link, index) => (
-									<div key={index} className="p-4 bg-gray-50 rounded-lg">
+									<div key={index} className="p-4 bg-background rounded-lg">
 										<div className="flex items-start justify-between mb-2">
 											<div>
-												<div className="font-semibold text-gray-900">
+												<div className="font-semibold text-foreground">
 													{link.label}
 												</div>
-												<div className="text-sm text-gray-500 font-mono">
+												<div className="text-sm text-muted-foreground font-mono">
 													{link.url}
 												</div>
 											</div>
 										</div>
-										<div className="flex items-center gap-4 text-sm text-gray-600">
+										<div className="flex items-center gap-4 text-sm text-muted-foreground">
 											<span>{link.clicks.toLocaleString()} clicks</span>
 										</div>
 									</div>
 								))
 							) : (
-								<div className="p-4 bg-gray-50 rounded-lg text-center text-gray-500">
+								<div className="p-4 bg-background rounded-lg text-center text-muted-foreground">
 									No links created yet.{" "}
-									<a href="/partner/links" className="text-blue-600">
+									<a href="/partner/links" className="text-primary">
 										Create one now
 									</a>
 								</div>
@@ -510,14 +510,14 @@ export default function PartnerDashboard() {
 					</div>
 
 					{/* Recent Conversions */}
-					<div className="bg-white rounded-lg shadow p-6">
+					<div className="bg-background rounded-lg shadow p-6">
 						<div className="flex items-center justify-between mb-6">
-							<h2 className="text-xl font-bold text-gray-900">
+							<h2 className="text-xl font-bold text-foreground">
 								Recent Conversions
 							</h2>
 							<a
 								href="/partner/earnings"
-								className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+								className="text-primary hover:text-primary text-sm font-medium"
 							>
 								View All →
 							</a>
@@ -527,18 +527,18 @@ export default function PartnerDashboard() {
 								recentConversions.map((conversion, index) => (
 									<div
 										key={index}
-										className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+										className="flex items-center justify-between p-4 bg-background rounded-lg"
 									>
 										<div>
-											<div className="font-semibold text-gray-900">
+											<div className="font-semibold text-foreground">
 												{conversion.campaign}
 											</div>
-											<div className="text-sm text-gray-600">
+											<div className="text-sm text-muted-foreground">
 												{conversion.date}
 											</div>
 										</div>
 										<div className="text-right">
-											<div className="font-bold text-gray-900">
+											<div className="font-bold text-foreground">
 												${conversion.amount.toFixed(2)}
 											</div>
 											<span
@@ -554,9 +554,9 @@ export default function PartnerDashboard() {
 									</div>
 								))
 							) : (
-								<div className="p-4 bg-gray-50 rounded-lg text-center text-gray-500">
+								<div className="p-4 bg-background rounded-lg text-center text-muted-foreground">
 									No conversions yet.{" "}
-									<a href="/partner/campaigns" className="text-blue-600">
+									<a href="/partner/campaigns" className="text-primary">
 										Browse campaigns
 									</a>
 								</div>
@@ -566,8 +566,8 @@ export default function PartnerDashboard() {
 				</div>
 
 				{/* Quick Actions */}
-				<div className="mt-8 bg-white rounded-lg shadow p-6">
-					<h2 className="text-xl font-bold text-gray-900 mb-4">
+				<div className="mt-8 bg-background rounded-lg shadow p-6">
+					<h2 className="text-xl font-bold text-foreground mb-4">
 						Quick Actions
 					</h2>
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -598,12 +598,12 @@ export default function PartnerDashboard() {
 
 function StatCard({ icon, label, value, bgColor }) {
 	return (
-		<div className="bg-white rounded-lg shadow p-6">
+		<div className="bg-background rounded-lg shadow p-6">
 			<div className="flex items-center justify-between mb-4">
 				<div className={`p-3 rounded-lg ${bgColor}`}>{icon}</div>
 			</div>
-			<div className="text-2xl font-bold text-gray-900">{value}</div>
-			<div className="text-sm text-gray-600 mt-1">{label}</div>
+			<div className="text-2xl font-bold text-foreground">{value}</div>
+			<div className="text-sm text-muted-foreground mt-1">{label}</div>
 		</div>
 	);
 }
@@ -612,12 +612,12 @@ function ActionButton({ icon, label, description, href }) {
 	return (
 		<a
 			href={href}
-			className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left"
+			className="flex items-start gap-4 p-4 border border-border rounded-lg hover:border-primary hover:bg-primary/10 transition text-left"
 		>
-			<div className="p-3 bg-blue-100 rounded-lg text-blue-600">{icon}</div>
+			<div className="p-3 bg-purple-100 rounded-lg text-primary">{icon}</div>
 			<div>
-				<div className="font-semibold text-gray-900">{label}</div>
-				<div className="text-sm text-gray-600">{description}</div>
+				<div className="font-semibold text-foreground">{label}</div>
+				<div className="text-sm text-muted-foreground">{description}</div>
 			</div>
 		</a>
 	);

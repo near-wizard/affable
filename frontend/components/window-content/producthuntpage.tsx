@@ -100,7 +100,7 @@ export function ProductHuntPage() {
 				</aside>
 			</section>
 
-			<footer className="max-w-5xl mx-auto mt-12 text-sm text-slate-500 text-center">
+			<footer className="max-w-5xl mx-auto mt-12 text-sm text-muted-foreground text-center">
 				<p>
 					Friendly, maker-first approach — built to keep momentum after launch
 					day.

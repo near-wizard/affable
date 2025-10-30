@@ -33,21 +33,21 @@ export function YCPage() {
 							</p>
 
 							<div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-								<div className="p-4 bg-slate-50 rounded shadow-sm">
+								<div className="p-4 bg-muted rounded shadow-sm">
 									<h4 className="font-medium">Launch in Days</h4>
 									<p className="text-sm mt-1">
 										Plug-and-play templates for tracking, rewards, and
 										creatives.
 									</p>
 								</div>
-								<div className="p-4 bg-slate-50 rounded shadow-sm">
+								<div className="p-4 bg-muted rounded shadow-sm">
 									<h4 className="font-medium">Clean Attribution</h4>
 									<p className="text-sm mt-1">
 										We help you track signups back to creatives and partners —
 										no messy spreadsheets.
 									</p>
 								</div>
-								<div className="p-4 bg-slate-50 rounded shadow-sm">
+								<div className="p-4 bg-muted rounded shadow-sm">
 									<h4 className="font-medium">Engineering-light</h4>
 									<p className="text-sm mt-1">
 										Works with Stripe webhook integration.
@@ -108,7 +108,7 @@ export function YCPage() {
 				</aside>
 			</section>
 
-			<footer className="max-w-6xl mx-auto mt-12 text-sm text-slate-500">
+			<footer className="max-w-6xl mx-auto mt-12 text-sm text-muted-foreground">
 				<p>
 					Designed for startups prioritizing rapid, data-driven growth
 					experiments.

@@ -39,26 +39,26 @@ export default function VendorPayouts() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading payouts...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading payouts...</p>
         </div>
       </div>
     );
   }
 
   return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         {/* Header */}
-        <div className="bg-white shadow">
+        <div className="bg-background shadow">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex items-center justify-between">
               <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2"> <CreditCard size={32} className="text-blue-600" /> Manage Payouts</h1>
-                <p className="text-gray-600 mt-1">Process and manage pending partner payouts</p>
+              <h1 className="text-3xl font-bold text-foreground flex items-center gap-2"> <CreditCard size={32} className="text-primary" /> Manage Payouts</h1>
+                <p className="text-muted-foreground mt-1">Process and manage pending partner payouts</p>
               </div>
-              <button className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
+              <button className="flex items-center gap-2 border border-border px-4 py-2 rounded-lg hover:bg-background transition">
                 <Download size={20} />
                 Export Report
               </button>
@@ -72,8 +72,8 @@ export default function VendorPayouts() {
             <div className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-6 mb-8">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-2">Pending Payouts</h2>
-                  <p className="text-gray-700">
+                  <h2 className="text-xl font-bold text-foreground mb-2">Pending Payouts</h2>
+                  <p className="text-foreground">
                     {pendingPayouts.length} partners have pending commissions totaling{' '}
                     <span className="font-bold text-orange-700">${totalPending.toLocaleString()}</span>
                   </p>
@@ -88,20 +88,20 @@ export default function VendorPayouts() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                 {pendingPayouts.slice(0, 3).map((payout) => (
-                  <div key={payout.payout_id} className="bg-white rounded-lg p-4 shadow">
+                  <div key={payout.payout_id} className="bg-background rounded-lg p-4 shadow">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <div className="font-semibold text-gray-900">Partner {payout.partner_id}</div>
-                        <div className="text-sm text-gray-600">
+                        <div className="font-semibold text-foreground">Partner {payout.partner_id}</div>
+                        <div className="text-sm text-muted-foreground">
                           1 pending conversion
                         </div>
                       </div>
                       <Clock className="text-orange-600" size={20} />
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-2">
+                    <div className="text-2xl font-bold text-foreground mb-2">
                       ${(payout.amount || 0).toLocaleString()}
                     </div>
-                    <div className="text-xs text-gray-600">
+                    <div className="text-xs text-muted-foreground">
                       Oldest unpaid: {payout.start_date ? new Date(payout.start_date).toLocaleDateString() : 'N/A'}
                     </div>
                     <button className="w-full mt-3 bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition text-sm font-medium">
@@ -124,34 +124,34 @@ export default function VendorPayouts() {
             <SummaryCard
               label="Processing"
               value={`$${processingPayouts.reduce((s, p) => s + (p.amount || 0), 0).toLocaleString()}`}
-              icon={<Clock className="text-blue-600" />}
-              bgColor="bg-blue-50"
+              icon={<Clock className="text-primary" />}
+              bgColor="bg-primary/10"
             />
             <SummaryCard
               label="Completed This Month"
               value={`$${completedPayouts.reduce((s, p) => s + (p.amount || 0), 0).toLocaleString()}`}
-              icon={<CheckCircle className="text-green-600" />}
-              bgColor="bg-green-50"
+              icon={<CheckCircle className="text-secondary" />}
+              bgColor="bg-secondary"
             />
             <SummaryCard
               label="Failed"
               value={failedPayouts.length}
-              icon={<XCircle className="text-red-600" />}
-              bgColor="bg-red-50"
+              icon={<XCircle className="text-destructive" />}
+              bgColor="bg-destructive/10"
             />
           </div>
 
           {/* Filters */}
           {payouts.length > 0 && (
-            <div className="bg-white rounded-lg shadow p-4 mb-6">
+            <div className="bg-background rounded-lg shadow p-4 mb-6">
               <div className="flex items-center gap-4 flex-wrap">
-                <Filter size={20} className="text-gray-400" />
+                <Filter size={20} className="text-muted-foreground" />
                 <button
                   onClick={() => setStatusFilter('all')}
                   className={`px-4 py-2 rounded-lg font-medium transition ${
                     statusFilter === 'all'
-                      ? 'bg-blue-600 text-white'
-                      : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      ? 'border border-blueberry bg-primary/100 text-white'
+                      : 'border border-border text-foreground hover:bg-background'
                   }`}
                 >
                   All ({payouts.length})
@@ -170,8 +170,8 @@ export default function VendorPayouts() {
                         onClick={() => setStatusFilter(status)}
                         className={`px-4 py-2 rounded-lg font-medium transition ${
                           statusFilter === status
-                            ? 'bg-blue-600 text-white'
-                            : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                            ? 'border border-blueberry bg-primary/100 text-white'
+                            : 'border border-border text-foreground hover:bg-background'
                         }`}
                       >
                         {status.charAt(0).toUpperCase() + status.slice(1)} ({counts[status]})
@@ -184,8 +184,8 @@ export default function VendorPayouts() {
 
           {/* View Full History */}
           <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-8 text-center">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">View Complete Payout History</h2>
-            <p className="text-gray-600 mb-6">
+            <h2 className="text-xl font-bold text-foreground mb-2">View Complete Payout History</h2>
+            <p className="text-muted-foreground mb-6">
               See all completed and historical payouts with detailed filtering and export options.
             </p>
             <a
@@ -205,12 +205,12 @@ export default function VendorPayouts() {
 
 function SummaryCard({ label, value, icon, bgColor }) {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-background rounded-lg shadow p-6">
       <div className={`inline-flex p-3 rounded-lg ${bgColor} mb-4`}>
         {icon}
       </div>
-      <div className="text-2xl font-bold text-gray-900 mb-1">{value}</div>
-      <div className="text-sm text-gray-600">{label}</div>
+      <div className="text-2xl font-bold text-foreground mb-1">{value}</div>
+      <div className="text-sm text-muted-foreground">{label}</div>
     </div>
   );
 }
@@ -218,7 +218,7 @@ function SummaryCard({ label, value, icon, bgColor }) {
 function StatusBadge({ status }) {
   const config = {
     completed: { bg: 'bg-green-100', text: 'text-green-800', label: 'Completed' },
-    processing: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Processing' },
+    processing: { bg: 'bg-purple-100', text: 'text-blue-800', label: 'Processing' },
     failed: { bg: 'bg-red-100', text: 'text-red-800', label: 'Failed' },
     pending: { bg: 'bg-orange-100', text: 'text-orange-800', label: 'Pending' },
   };

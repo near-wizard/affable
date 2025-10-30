@@ -10,7 +10,7 @@ const categoryColors: Record<string, { bg: string; text: string; border: string;
   'Security': { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', badge: 'bg-red-100 text-red-700', icon: '🛡️' },
   'Strategy': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-700', icon: '📊' },
   'Design': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-700', icon: '🎨' },
-  'Engineering': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-700', icon: '⚙️' },
+  'Engineering': { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/30', badge: 'bg-primary/10 text-primary', icon: '⚙️' },
   'Product': { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', badge: 'bg-purple-100 text-purple-700', icon: '🚀' },
   'Marketing': { bg: 'bg-pink-50', text: 'text-pink-700', border: 'border-pink-200', badge: 'bg-pink-100 text-pink-700', icon: '📢' },
 };
@@ -63,7 +63,7 @@ export default function BlogPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-2000"></div>
       </div>
 
@@ -81,14 +81,14 @@ export default function BlogPage() {
             <h1 className="text-5xl sm:text-6xl font-bold text-white mb-6 leading-tight">
               Insights for <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Modern Founders</span>
             </h1>
-            <p className="text-xl text-slate-300 max-w-2xl leading-relaxed mb-8">
+            <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed mb-8">
               Deep dives into affiliate programs, partner marketing, and SaaS growth. Learn from experts building the fastest affiliate platform.
             </p>
 
             {/* Search Bar */}
             <div ref={searchRef} className="relative mb-6">
               <div className="relative">
-                <Search className="absolute left-4 top-3.5 w-5 h-5 text-slate-400 pointer-events-none" />
+                <Search className="absolute left-4 top-3.5 w-5 h-5 text-muted-foreground pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Search posts by title, topic, or author..."
@@ -136,7 +136,7 @@ export default function BlogPage() {
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   filterCategory === 'all'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'
+                    : 'bg-slate-800 text-muted-foreground border border-slate-700 hover:bg-slate-700'
                 }`}
               >
                 All
@@ -150,7 +150,7 @@ export default function BlogPage() {
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
                       filterCategory === category
                         ? `${catInfo.badge}`
-                        : `bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700`
+                        : `bg-slate-800 text-muted-foreground border border-slate-700 hover:bg-slate-700`
                     }`}
                   >
                     <span>{catInfo.icon}</span>
@@ -189,7 +189,7 @@ export default function BlogPage() {
                                   {post.category}
                                 </span>
                               </div>
-                              <div className="text-slate-500 text-sm">{post.readTime} min</div>
+                              <div className="text-muted-foreground text-sm">{post.readTime} min</div>
                             </div>
 
                             {/* Title */}
@@ -198,13 +198,13 @@ export default function BlogPage() {
                             </h2>
 
                             {/* Excerpt */}
-                            <p className="text-slate-300 mb-6 leading-relaxed flex-grow">
+                            <p className="text-muted-foreground mb-6 leading-relaxed flex-grow">
                               {post.excerpt}
                             </p>
 
                             {/* Footer with metadata and CTA */}
                             <div className="flex items-center justify-between pt-6 border-t border-slate-600">
-                              <div className="flex items-center gap-4 text-sm text-slate-400">
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
                                 <div className="flex items-center gap-2">
                                   <Calendar size={16} />
                                   {new Date(post.date).toLocaleDateString('en-US', {
@@ -248,7 +248,7 @@ export default function BlogPage() {
                     />
                     <button
                       type="submit"
-                      className="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors hover:shadow-lg"
+                      className="px-8 py-3 bg-white text-primary font-semibold rounded-lg hover:bg-primary/10 transition-colors hover:shadow-lg"
                     >
                       Subscribe
                     </button>
@@ -259,23 +259,23 @@ export default function BlogPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 text-center">
                     <div className="text-4xl font-bold text-blue-400 mb-2">5</div>
-                    <p className="text-slate-300">Insightful Articles</p>
+                    <p className="text-muted-foreground">Insightful Articles</p>
                   </div>
                   <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 text-center">
                     <div className="text-4xl font-bold text-purple-400 mb-2">1hr+</div>
-                    <p className="text-slate-300">Total Reading Time</p>
+                    <p className="text-muted-foreground">Total Reading Time</p>
                   </div>
                   <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 text-center">
                     <div className="text-4xl font-bold text-pink-400 mb-2">Expert</div>
-                    <p className="text-slate-300">Quality Content</p>
+                    <p className="text-muted-foreground">Quality Content</p>
                   </div>
                 </div>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <BookOpen className="w-12 h-12 text-slate-500 mb-4 opacity-50" />
-                <p className="text-slate-300 text-lg font-medium">No posts match your filters</p>
-                <p className="text-slate-400 text-sm mt-2">Try adjusting your search or category selection</p>
+                <BookOpen className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
+                <p className="text-muted-foreground text-lg font-medium">No posts match your filters</p>
+                <p className="text-muted-foreground text-sm mt-2">Try adjusting your search or category selection</p>
               </div>
             )}
           </div>

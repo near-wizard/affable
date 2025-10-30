@@ -140,9 +140,9 @@ class CampaignPartner(BaseModel):
 
 class PartnerCampaignOverride(BaseModel):
     """Custom commission rates for specific partners."""
-    
+
     __tablename__ = "partner_campaign_overrides"
-    
+
     partner_campaign_override_id = Column(Integer, primary_key=True, index=True)
     partner_id = Column(Integer, ForeignKey("partners.partner_id", ondelete="CASCADE"), nullable=False, index=True)
     campaign_version_id = Column(Integer, ForeignKey("campaign_versions.campaign_version_id", ondelete="CASCADE"), nullable=False, index=True)
@@ -152,15 +152,15 @@ class PartnerCampaignOverride(BaseModel):
     notes = Column(Text)
     valid_from = Column(DateTime, default=datetime.utcnow)
     valid_until = Column(DateTime)
-    
+
     # Relationships
     partner = relationship("Partner")
     campaign_version = relationship("CampaignVersion", back_populates="partner_overrides")
     conversion_event_type = relationship("ConversionEventType")
-    
+
     def __repr__(self):
         return f"<PartnerCampaignOverride partner={self.partner_id} campaign={self.campaign_version_id}>"
-    
+
     def is_valid(self) -> bool:
         """Check if override is currently valid."""
         now = datetime.utcnow()
@@ -169,3 +169,48 @@ class PartnerCampaignOverride(BaseModel):
             self.valid_from <= now and
             (self.valid_until is None or self.valid_until >= now)
         )
+
+
+class PartnerInvitation(BaseModel):
+    """Partner invitation to join a campaign."""
+
+    __tablename__ = "partner_invitations"
+
+    partner_invitation_id = Column(Integer, primary_key=True, index=True)
+    campaign_id = Column(Integer, ForeignKey("campaigns.campaign_id", ondelete="CASCADE"), nullable=False, index=True)
+    partner_id = Column(Integer, ForeignKey("partners.partner_id", ondelete="CASCADE"), nullable=False, index=True)
+    invited_by = Column(Integer, ForeignKey("vendor_users.vendor_user_id"), nullable=False)
+    status = Column(String(50), default='pending', nullable=False, index=True)  # pending, accepted, declined, expired
+    invitation_message = Column(Text)
+    invited_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    accepted_at = Column(DateTime)
+    declined_at = Column(DateTime)
+    declined_reason = Column(Text)
+    expires_at = Column(DateTime, nullable=False)  # 30 days from invitation by default
+
+    # Relationships
+    campaign = relationship("Campaign")
+    partner = relationship("Partner")
+    inviter = relationship("VendorUser", foreign_keys=[invited_by])
+
+    def __repr__(self):
+        return f"<PartnerInvitation campaign={self.campaign_id} partner={self.partner_id} status={self.status}>"
+
+    def accept(self):
+        """Accept the invitation."""
+        self.status = 'accepted'
+        self.accepted_at = datetime.utcnow()
+
+    def decline(self, reason: str = None):
+        """Decline the invitation."""
+        self.status = 'declined'
+        self.declined_at = datetime.utcnow()
+        self.declined_reason = reason
+
+    def is_pending(self) -> bool:
+        """Check if invitation is still pending."""
+        return self.status == 'pending' and datetime.utcnow() < self.expires_at and not self.is_deleted
+
+    def is_expired(self) -> bool:
+        """Check if invitation has expired."""
+        return self.status == 'pending' and datetime.utcnow() >= self.expires_at

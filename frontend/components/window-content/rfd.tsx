@@ -13,7 +13,7 @@ interface RFDContentProps {
 
 const stateColors: Record<RFDState, { badge: string; gradient: string; icon: string }> = {
   prediscussion: {
-    badge: "bg-slate-100 text-slate-700",
+    badge: "bg-muted text-slate-700",
     gradient: "from-slate-50 to-slate-100",
     icon: "💭"
   },
@@ -38,7 +38,7 @@ const stateColors: Record<RFDState, { badge: string; gradient: string; icon: str
     icon: "✅"
   },
   abandoned: {
-    badge: "bg-rose-100 text-rose-700",
+    badge: "bg-rose-100 text-primary",
     gradient: "from-rose-50 to-rose-100",
     icon: "🗑️"
   }
@@ -113,7 +113,7 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
     return (
       <div className="flex flex-col h-full bg-white">
         {/* Premium Header with Gradient Background */}
-        <div className={`bg-gradient-to-r ${stateInfo.gradient} border-b border-gray-200 p-6 shadow-sm`}>
+        <div className={`bg-gradient-to-r ${stateInfo.gradient} border-b border-border p-6 shadow-sm`}>
           <button
             onClick={handleBackToList}
             className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-4 transition-colors group"
@@ -130,10 +130,10 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
                   {currentRFD.state}
                 </span>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-3xl font-bold text-foreground leading-tight">
                 RFD {currentRFD.number}
               </h1>
-              <p className="text-lg text-gray-700 mt-2">
+              <p className="text-lg text-foreground mt-2">
                 {currentRFD.title.replace(`RFD ${currentRFD.number}: `, '')}
               </p>
             </div>
@@ -142,12 +142,12 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
           {/* Metadata Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="flex items-center gap-2 text-sm">
-              <User className="w-4 h-4 text-gray-600" />
-              <span className="font-medium text-gray-900">{currentRFD.authors.join(', ')}</span>
+              <User className="w-4 h-4 text-muted-foreground" />
+              <span className="font-medium text-foreground">{currentRFD.authors.join(', ')}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <Calendar className="w-4 h-4 text-gray-600" />
-              <span className="font-medium text-gray-900">{currentRFD.date}</span>
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+              <span className="font-medium text-foreground">{currentRFD.date}</span>
             </div>
             {currentRFD.discussion && (
               <div className="col-span-2 md:col-span-2">
@@ -167,11 +167,11 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
 
           {/* Labels */}
           {currentRFD.labels.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-300 border-opacity-50">
+            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border border-opacity-50">
               {currentRFD.labels.map(label => (
                 <span
                   key={label}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-white bg-opacity-60 text-gray-700 text-xs font-medium rounded-full border border-gray-300 border-opacity-50"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-white bg-opacity-60 text-foreground text-xs font-medium rounded-full border border-border border-opacity-50"
                 >
                   <Tag className="w-3 h-3" />
                   {label}
@@ -184,7 +184,7 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
         {/* Premium Content Area */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-8 py-8">
-            <article className="prose prose-lg prose-slate max-w-none prose-headings:text-gray-900 prose-headings:font-bold prose-a:text-violet-600 prose-a:no-underline hover:prose-a:underline prose-code:text-rose-600 prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-strong:text-gray-900 prose-em:text-gray-700">
+            <article className="prose prose-lg prose-slate max-w-none prose-headings:text-foreground prose-headings:font-bold prose-a:text-violet-600 prose-a:no-underline hover:prose-a:underline prose-code:text-primary prose-code:bg-muted prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-strong:text-foreground prose-em:text-foreground">
               <ReactMarkdown>{currentRFD.content}</ReactMarkdown>
             </article>
           </div>
@@ -194,33 +194,33 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col h-full bg-muted">
       {/* Premium Header */}
-      <div className="border-b border-gray-200 p-6 bg-white shadow-sm">
+      <div className="border-b border-border p-6 bg-white shadow-sm">
         <div className="flex items-center gap-3 mb-4">
           <Sparkles className="w-6 h-6 text-violet-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Requests for Discussion</h1>
+          <h1 className="text-3xl font-bold text-foreground">Requests for Discussion</h1>
         </div>
-        <p className="text-base text-gray-600 mb-6 max-w-2xl">
+        <p className="text-base text-muted-foreground mb-6 max-w-2xl">
           Design decisions, architecture proposals, and technical RFDs shaped through open discussion. Read our thinking process in public.
         </p>
 
         {/* Premium Search Bar */}
         <div ref={searchRef} className="relative mb-6">
           <div className="relative">
-            <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
+            <Search className="absolute left-4 top-3.5 w-5 h-5 text-muted-foreground pointer-events-none" />
             <input
               type="text"
               placeholder="Search by title, topic, or label..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => searchQuery && setShowAutocomplete(true)}
-              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white transition-all"
+              className="w-full pl-12 pr-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white transition-all"
             />
 
             {/* Premium Autocomplete Dropdown */}
             {showAutocomplete && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto z-10">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-lg shadow-xl max-h-80 overflow-y-auto z-10">
                 {filteredRFDs?.length > 0 ? (
                   <div className="divide-y divide-gray-100">
                     {filteredRFDs.map(rfd => {
@@ -233,18 +233,18 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
                         >
                           <div className="flex items-center gap-3 mb-2">
                             <span className="text-lg">{rfdState.icon}</span>
-                            <span className="font-mono text-xs font-bold text-gray-500">RFD {rfd.number}</span>
+                            <span className="font-mono text-xs font-bold text-muted-foreground">RFD {rfd.number}</span>
                             <span className={`${rfdState.badge} px-2 py-0.5 rounded-full text-xs font-semibold uppercase`}>
                               {rfd.state}
                             </span>
                           </div>
-                          <div className="font-semibold text-gray-900 group-hover:text-violet-600 transition-colors">{rfd.title}</div>
+                          <div className="font-semibold text-foreground group-hover:text-violet-600 transition-colors">{rfd.title}</div>
                         </button>
                       )
                     })}
                   </div>
                 ) : (
-                  <div className="px-4 py-8 text-center text-gray-500">
+                  <div className="px-4 py-8 text-center text-muted-foreground">
                     <p className="text-sm">No RFDs found</p>
                   </div>
                 )}
@@ -260,7 +260,7 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
             className={`px-4 py-2 rounded-full font-medium transition-all ${
               filterState === 'all'
                 ? 'bg-gray-900 text-white shadow-md'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                : 'bg-white text-foreground border border-border hover:bg-muted'
             }`}
           >
             All RFDs
@@ -274,7 +274,7 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
                 className={`px-4 py-2 rounded-full font-medium transition-all flex items-center gap-2 ${
                   filterState === state
                     ? `${stateInfo.badge} shadow-md`
-                    : `bg-white text-gray-700 border border-gray-300 hover:bg-gray-100`
+                    : `bg-white text-foreground border border-border hover:bg-muted`
                 }`}
               >
                 <span>{stateInfo.icon}</span>
@@ -295,32 +295,32 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
                 <button
                   key={rfd.number}
                   onClick={() => handleRFDClick(rfd)}
-                  className={`text-left p-5 rounded-xl border border-gray-200 bg-white hover:shadow-lg hover:border-violet-200 transition-all group cursor-pointer bg-gradient-to-r ${rfdState.gradient}`}
+                  className={`text-left p-5 rounded-xl border border-border bg-white hover:shadow-lg hover:border-violet-200 transition-all group cursor-pointer bg-gradient-to-r ${rfdState.gradient}`}
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="text-2xl flex-shrink-0">{rfdState.icon}</span>
-                        <span className="font-mono text-xs font-bold text-gray-600">RFD {rfd.number}</span>
+                        <span className="font-mono text-xs font-bold text-muted-foreground">RFD {rfd.number}</span>
                         <span className={`${rfdState.badge} px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider`}>
                           {rfd.state}
                         </span>
                       </div>
-                      <h3 className="text-lg font-bold text-gray-900 group-hover:text-violet-600 transition-colors truncate">
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-violet-600 transition-colors truncate">
                         {rfd.title.replace(`RFD ${rfd.number}: `, '')}
                       </h3>
                     </div>
                   </div>
 
                   {/* Metadata Row */}
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3 pb-3 border-b border-gray-200 border-opacity-50">
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3 pb-3 border-b border-border border-opacity-50">
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-gray-400" />
-                      <span className="font-medium text-gray-900">{rfd.authors.join(', ')}</span>
+                      <User className="w-4 h-4 text-muted-foreground" />
+                      <span className="font-medium text-foreground">{rfd.authors.join(', ')}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">{rfd.date}</span>
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-foreground">{rfd.date}</span>
                     </div>
                   </div>
 
@@ -330,7 +330,7 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
                       {rfd.labels.map(label => (
                         <span
                           key={label}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-white bg-opacity-70 text-gray-700 text-xs font-medium rounded-full border border-gray-300 border-opacity-50"
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-white bg-opacity-70 text-foreground text-xs font-medium rounded-full border border-border border-opacity-50"
                         >
                           <Tag className="w-3 h-3" />
                           {label}
@@ -343,9 +343,9 @@ export function RFDContent({ rfds, initialNumber, onNavigate }: RFDContentProps)
             })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+          <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
             <Sparkles className="w-12 h-12 mb-4 opacity-30" />
-            <p className="text-lg font-medium text-gray-700">No RFDs match your filters</p>
+            <p className="text-lg font-medium text-foreground">No RFDs match your filters</p>
             <p className="text-sm mt-2">Try adjusting your search or filters</p>
           </div>
         )}

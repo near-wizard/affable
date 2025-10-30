@@ -32,10 +32,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ${isOpen ? "translate-x-0" : "-translate-x-64"}
         `}
       >
-        <div className="flex justify-between items-center p-4 border-b border-gray-200">
+        <div className="flex justify-between items-center p-4 border-b border-border">
           <h2 className="font-bold text-lg">Admin Menu</h2>
           <button
-            className="text-gray-600 hover:text-gray-900"
+            className="text-muted-foreground hover:text-foreground"
             onClick={() => setIsOpen(false)}
           >
             ✕
@@ -49,8 +49,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 key={link.path}
                 href={link.path}
-                className={`p-2 rounded hover:bg-gray-100 ${
-                  isActive ? "bg-gray-200 font-semibold" : ""
+                className={`p-2 rounded hover:bg-muted ${
+                  isActive ? "bg-muted font-semibold" : ""
                 }`}
                 onClick={() => setIsOpen(false)}
               >
@@ -68,9 +68,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }`}
       >
         {/* Top bar */}
-        <header className="p-4 bg-white border-b border-gray-300 flex items-center">
+        <header className="p-4 bg-white border-b border-border flex items-center">
           <button
-            className="p-2 mr-4 rounded hover:bg-gray-200"
+            className="p-2 mr-4 rounded hover:bg-muted"
             onClick={() => setIsOpen(true)}
           >
             <Menu size={24} />

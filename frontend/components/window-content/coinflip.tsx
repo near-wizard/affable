@@ -91,8 +91,8 @@ export default function CoinFlipGame() {
 
       {result && !flipping && (
         <div className="text-center" aria-live="polite">
-          <p className="text-2xl font-bold text-gray-800 mb-2">Result: {result}</p>
-          <p className="text-lg text-gray-600">
+          <p className="text-2xl font-bold text-foreground mb-2">Result: {result}</p>
+          <p className="text-lg text-muted-foreground">
             {consecutive} {consecutive === 1 ? 'time' : 'times'} in a row
           </p>
         </div>

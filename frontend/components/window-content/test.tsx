@@ -22,15 +22,15 @@ function FeaturesContent() {
       <div className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold">Real-Time Tracking</h3>
-          <p className="text-sm text-gray-600">Monitor affiliate performance with live conversion tracking and attribution modeling.</p>
+          <p className="text-sm text-muted-foreground">Monitor affiliate performance with live conversion tracking and attribution modeling.</p>
         </div>
         <div>
           <h3 className="text-lg font-semibold">Commission Automation</h3>
-          <p className="text-sm text-gray-600">Automatically calculate and process commissions based on your custom rules.</p>
+          <p className="text-sm text-muted-foreground">Automatically calculate and process commissions based on your custom rules.</p>
         </div>
         <div>
           <h3 className="text-lg font-semibold">Fraud Detection</h3>
-          <p className="text-sm text-gray-600">Advanced algorithms detect suspicious activity and protect your program.</p>
+          <p className="text-sm text-muted-foreground">Advanced algorithms detect suspicious activity and protect your program.</p>
         </div>
       </div>
     </div>
@@ -42,7 +42,7 @@ function PricingContent() {
     <div className="prose prose-sm max-w-none">
       <h2 className="text-2xl font-bold mb-4">Pricing</h2>
       <div className="space-y-6">
-        <div className="border-2 border-gray-200 rounded p-4">
+        <div className="border-2 border-border rounded p-4">
           <h3 className="text-xl font-bold">Starter</h3>
           <p className="text-3xl font-bold my-2">$99<span className="text-lg font-normal">/mo</span></p>
           <ul className="list-disc pl-5 space-y-1 text-sm">
@@ -51,7 +51,7 @@ function PricingContent() {
             <li>Email support</li>
           </ul>
         </div>
-        <div className="border-2 border-blue-500 rounded p-4 bg-blue-50">
+        <div className="border-2 border-blue-500 rounded p-4 bg-primary/10">
           <h3 className="text-xl font-bold">Pro</h3>
           <p className="text-3xl font-bold my-2">$299<span className="text-lg font-normal">/mo</span></p>
           <ul className="list-disc pl-5 space-y-1 text-sm">
@@ -77,7 +77,7 @@ function GetStartedContent() {
         <li><strong>Invite affiliates</strong> - Onboard your partners</li>
         <li><strong>Track & optimize</strong> - Monitor performance in real-time</li>
       </ol>
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded">
+      <div className="mt-6 p-4 bg-primary/10 border border-primary/30 rounded">
         <p className="text-sm font-semibold">🚀 Get early access today!</p>
         <p className="text-sm mt-2">Join our waitlist for exclusive launch pricing.</p>
       </div>
@@ -90,7 +90,7 @@ function CookieBanner({ onAccept }: { onAccept: () => void }) {
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md bg-white border-2 border-gray-800 shadow-lg p-4 z-[9999] rounded">
       <h3 className="font-bold mb-2">Cookie Notice</h3>
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         We use cookies to remember your tutorial progress and improve your experience. By clicking "Accept", you consent to our use of cookies.
       </p>
       <div className="flex gap-2">
@@ -102,7 +102,7 @@ function CookieBanner({ onAccept }: { onAccept: () => void }) {
         </button>
         <button
           onClick={onAccept}
-          className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors text-sm"
+          className="px-4 py-2 border border-border rounded hover:bg-muted transition-colors text-sm"
         >
           Decline
         </button>
@@ -148,12 +148,12 @@ function TutorialLightbox({ step, onNext, onSkip }: { step: number; onNext: () =
       <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6 relative">
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-500">Step {step + 1} of {tutorials.length}</span>
-            <button onClick={onSkip} className="text-sm text-gray-500 hover:text-gray-700">
+            <span className="text-sm text-muted-foreground">Step {step + 1} of {tutorials.length}</span>
+            <button onClick={onSkip} className="text-sm text-muted-foreground hover:text-foreground">
               Skip tutorial
             </button>
           </div>
-          <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-1 bg-muted rounded-full overflow-hidden">
             <div 
               className="h-full bg-blue-600 transition-all duration-300"
               style={{ width: `${((step + 1) / tutorials.length) * 100}%` }}
@@ -162,7 +162,7 @@ function TutorialLightbox({ step, onNext, onSkip }: { step: number; onNext: () =
         </div>
 
         <h2 className="text-2xl font-bold mb-3">{current.title}</h2>
-        <p className="text-gray-600 mb-6">{current.description}</p>
+        <p className="text-muted-foreground mb-6">{current.description}</p>
 
         <div className="flex gap-3">
           {step < tutorials.length - 1 ? (

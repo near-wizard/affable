@@ -116,9 +116,9 @@ export default function VendorInterestForm() {
 							value={option}
 							checked={(formData[field] as string[]).includes(option)}
 							onChange={handleChange}
-							className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+							className="w-4 h-4 text-primary border-border rounded focus:ring-blue-500"
 						/>
-						<span className="text-gray-700">{option}</span>
+						<span className="text-foreground">{option}</span>
 					</label>
 				))}
 
@@ -133,7 +133,7 @@ export default function VendorInterestForm() {
 								if (!formData[otherField])
 									setFormData({ ...formData, [otherField]: "" });
 							}}
-							className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+							className="w-4 h-4 text-primary border-border rounded focus:ring-blue-500"
 						/>
 						<input
 							type="text"
@@ -141,7 +141,7 @@ export default function VendorInterestForm() {
 							name={otherField}
 							value={formData[otherField]}
 							onChange={handleChange}
-							className="flex-1 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
+							className="flex-1 px-3 py-1 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
 						/>
 					</div>
 				)}
@@ -225,7 +225,7 @@ export default function VendorInterestForm() {
 							required
 							value={formData.monthlyRevenue}
 							onChange={handleChange}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
+							className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
 						>
 							<option value="">Select revenue range</option>
 							<option value="<8k">&lt; $8k</option>
@@ -260,7 +260,7 @@ export default function VendorInterestForm() {
 							required
 							value={formData.existingPartners}
 							onChange={handleChange}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
+							className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
 						>
 							<option value="">Select an option</option>
 							<option value="No partners">No partners</option>
@@ -321,7 +321,7 @@ export default function VendorInterestForm() {
 							value={formData.existingAffiliateProgram}
 							onChange={handleChange}
 							required
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
+							className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
 						>
 							<option value="">Select an option</option>
 							<option value="yes">Yes</option>
@@ -357,7 +357,7 @@ export default function VendorInterestForm() {
 							name="decisionTimeline"
 							value={formData.decisionTimeline}
 							onChange={handleChange}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
+							className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
 						>
 							<option value="">Select a timeframe</option>
 							<option value="immediately">Immediately</option>
@@ -375,7 +375,7 @@ export default function VendorInterestForm() {
 							name="heardAbout"
 							value={formData.heardAbout}
 							onChange={handleChange}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
+							className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background"
 						>
 							<option value="">Select an option</option>
 							<option value="referral">Referral</option>

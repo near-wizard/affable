@@ -45,26 +45,26 @@ export default function PartnerEarnings() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading earnings...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading earnings...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="bg-background shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Earnings</h1>
-              <p className="text-gray-600 mt-1">Track your commissions and payouts</p>
+              <h1 className="text-3xl font-bold text-foreground">Earnings</h1>
+              <p className="text-muted-foreground mt-1">Track your commissions and payouts</p>
             </div>
-            <button className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
+            <button className="flex items-center gap-2 border border-border px-4 py-2 rounded-lg hover:bg-background transition">
               <Download size={20} />
               Export Report
             </button>
@@ -82,19 +82,19 @@ export default function PartnerEarnings() {
             bgColor="bg-orange-50"
           />
           <SummaryCard
-            icon={<CheckCircle className="text-blue-600" />}
+            icon={<CheckCircle className="text-primary" />}
             label="Approved (Unpaid)"
             value={`$${approvedCommission.toFixed(2)}`}
-            bgColor="bg-blue-50"
+            bgColor="bg-primary/10"
           />
           <SummaryCard
-            icon={<DollarSign className="text-green-600" />}
+            icon={<DollarSign className="text-secondary" />}
             label="Total Paid Out"
             value={`$${paidCommission.toFixed(2)}`}
-            bgColor="bg-green-50"
+            bgColor="bg-secondary"
           />
           <SummaryCard
-            icon={<TrendingUp className="text-purple-600" />}
+            icon={<TrendingUp className="text-primary" />}
             label="Next Payout"
             value={nextPayoutDate.toLocaleDateString()}
             bgColor="bg-purple-50"
@@ -104,15 +104,15 @@ export default function PartnerEarnings() {
 
         {/* Payout Schedule Banner */}
         {approvedCommission > 0 && (
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6 mb-8">
+          <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-border rounded-lg p-6 mb-8">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-600 rounded-lg">
+              <div className="p-3 bg-primary/100 rounded-lg">
                 <DollarSign className="text-white" size={24} />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-gray-900 text-lg">Ready for Payout</h3>
-                <p className="text-gray-700">
-                  You have <span className="font-bold text-blue-700">${approvedCommission.toFixed(2)}</span> in approved commissions.
+                <h3 className="font-bold text-foreground text-lg">Ready for Payout</h3>
+                <p className="text-foreground">
+                  You have <span className="font-bold text-primary">${approvedCommission.toFixed(2)}</span> in approved commissions.
                   Next payout on {nextPayoutDate.toLocaleDateString()}.
                 </p>
               </div>
@@ -121,14 +121,14 @@ export default function PartnerEarnings() {
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="bg-background rounded-lg shadow p-4 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex items-center gap-2 flex-1">
-              <Filter size={20} className="text-gray-400" />
+              <Filter size={20} className="text-muted-foreground" />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
@@ -139,58 +139,58 @@ export default function PartnerEarnings() {
         </div>
 
         {/* Conversions Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900">Commission History</h2>
+        <div className="bg-background rounded-lg shadow overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-border">
+            <h2 className="text-xl font-bold text-foreground">Commission History</h2>
           </div>
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-background">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Campaign
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Event Type
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Order Value
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Commission
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Date
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-background divide-y divide-gray-200">
                 {filteredConversions.map((conversion) => (
-                  <tr key={conversion.conversion_event_id} className="hover:bg-gray-50 transition">
+                  <tr key={conversion.conversion_event_id} className="hover:bg-background transition">
                     <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">Campaign #{conversion.campaign_id}</div>
+                      <div className="font-medium text-foreground">Campaign #{conversion.campaign_id}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">
+                      <span className="px-2 py-1 bg-muted text-foreground text-xs rounded">
                         {conversion.event_type.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                       {conversion.event_value ? `$${conversion.event_value.toFixed(2)}` : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-semibold text-gray-900">
+                      <div className="font-semibold text-foreground">
                         ${(conversion.commission_amount || 0).toFixed(2)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge status={conversion.status} />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                       {new Date(conversion.occurred_at).toLocaleDateString()}
                     </td>
                   </tr>
@@ -201,9 +201,9 @@ export default function PartnerEarnings() {
 
           {filteredConversions.length === 0 && (
             <div className="text-center py-12">
-              <DollarSign className="mx-auto text-gray-400 mb-4" size={48} />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No conversions found</h3>
-              <p className="text-gray-600">
+              <DollarSign className="mx-auto text-muted-foreground mb-4" size={48} />
+              <h3 className="text-lg font-semibold text-foreground mb-2">No conversions found</h3>
+              <p className="text-muted-foreground">
                 {statusFilter !== 'all'
                   ? 'Try changing the filter to see more conversions'
                   : 'Conversions will appear here once you start earning'}
@@ -214,25 +214,25 @@ export default function PartnerEarnings() {
 
         {/* Payout History */}
         {payouts.length > 0 && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Payout History</h2>
+          <div className="bg-background rounded-lg shadow overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
+              <h2 className="text-xl font-bold text-foreground">Payout History</h2>
             </div>
 
             <div className="divide-y divide-gray-200">
               {payouts.map((payout) => (
-                <div key={payout.payout_id} className="p-6 hover:bg-gray-50 transition">
+                <div key={payout.payout_id} className="p-6 hover:bg-background transition">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 bg-green-100 rounded-lg">
-                          <CheckCircle className="text-green-600" size={20} />
+                          <CheckCircle className="text-secondary" size={20} />
                         </div>
                         <div>
-                          <div className="font-semibold text-gray-900">
+                          <div className="font-semibold text-foreground">
                             ${(payout.amount || 0).toFixed(2)}
                           </div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-muted-foreground">
                             {new Date(payout.period_start_date).toLocaleDateString()} -{' '}
                             {new Date(payout.period_end_date).toLocaleDateString()}
                           </div>
@@ -241,10 +241,10 @@ export default function PartnerEarnings() {
                     </div>
                     <div className="text-right">
                       <StatusBadge status={payout.status} />
-                      <div className="text-sm text-gray-600 mt-1">
+                      <div className="text-sm text-muted-foreground mt-1">
                         Partner #{payout.partner_id}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-muted-foreground">
                         Created: {new Date(payout.created_at).toLocaleDateString()}
                       </div>
                     </div>
@@ -256,17 +256,17 @@ export default function PartnerEarnings() {
         )}
 
         {/* Payment Method Info */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div className="mt-8 bg-primary/10 border border-border rounded-lg p-6">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-blue-600 rounded-lg">
+            <div className="p-3 bg-primary/100 rounded-lg">
               <DollarSign className="text-white" size={20} />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Payment Method</h3>
-              <p className="text-gray-700 mb-3">
+              <h3 className="font-semibold text-foreground mb-2">Payment Method</h3>
+              <p className="text-foreground mb-3">
                 Your earnings are paid out via <span className="font-semibold">Stripe</span> to your connected account.
               </p>
-              <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+              <button className="text-primary hover:text-primary font-medium text-sm">
                 Update Payment Method →
               </button>
             </div>
@@ -279,13 +279,13 @@ export default function PartnerEarnings() {
 
 function SummaryCard({ icon, label, value, bgColor, subtext }) {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-background rounded-lg shadow p-6">
       <div className={`inline-flex p-3 rounded-lg ${bgColor} mb-4`}>
         {icon}
       </div>
-      <div className="text-2xl font-bold text-gray-900 mb-1">{value}</div>
-      <div className="text-sm text-gray-600">{label}</div>
-      {subtext && <div className="text-xs text-gray-500 mt-1">{subtext}</div>}
+      <div className="text-2xl font-bold text-foreground mb-1">{value}</div>
+      <div className="text-sm text-muted-foreground">{label}</div>
+      {subtext && <div className="text-xs text-muted-foreground mt-1">{subtext}</div>}
     </div>
   );
 }
@@ -293,7 +293,7 @@ function SummaryCard({ icon, label, value, bgColor, subtext }) {
 function StatusBadge({ status }) {
   const config = {
     completed: { bg: 'bg-green-100', text: 'text-green-800', label: 'Completed' },
-    approved: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Approved' },
+    approved: { bg: 'bg-purple-100', text: 'text-blue-800', label: 'Approved' },
     pending: { bg: 'bg-orange-100', text: 'text-orange-800', label: 'Pending' },
     paid: { bg: 'bg-green-100', text: 'text-green-800', label: 'Paid' },
   };

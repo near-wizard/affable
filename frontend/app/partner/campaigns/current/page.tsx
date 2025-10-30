@@ -78,27 +78,27 @@ export default function CurrentCampaignsPage() {
 		});
 
 	return (
-		<div className="min-h-screen bg-gray-50">
+		<div className="min-h-screen bg-background">
 			{/* Header */}
-			<div className="bg-white shadow">
+			<div className="bg-background shadow">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 					<div>
-						<h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-							<Target size={32} className="text-blue-600" /> Current Campaigns
+						<h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+							<Target size={32} className="text-primary" /> Current Campaigns
 						</h1>
-						<p className="text-gray-600 mt-1">
+						<p className="text-muted-foreground mt-1">
 							Manage and track your active affiliate programs
 						</p>
 					</div>
 
 					<div className="flex gap-2 items-center w-full md:w-auto">
-						<div className="flex gap-2 bg-white rounded-lg border border-gray-200 p-1">
+						<div className="flex gap-2 bg-background rounded-lg border border-border p-1">
 							<button
 								onClick={() => setViewMode("table")}
 								className={`px-3 py-1 rounded-lg text-sm font-medium transition ${
 									viewMode === "table"
-										? "bg-blue-600 text-white"
-										: "text-gray-700 hover:bg-gray-100"
+										? "border border-blueberry bg-primary/100 text-white"
+										: "text-foreground hover:bg-muted"
 								} flex items-center gap-1`}
 							>
 								Table
@@ -107,8 +107,8 @@ export default function CurrentCampaignsPage() {
 								onClick={() => setViewMode("card")}
 								className={`px-3 py-1 rounded-lg text-sm font-medium transition ${
 									viewMode === "card"
-										? "bg-blue-600 text-white"
-										: "text-gray-700 hover:bg-gray-100"
+										? "border border-blueberry bg-primary/100 text-white"
+										: "text-foreground hover:bg-muted"
 								} flex items-center gap-1`}
 							>
 								Card
@@ -117,7 +117,7 @@ export default function CurrentCampaignsPage() {
 
 						<div className="relative w-full md:w-64">
 							<Search
-								className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+								className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
 								size={20}
 							/>
 							<input
@@ -125,7 +125,7 @@ export default function CurrentCampaignsPage() {
 								placeholder="Search campaigns..."
 								value={search}
 								onChange={(e) => setSearch(e.target.value)}
-								className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
 							/>
 						</div>
 					</div>
@@ -142,7 +142,7 @@ export default function CurrentCampaignsPage() {
 				) : (
 					<>
 						{viewMode === "table" ? (
-							<div className="overflow-x-auto bg-white rounded-lg shadow">
+							<div className="overflow-x-auto bg-background rounded-lg shadow">
 								<table className="min-w-full divide-y divide-gray-200">
 									<thead>
 										<tr>
@@ -159,7 +159,7 @@ export default function CurrentCampaignsPage() {
 												<th
 													key={column}
 													onClick={() => handleSort(column)}
-													className="px-4 py-3 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider cursor-pointer select-none"
+													className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer select-none"
 												>
 													<div className="flex items-center gap-1 whitespace-nowrap">
 														<span>
@@ -175,8 +175,8 @@ export default function CurrentCampaignsPage() {
 																className={`${
 																	sortColumn === column &&
 																	sortDirection === "asc"
-																		? "text-blue-600"
-																		: "text-gray-300"
+																		? "text-primary"
+																		: "text-muted-foreground"
 																}`}
 															/>
 															<ChevronDown
@@ -184,26 +184,26 @@ export default function CurrentCampaignsPage() {
 																className={`${
 																	sortColumn === column &&
 																	sortDirection === "desc"
-																		? "text-blue-600"
-																		: "text-gray-300"
+																		? "text-primary"
+																		: "text-muted-foreground"
 																}`}
 															/>
 														</div>
 													</div>
 												</th>
 											))}
-											<th className="px-4 py-3 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">
+											<th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">
 												Actions
 											</th>
 										</tr>
 									</thead>
 									<tbody className="divide-y divide-gray-100">
 										{sortedCampaigns.map((c) => (
-											<tr key={c.campaign_id} className="hover:bg-gray-50">
-												<td className="px-4 py-4 text-gray-900 font-medium">
+											<tr key={c.campaign_id} className="hover:bg-background">
+												<td className="px-4 py-4 text-foreground font-medium">
 													{c.name}
 												</td>
-												<td className="px-4 py-4 text-gray-700">
+												<td className="px-4 py-4 text-foreground">
 													{c.vendor_name || "Unknown"}
 												</td>
 												<td className="px-4 py-4">
@@ -213,7 +213,7 @@ export default function CurrentCampaignsPage() {
 																? "bg-green-100 text-green-800"
 																: c.status === "paused"
 																? "bg-yellow-100 text-yellow-800"
-																: "bg-gray-100 text-gray-800"
+																: "bg-muted text-foreground"
 														}`}
 													>
 														{c.status
@@ -222,26 +222,26 @@ export default function CurrentCampaignsPage() {
 															: "Unknown"}
 													</span>
 												</td>
-												<td className="px-4 py-4 text-gray-700">
+												<td className="px-4 py-4 text-foreground">
 													{(c.click_count || 0).toLocaleString()}
 												</td>
-												<td className="px-4 py-4 text-gray-700">
+												<td className="px-4 py-4 text-foreground">
 													{c.conversion_count || 0}
 												</td>
-												<td className="px-4 py-4 text-gray-700">
+												<td className="px-4 py-4 text-foreground">
 													{c.conversion_rate || 0}%
 												</td>
-												<td className="px-4 py-4 text-gray-900 font-semibold">
+												<td className="px-4 py-4 text-foreground font-semibold">
 													${(c.earned_commission || 0).toLocaleString()}
 												</td>
-												<td className="px-4 py-4 text-gray-500 text-sm">
+												<td className="px-4 py-4 text-muted-foreground text-sm">
 													{c.created_at
 														? new Date(c.created_at).toLocaleDateString()
 														: "-"}
 												</td>
 												<td className="px-4 py-4">
-													<button className="p-2 hover:bg-gray-100 rounded-lg transition">
-														<ExternalLink size={18} className="text-blue-600" />
+													<button className="p-2 hover:bg-muted rounded-lg transition">
+														<ExternalLink size={18} className="text-primary" />
 													</button>
 												</td>
 											</tr>
@@ -250,7 +250,7 @@ export default function CurrentCampaignsPage() {
 											<tr>
 												<td
 													colSpan={9}
-													className="text-center text-gray-400 py-4"
+													className="text-center text-muted-foreground py-4"
 												>
 													No campaigns found
 												</td>
@@ -264,14 +264,14 @@ export default function CurrentCampaignsPage() {
 								{sortedCampaigns.map((c) => (
 									<div
 										key={c.campaign_id}
-										className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"
+										className="bg-background rounded-lg shadow p-6 hover:shadow-lg transition"
 									>
 										<div className="flex items-start justify-between mb-3">
 											<div>
-												<h2 className="text-lg font-bold text-gray-900">
+												<h2 className="text-lg font-bold text-foreground">
 													{c.name}
 												</h2>
-												<p className="text-sm text-gray-600">
+												<p className="text-sm text-muted-foreground">
 													{c.vendor_name || "Unknown Vendor"}
 												</p>
 											</div>
@@ -281,7 +281,7 @@ export default function CurrentCampaignsPage() {
 														? "bg-green-100 text-green-800"
 														: c.status === "paused"
 														? "bg-yellow-100 text-yellow-800"
-														: "bg-gray-100 text-gray-800"
+														: "bg-muted text-foreground"
 												}`}
 											>
 												{c.status
@@ -291,12 +291,12 @@ export default function CurrentCampaignsPage() {
 										</div>
 
 										{/* Commission Badge */}
-										<div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+										<div className="mb-4 p-3 bg-primary/10 border border-border rounded-lg">
 											<div className="flex items-center justify-between">
-												<span className="text-sm font-medium text-gray-600">
+												<span className="text-sm font-medium text-muted-foreground">
 													Commission
 												</span>
-												<span className="text-lg font-bold text-blue-600">
+												<span className="text-lg font-bold text-primary">
 													{c.commission_type === "percentage"
 														? `${c.commission_value}%`
 														: `$${c.commission_value}`}
@@ -310,7 +310,7 @@ export default function CurrentCampaignsPage() {
 												icon={
 													<MousePointerClick
 														size={16}
-														className="text-blue-600"
+														className="text-primary"
 													/>
 												}
 												label="Clicks"
@@ -318,7 +318,7 @@ export default function CurrentCampaignsPage() {
 											/>
 											<StatBox
 												icon={
-													<TrendingUp size={16} className="text-green-600" />
+													<TrendingUp size={16} className="text-secondary" />
 												}
 												label="Conv."
 												value={c.conversion_count || 0}
@@ -334,21 +334,21 @@ export default function CurrentCampaignsPage() {
 											/>
 											<StatBox
 												icon={
-													<TrendingUp size={16} className="text-purple-600" />
+													<TrendingUp size={16} className="text-primary" />
 												}
 												label="Rate"
 												value={`${c.conversion_rate || 0}%`}
 											/>
 										</div>
 
-										<div className="mb-4 text-sm text-gray-600">
+										<div className="mb-4 text-sm text-muted-foreground">
 											<span className="font-semibold">Joined:</span>{" "}
 											{c.created_at
 												? new Date(c.created_at).toLocaleDateString()
 												: "-"}
 										</div>
 
-										<button className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition">
+										<button className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-blueberry bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition">
 											<ExternalLink size={16} /> View Details
 										</button>
 									</div>
@@ -376,12 +376,12 @@ type StatBoxProps = {
 
 function StatBox({ icon, label, value }: StatBoxProps) {
 	return (
-		<div className="bg-gray-50 rounded-lg p-3 flex flex-col gap-1">
-			<div className="flex items-center gap-2 text-sm text-gray-600">
+		<div className="bg-background rounded-lg p-3 flex flex-col gap-1">
+			<div className="flex items-center gap-2 text-sm text-muted-foreground">
 				{icon}
 				<span>{label}</span>
 			</div>
-			<div className="text-lg font-bold text-gray-900">{value}</div>
+			<div className="text-lg font-bold text-foreground">{value}</div>
 		</div>
 	);
 }

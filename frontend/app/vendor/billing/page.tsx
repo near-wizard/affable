@@ -145,18 +145,18 @@ export default function BillingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Billing & Subscription</h1>
-          <p className="text-slate-600">Manage your subscription plan, payment methods, and invoices</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Billing & Subscription</h1>
+          <p className="text-muted-foreground">Manage your subscription plan, payment methods, and invoices</p>
         </div>
 
         {/* Test Mode Banner */}
         {process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.includes('pk_test') && (
-          <Alert className="mb-6 border-blue-200 bg-blue-50">
-            <AlertCircle className="h-4 w-4 text-blue-600" />
+          <Alert className="mb-6 border-border bg-primary/10">
+            <AlertCircle className="h-4 w-4 text-primary" />
             <AlertTitle>Test Mode</AlertTitle>
             <AlertDescription>
               This is a test environment. Use test credit cards (e.g., 4242 4242 4242 4242) for payments.
@@ -190,10 +190,10 @@ export default function BillingPage() {
             <TabsContent value="overview" className="space-y-6">
               {/* Current Plan Card */}
               {subscription && (
-                <Card className="border-2 border-blue-100 bg-gradient-to-br from-white to-blue-50">
+                <Card className="border-2 border-border bg-gradient-to-br from-white to-primary/10">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Zap className="h-5 w-5 text-blue-600" />
+                      <Zap className="h-5 w-5 text-primary" />
                       Current Subscription Plan
                     </CardTitle>
                     <CardDescription>
@@ -209,10 +209,10 @@ export default function BillingPage() {
                             const currentPlan = plans.find(p => p.id === subscription.plan_id);
                             return (
                               <>
-                                <h3 className="text-2xl font-bold text-slate-900">
+                                <h3 className="text-2xl font-bold text-foreground">
                                   {currentPlan?.display_name || 'Unknown Plan'}
                                 </h3>
-                                <p className="text-slate-600 mt-1">
+                                <p className="text-muted-foreground mt-1">
                                   {currentPlan?.description || ''}
                                 </p>
                               </>
@@ -222,8 +222,8 @@ export default function BillingPage() {
 
                         <div className="space-y-3 text-sm">
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-600">Base Price</span>
-                            <span className="font-semibold text-slate-900">
+                            <span className="text-muted-foreground">Base Price</span>
+                            <span className="font-semibold text-foreground">
                               ${(() => {
                                 const currentPlan = plans.find(p => p.id === subscription.plan_id);
                                 return parseFloat(currentPlan?.base_price || '0').toFixed(2);
@@ -231,8 +231,8 @@ export default function BillingPage() {
                             </span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-600">GMV Fee</span>
-                            <span className="font-semibold text-slate-900">
+                            <span className="text-muted-foreground">GMV Fee</span>
+                            <span className="font-semibold text-foreground">
                               {(() => {
                                 const currentPlan = plans.find(p => p.id === subscription.plan_id);
                                 return `${currentPlan?.gmv_percentage || '0'}%`;
@@ -240,10 +240,10 @@ export default function BillingPage() {
                             </span>
                           </div>
                           <div className="flex justify-between items-center pt-2 border-t">
-                            <span className="text-slate-600 font-semibold">Status</span>
+                            <span className="text-muted-foreground font-semibold">Status</span>
                             <div className="flex items-center gap-2">
-                              <CheckCircle className="h-4 w-4 text-green-600" />
-                              <span className="capitalize font-semibold text-green-600">
+                              <CheckCircle className="h-4 w-4 text-secondary" />
+                              <span className="capitalize font-semibold text-secondary">
                                 {subscription.status}
                               </span>
                             </div>
@@ -253,31 +253,31 @@ export default function BillingPage() {
 
                       {/* Billing Information */}
                       <div>
-                        <div className="bg-white rounded-lg p-4 space-y-4 border border-slate-200">
+                        <div className="bg-background rounded-lg p-4 space-y-4 border border-border">
                           <div>
-                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                               Subscription Started
                             </p>
-                            <p className="text-lg font-semibold text-slate-900">
+                            <p className="text-lg font-semibold text-foreground">
                               {new Date(subscription.start_date).toLocaleDateString()}
                             </p>
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide flex items-center gap-1">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
                               Next Billing Date
                             </p>
-                            <p className="text-lg font-semibold text-slate-900">
+                            <p className="text-lg font-semibold text-foreground">
                               {new Date(subscription.next_billing_date).toLocaleDateString()}
                             </p>
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                               Currency
                             </p>
-                            <p className="text-lg font-semibold text-slate-900">
+                            <p className="text-lg font-semibold text-foreground">
                               {subscription.currency}
                             </p>
                           </div>
@@ -314,24 +314,24 @@ export default function BillingPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <p className="text-sm text-slate-600 mb-1">Base Fee</p>
-                      <p className="text-2xl font-bold text-slate-900">
+                    <div className="bg-background rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground mb-1">Base Fee</p>
+                      <p className="text-2xl font-bold text-foreground">
                         ${(() => {
                           const currentPlan = plans.find(p => p.id === subscription?.plan_id);
                           return parseFloat(currentPlan?.base_price || '0').toFixed(2);
                         })()}
                       </p>
                     </div>
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <p className="text-sm text-slate-600 mb-1">GMV This Period</p>
-                      <p className="text-2xl font-bold text-slate-900">--</p>
-                      <p className="text-xs text-slate-500 mt-1">Coming from API</p>
+                    <div className="bg-background rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground mb-1">GMV This Period</p>
+                      <p className="text-2xl font-bold text-foreground">--</p>
+                      <p className="text-xs text-muted-foreground mt-1">Coming from API</p>
                     </div>
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <p className="text-sm text-slate-600 mb-1">GMV Fee</p>
-                      <p className="text-2xl font-bold text-slate-900">--</p>
-                      <p className="text-xs text-slate-500 mt-1">Based on GMV %</p>
+                    <div className="bg-background rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground mb-1">GMV Fee</p>
+                      <p className="text-2xl font-bold text-foreground">--</p>
+                      <p className="text-xs text-muted-foreground mt-1">Based on GMV %</p>
                     </div>
                   </div>
                 </CardContent>
@@ -353,45 +353,45 @@ export default function BillingPage() {
                 <CardContent>
                   {invoices.length === 0 ? (
                     <div className="text-center py-12">
-                      <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                      <p className="text-slate-600">No invoices yet</p>
-                      <p className="text-sm text-slate-500 mt-1">
+                      <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No invoices yet</p>
+                      <p className="text-sm text-muted-foreground mt-1">
                         Your invoices will appear here once you have active usage
                       </p>
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full">
-                        <thead className="bg-slate-50 border-b">
+                        <thead className="bg-background border-b">
                           <tr>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
                               Invoice
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
                               Period
                             </th>
-                            <th className="px-4 py-3 text-right text-sm font-semibold text-slate-900">
+                            <th className="px-4 py-3 text-right text-sm font-semibold text-foreground">
                               Amount
                             </th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-900">
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
                               Status
                             </th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-900">
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
                               Action
                             </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y">
                           {invoices.map((invoice) => (
-                            <tr key={invoice.invoice_id} className="hover:bg-slate-50 transition">
-                              <td className="px-4 py-3 text-sm font-medium text-slate-900">
+                            <tr key={invoice.invoice_id} className="hover:bg-background transition">
+                              <td className="px-4 py-3 text-sm font-medium text-foreground">
                                 {invoice.invoice_number}
                               </td>
-                              <td className="px-4 py-3 text-sm text-slate-600">
+                              <td className="px-4 py-3 text-sm text-muted-foreground">
                                 {new Date(invoice.billing_start).toLocaleDateString()} -{' '}
                                 {new Date(invoice.billing_end).toLocaleDateString()}
                               </td>
-                              <td className="px-4 py-3 text-sm font-semibold text-slate-900 text-right">
+                              <td className="px-4 py-3 text-sm font-semibold text-foreground text-right">
                                 ${parseFloat(invoice.total).toFixed(2)}
                               </td>
                               <td className="px-4 py-3 text-center text-sm">
@@ -435,7 +435,7 @@ export default function BillingPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-purple-600" />
+                    <CreditCard className="h-5 w-5 text-primary" />
                     Payment Methods
                   </CardTitle>
                   <CardDescription>
@@ -444,12 +444,12 @@ export default function BillingPage() {
                 </CardHeader>
                 <CardContent>
                   {paymentMethods.length === 0 ? (
-                    <div className="bg-slate-50 rounded-lg p-6 text-center">
-                      <CreditCard className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                      <p className="text-slate-900 font-semibold mb-2">
+                    <div className="bg-background rounded-lg p-6 text-center">
+                      <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-foreground font-semibold mb-2">
                         No payment method on file
                       </p>
-                      <p className="text-slate-600 text-sm mb-4">
+                      <p className="text-muted-foreground text-sm mb-4">
                         Add a payment method to enable automatic billing
                       </p>
                       <Link href="/vendor/billing/payment">
@@ -462,11 +462,11 @@ export default function BillingPage() {
                   ) : (
                     <div className="space-y-4">
                       {paymentMethods.map((method) => (
-                        <div key={method.vendor_payment_method_id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                        <div key={method.vendor_payment_method_id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-background transition-colors">
                           <div className="flex items-center gap-4 flex-1">
-                            <CreditCard className="h-8 w-8 text-purple-600" />
+                            <CreditCard className="h-8 w-8 text-primary" />
                             <div className="flex-1">
-                              <p className="font-semibold text-slate-900 capitalize">
+                              <p className="font-semibold text-foreground capitalize">
                                 {method.payment_provider}
                                 {method.is_default && (
                                   <span className="ml-2 text-xs font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded">
@@ -474,7 +474,7 @@ export default function BillingPage() {
                                   </span>
                                 )}
                               </p>
-                              <p className="text-sm text-slate-600">
+                              <p className="text-sm text-muted-foreground">
                                 {method.account_details?.card_last_4 ? `****${method.account_details.card_last_4}` : method.provider_account_id}
                                 {method.account_details?.card_brand && ` • ${method.account_details.card_brand}`}
                               </p>
@@ -535,7 +535,7 @@ export default function BillingPage() {
                                   }
                                 }
                               }}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-destructive hover:text-red-700"
                             >
                               Delete
                             </Button>

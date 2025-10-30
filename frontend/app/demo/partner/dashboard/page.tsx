@@ -42,7 +42,7 @@ export default function DemoPartnerDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Earnings Banner */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-8 mb-8 text-white">
@@ -81,10 +81,10 @@ export default function DemoPartnerDashboard() {
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StatCard
-            icon={<MousePointerClick className="text-blue-600" />}
+            icon={<MousePointerClick className="text-primary" />}
             label="Total Clicks"
             value={(stats.total_clicks || 0).toLocaleString()}
-            bgColor="bg-blue-50"
+            bgColor="bg-primary/10"
           />
           <StatCard
             icon={<CheckCircle className="text-green-600" />}
@@ -102,16 +102,16 @@ export default function DemoPartnerDashboard() {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">Filters</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 UTM Source
               </label>
               <select
                 value={selectedUTMSource}
                 onChange={(e) => setSelectedUTMSource(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+                className="w-full border border-border rounded-lg p-2 text-foreground"
               >
                 <option value="">All Sources</option>
                 <option value="google">Google</option>
@@ -120,13 +120,13 @@ export default function DemoPartnerDashboard() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 UTM Medium
               </label>
               <select
                 value={selectedUTMmedium}
                 onChange={(e) => setSelectedUTMmedium(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+                className="w-full border border-border rounded-lg p-2 text-foreground"
               >
                 <option value="">All Mediums</option>
                 <option value="cpc">CPC</option>
@@ -135,13 +135,13 @@ export default function DemoPartnerDashboard() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 UTM Campaign
               </label>
               <select
                 value={selectedUTMCampaign}
                 onChange={(e) => setSelectedUTMCampaign(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-2 text-gray-900"
+                className="w-full border border-border rounded-lg p-2 text-foreground"
               >
                 <option value="">All Campaigns</option>
                 <option value="summer_sale">Summer Sale</option>
@@ -150,14 +150,14 @@ export default function DemoPartnerDashboard() {
               </select>
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
+          <p className="text-sm text-muted-foreground mt-4">
             Note: Filters are preserved but data is static in demo mode
           </p>
         </div>
 
         {/* Performance Chart */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-foreground mb-4">
             Performance Over Time
           </h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -187,7 +187,7 @@ export default function DemoPartnerDashboard() {
         {/* Top Links */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
               <Link2 size={20} />
               Top Performing Links
             </h3>
@@ -195,17 +195,17 @@ export default function DemoPartnerDashboard() {
               {partnerData.topLinks.map((link) => (
                 <div
                   key={link.url}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
                 >
                   <div>
-                    <p className="font-medium text-gray-900">{link.label}</p>
-                    <p className="text-sm text-gray-500">{link.url}</p>
+                    <p className="font-medium text-foreground">{link.label}</p>
+                    <p className="text-sm text-muted-foreground">{link.url}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="text-2xl font-bold text-primary">
                       {link.clicks.toLocaleString()}
                     </p>
-                    <p className="text-xs text-gray-500">clicks</p>
+                    <p className="text-xs text-muted-foreground">clicks</p>
                   </div>
                 </div>
               ))}
@@ -214,7 +214,7 @@ export default function DemoPartnerDashboard() {
 
           {/* Recent Conversions */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
               <CheckCircle size={20} />
               Recent Conversions
             </h3>
@@ -222,11 +222,11 @@ export default function DemoPartnerDashboard() {
               {partnerData.recentConversions.map((conv, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
                 >
                   <div>
-                    <p className="font-medium text-gray-900">{conv.campaign}</p>
-                    <p className="text-sm text-gray-500">{conv.date}</p>
+                    <p className="font-medium text-foreground">{conv.campaign}</p>
+                    <p className="text-sm text-muted-foreground">{conv.date}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold text-green-600">
@@ -267,8 +267,8 @@ function StatCard({
     <div className={`${bgColor} rounded-lg p-6 shadow`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-600 text-sm font-medium">{label}</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
+          <p className="text-muted-foreground text-sm font-medium">{label}</p>
+          <p className="text-3xl font-bold text-foreground mt-2">{value}</p>
         </div>
         <div className="text-3xl">{icon}</div>
       </div>

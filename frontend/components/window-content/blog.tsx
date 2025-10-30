@@ -13,7 +13,7 @@ interface BlogContentProps {
 
 const categoryColors: Record<string, { badge: string; gradient: string; icon: string }> = {
   "Engineering": {
-    badge: "bg-blue-100 text-blue-700",
+    badge: "bg-primary/10 text-primary",
     gradient: "from-blue-50 to-blue-100",
     icon: "⚙️"
   },
@@ -116,7 +116,7 @@ export function BlogContent({ blogPosts, initialSlug, onNavigate }: BlogContentP
     return (
       <div className="flex flex-col h-full bg-white">
         {/* Premium Header with Gradient Background */}
-        <div className={`bg-gradient-to-r ${categoryInfo.gradient} border-b border-gray-200 p-6 shadow-sm`}>
+        <div className={`bg-gradient-to-r ${categoryInfo.gradient} border-b border-border p-6 shadow-sm`}>
           <button
             onClick={handleBackToList}
             className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-4 transition-colors group"
@@ -133,7 +133,7 @@ export function BlogContent({ blogPosts, initialSlug, onNavigate }: BlogContentP
                   {currentPost.category}
                 </span>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-3xl font-bold text-foreground leading-tight">
                 {currentPost.title}
               </h1>
             </div>
@@ -142,15 +142,15 @@ export function BlogContent({ blogPosts, initialSlug, onNavigate }: BlogContentP
           {/* Metadata Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-2 text-sm">
-              <User className="w-4 h-4 text-gray-600" />
-              <span className="font-medium text-gray-900">{currentPost.author}</span>
+              <User className="w-4 h-4 text-muted-foreground" />
+              <span className="font-medium text-foreground">{currentPost.author}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <Calendar className="w-4 h-4 text-gray-600" />
-              <span className="font-medium text-gray-900">{currentPost.date}</span>
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+              <span className="font-medium text-foreground">{currentPost.date}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <span className="font-medium text-gray-900">{currentPost.readTime} min read</span>
+              <span className="font-medium text-foreground">{currentPost.readTime} min read</span>
             </div>
           </div>
         </div>
@@ -158,7 +158,7 @@ export function BlogContent({ blogPosts, initialSlug, onNavigate }: BlogContentP
         {/* Premium Content Area */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-8 py-8">
-            <article className="prose prose-lg prose-slate max-w-none prose-headings:text-gray-900 prose-headings:font-bold prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-code:text-rose-600 prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-strong:text-gray-900 prose-em:text-gray-700">
+            <article className="prose prose-lg prose-slate max-w-none prose-headings:text-foreground prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:text-primary prose-code:bg-muted prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-strong:text-foreground prose-em:text-foreground">
               <ReactMarkdown>{currentPost.content}</ReactMarkdown>
             </article>
           </div>
@@ -168,33 +168,33 @@ export function BlogContent({ blogPosts, initialSlug, onNavigate }: BlogContentP
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col h-full bg-muted">
       {/* Premium Header */}
-      <div className="border-b border-gray-200 p-6 bg-white shadow-sm">
+      <div className="border-b border-border p-6 bg-white shadow-sm">
         <div className="flex items-center gap-3 mb-4">
-          <BookOpen className="w-6 h-6 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Blog</h1>
+          <BookOpen className="w-6 h-6 text-primary" />
+          <h1 className="text-3xl font-bold text-foreground">Blog</h1>
         </div>
-        <p className="text-base text-gray-600 mb-6 max-w-2xl">
+        <p className="text-base text-muted-foreground mb-6 max-w-2xl">
           Expert insights on affiliate programs, partner marketing, and building world-class integration platforms.
         </p>
 
         {/* Premium Search Bar */}
         <div ref={searchRef} className="relative mb-6">
           <div className="relative">
-            <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
+            <Search className="absolute left-4 top-3.5 w-5 h-5 text-muted-foreground pointer-events-none" />
             <input
               type="text"
               placeholder="Search by title, topic, or author..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => searchQuery && setShowAutocomplete(true)}
-              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white transition-all"
+              className="w-full pl-12 pr-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white transition-all"
             />
 
             {/* Premium Autocomplete Dropdown */}
             {showAutocomplete && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto z-10">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-lg shadow-xl max-h-80 overflow-y-auto z-10">
                 {filteredPosts?.length > 0 ? (
                   <div className="divide-y divide-gray-100">
                     {filteredPosts.map(post => {
@@ -203,7 +203,7 @@ export function BlogContent({ blogPosts, initialSlug, onNavigate }: BlogContentP
                         <button
                           key={post.slug}
                           onClick={() => handlePostClick(post)}
-                          className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors group"
+                          className="w-full text-left px-4 py-3 hover:bg-primary/10 transition-colors group"
                         >
                           <div className="flex items-center gap-3 mb-2">
                             <span className="text-lg">{catInfo.icon}</span>
@@ -211,14 +211,14 @@ export function BlogContent({ blogPosts, initialSlug, onNavigate }: BlogContentP
                               {post.category}
                             </span>
                           </div>
-                          <div className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{post.title}</div>
-                          <div className="text-sm text-gray-600 mt-1">{post.excerpt}</div>
+                          <div className="font-semibold text-foreground group-hover:text-primary transition-colors">{post.title}</div>
+                          <div className="text-sm text-muted-foreground mt-1">{post.excerpt}</div>
                         </button>
                       )
                     })}
                   </div>
                 ) : (
-                  <div className="px-4 py-8 text-center text-gray-500">
+                  <div className="px-4 py-8 text-center text-muted-foreground">
                     <p className="text-sm">No posts found</p>
                   </div>
                 )}
@@ -234,7 +234,7 @@ export function BlogContent({ blogPosts, initialSlug, onNavigate }: BlogContentP
             className={`px-4 py-2 rounded-full font-medium transition-all ${
               filterCategory === 'all'
                 ? 'bg-gray-900 text-white shadow-md'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                : 'bg-white text-foreground border border-border hover:bg-muted'
             }`}
           >
             All Posts
@@ -248,7 +248,7 @@ export function BlogContent({ blogPosts, initialSlug, onNavigate }: BlogContentP
                 className={`px-4 py-2 rounded-full font-medium transition-all flex items-center gap-2 ${
                   filterCategory === category
                     ? `${catInfo.badge} shadow-md`
-                    : `bg-white text-gray-700 border border-gray-300 hover:bg-gray-100`
+                    : `bg-white text-foreground border border-border hover:bg-muted`
                 }`}
               >
                 <span>{catInfo.icon}</span>
@@ -269,7 +269,7 @@ export function BlogContent({ blogPosts, initialSlug, onNavigate }: BlogContentP
                 <button
                   key={post.slug}
                   onClick={() => handlePostClick(post)}
-                  className={`text-left p-5 rounded-xl border border-gray-200 bg-white hover:shadow-lg hover:border-blue-200 transition-all group cursor-pointer bg-gradient-to-r ${catInfo.gradient}`}
+                  className={`text-left p-5 rounded-xl border border-border bg-white hover:shadow-lg hover:border-primary/30 transition-all group cursor-pointer bg-gradient-to-r ${catInfo.gradient}`}
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex-1 min-w-0">
@@ -279,33 +279,33 @@ export function BlogContent({ blogPosts, initialSlug, onNavigate }: BlogContentP
                           {post.category}
                         </span>
                       </div>
-                      <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate">
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate">
                         {post.title}
                       </h3>
                     </div>
                   </div>
 
                   {/* Excerpt and Metadata Row */}
-                  <p className="text-gray-700 mb-3 line-clamp-2">{post.excerpt}</p>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 pb-3 border-b border-gray-200 border-opacity-50">
+                  <p className="text-foreground mb-3 line-clamp-2">{post.excerpt}</p>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground pb-3 border-b border-border border-opacity-50">
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-gray-400" />
-                      <span className="font-medium text-gray-900">{post.author}</span>
+                      <User className="w-4 h-4 text-muted-foreground" />
+                      <span className="font-medium text-foreground">{post.author}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">{post.date}</span>
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-foreground">{post.date}</span>
                     </div>
-                    <div className="text-gray-700">{post.readTime} min read</div>
+                    <div className="text-foreground">{post.readTime} min read</div>
                   </div>
                 </button>
               )
             })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+          <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
             <BookOpen className="w-12 h-12 mb-4 opacity-30" />
-            <p className="text-lg font-medium text-gray-700">No posts match your filters</p>
+            <p className="text-lg font-medium text-foreground">No posts match your filters</p>
             <p className="text-sm mt-2">Try adjusting your search or filters</p>
           </div>
         )}

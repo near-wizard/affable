@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import func
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from app.core.database import get_db
@@ -27,11 +27,16 @@ from app.schemas.campaign import (
     CampaignVersionCreate,
     PartnerCampaignOverrideCreate,
     PartnerCampaignOverrideResponse,
-    CampaignPartnerListResponse
+    CampaignPartnerListResponse,
+    PartnerInvitationCreate,
+    PartnerInvitationResponse,
+    PartnerInvitationListResponse,
+    PartnerInvitationAccept,
+    PartnerInvitationDecline
 )
 from app.models import (
     Campaign, CampaignVersion, CampaignPartner, Partner, VendorUser,
-    PartnerCampaignOverride, Click, ConversionEvent, PartnerLink
+    PartnerCampaignOverride, Click, ConversionEvent, PartnerLink, PartnerInvitation
 )
 
 router = APIRouter()
@@ -611,5 +616,257 @@ def create_commission_override(
     db.add(override)
     db.commit()
     db.refresh(override)
-    
+
     return override
+
+
+# Partner Invitation Endpoints
+
+@router.post("/{campaign_id}/partners/invite", response_model=PartnerInvitationResponse)
+def invite_partner_to_campaign(
+    campaign_id: int,
+    data: PartnerInvitationCreate,
+    vendor_user: VendorUser = Depends(get_current_vendor_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Invite a partner to a campaign.
+
+    Vendor users only. Creates an invitation that the partner can accept or decline.
+    """
+    # Verify campaign belongs to vendor
+    campaign = db.query(Campaign).filter(
+        Campaign.campaign_id == campaign_id,
+        Campaign.vendor_id == vendor_user.vendor_id,
+        Campaign.is_deleted == False
+    ).first()
+
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    # Verify partner exists
+    partner = db.query(Partner).filter(
+        Partner.partner_id == data.partner_id,
+        Partner.is_deleted == False
+    ).first()
+
+    if not partner:
+        raise HTTPException(status_code=404, detail="Partner not found")
+
+    # Check if invitation already exists and is pending
+    existing_invitation = db.query(PartnerInvitation).filter(
+        PartnerInvitation.campaign_id == campaign_id,
+        PartnerInvitation.partner_id == data.partner_id,
+        PartnerInvitation.status.in_(['pending', 'accepted'])
+    ).first()
+
+    if existing_invitation:
+        raise HTTPException(
+            status_code=400,
+            detail="Invitation already exists for this partner and campaign"
+        )
+
+    # Check if partner is already enrolled
+    existing_enrollment = db.query(CampaignPartner).filter(
+        CampaignPartner.campaign_version_id == campaign.current_campaign_version_id,
+        CampaignPartner.partner_id == data.partner_id,
+        CampaignPartner.status.in_(['pending', 'approved']),
+        CampaignPartner.is_deleted == False
+    ).first()
+
+    if existing_enrollment:
+        raise HTTPException(
+            status_code=400,
+            detail="Partner is already enrolled in this campaign"
+        )
+
+    # Create invitation (expires in 30 days)
+    invitation = PartnerInvitation(
+        campaign_id=campaign_id,
+        partner_id=data.partner_id,
+        invited_by=vendor_user.vendor_user_id,
+        invitation_message=data.invitation_message,
+        invited_at=datetime.utcnow(),
+        expires_at=datetime.utcnow() + timedelta(days=30)
+    )
+
+    db.add(invitation)
+    db.commit()
+    db.refresh(invitation)
+
+    return PartnerInvitationResponse(
+        partner_invitation_id=invitation.partner_invitation_id,
+        campaign_id=invitation.campaign_id,
+        partner_id=invitation.partner_id,
+        partner_name=partner.name,
+        partner_email=partner.email,
+        campaign_name=campaign.current_version.name,
+        status=invitation.status,
+        invitation_message=invitation.invitation_message,
+        invited_at=invitation.invited_at,
+        expires_at=invitation.expires_at
+    )
+
+
+@router.get("/invitations", response_model=PartnerInvitationListResponse)
+def list_partner_invitations(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    status_filter: Optional[str] = Query(None, alias="status"),
+    partner: Partner = Depends(get_current_partner),
+    db: Session = Depends(get_db)
+):
+    """
+    List partner invitations.
+
+    Partners see their own invitations. Vendors see invitations sent by them.
+    """
+    query = db.query(PartnerInvitation).filter(PartnerInvitation.is_deleted == False)
+
+    # Filter for partner's invitations
+    query = query.filter(PartnerInvitation.partner_id == partner.partner_id)
+
+    if status_filter:
+        query = query.filter(PartnerInvitation.status == status_filter)
+
+    total = query.count()
+    invitations = query.offset((page - 1) * limit).limit(limit).all()
+
+    # Build response
+    invitation_responses = []
+    for inv in invitations:
+        invitation_responses.append(
+            PartnerInvitationResponse(
+                partner_invitation_id=inv.partner_invitation_id,
+                campaign_id=inv.campaign_id,
+                partner_id=inv.partner_id,
+                partner_name=partner.name,
+                partner_email=partner.email,
+                campaign_name=inv.campaign.current_version.name,
+                status=inv.status,
+                invitation_message=inv.invitation_message,
+                invited_at=inv.invited_at,
+                accepted_at=inv.accepted_at,
+                declined_at=inv.declined_at,
+                declined_reason=inv.declined_reason,
+                expires_at=inv.expires_at
+            )
+        )
+
+    return PartnerInvitationListResponse(
+        data=invitation_responses,
+        total=total,
+        page=page,
+        limit=limit,
+        total_pages=(total + limit - 1) // limit
+    )
+
+
+@router.post("/invitations/{invitation_id}/accept", response_model=PartnerInvitationResponse)
+def accept_invitation(
+    invitation_id: int,
+    partner: Partner = Depends(get_current_partner),
+    db: Session = Depends(get_db)
+):
+    """
+    Accept a partner invitation to join a campaign.
+
+    Partners only. Creates enrollment in the campaign.
+    """
+    invitation = db.query(PartnerInvitation).filter(
+        PartnerInvitation.partner_invitation_id == invitation_id,
+        PartnerInvitation.partner_id == partner.partner_id,
+        PartnerInvitation.is_deleted == False
+    ).first()
+
+    if not invitation:
+        raise HTTPException(status_code=404, detail="Invitation not found")
+
+    if invitation.status != 'pending':
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invitation is already {invitation.status}"
+        )
+
+    if invitation.is_expired():
+        raise HTTPException(status_code=400, detail="Invitation has expired")
+
+    # Accept the invitation
+    invitation.accept()
+
+    # Create enrollment in the campaign
+    campaign = invitation.campaign
+    enrollment = CampaignPartner(
+        campaign_version_id=campaign.current_campaign_version_id,
+        partner_id=partner.partner_id,
+        status='approved' if not campaign.current_version.approval_required else 'pending',
+        applied_at=datetime.utcnow(),
+        approved_at=datetime.utcnow() if not campaign.current_version.approval_required else None
+    )
+
+    db.add(enrollment)
+    db.commit()
+    db.refresh(invitation)
+
+    return PartnerInvitationResponse(
+        partner_invitation_id=invitation.partner_invitation_id,
+        campaign_id=invitation.campaign_id,
+        partner_id=invitation.partner_id,
+        partner_name=partner.name,
+        partner_email=partner.email,
+        campaign_name=campaign.current_version.name,
+        status=invitation.status,
+        invitation_message=invitation.invitation_message,
+        invited_at=invitation.invited_at,
+        accepted_at=invitation.accepted_at,
+        expires_at=invitation.expires_at
+    )
+
+
+@router.post("/invitations/{invitation_id}/decline", response_model=PartnerInvitationResponse)
+def decline_invitation(
+    invitation_id: int,
+    data: PartnerInvitationDecline,
+    partner: Partner = Depends(get_current_partner),
+    db: Session = Depends(get_db)
+):
+    """
+    Decline a partner invitation.
+
+    Partners only.
+    """
+    invitation = db.query(PartnerInvitation).filter(
+        PartnerInvitation.partner_invitation_id == invitation_id,
+        PartnerInvitation.partner_id == partner.partner_id,
+        PartnerInvitation.is_deleted == False
+    ).first()
+
+    if not invitation:
+        raise HTTPException(status_code=404, detail="Invitation not found")
+
+    if invitation.status != 'pending':
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invitation is already {invitation.status}"
+        )
+
+    # Decline the invitation
+    invitation.decline(data.reason)
+
+    db.commit()
+    db.refresh(invitation)
+
+    return PartnerInvitationResponse(
+        partner_invitation_id=invitation.partner_invitation_id,
+        campaign_id=invitation.campaign_id,
+        partner_id=invitation.partner_id,
+        partner_name=partner.name,
+        partner_email=partner.email,
+        campaign_name=invitation.campaign.current_version.name,
+        status=invitation.status,
+        invitation_message=invitation.invitation_message,
+        invited_at=invitation.invited_at,
+        declined_at=invitation.declined_at,
+        declined_reason=invitation.declined_reason,
+        expires_at=invitation.expires_at
+    )
