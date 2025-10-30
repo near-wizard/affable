@@ -60,9 +60,23 @@ interface Invoice {
   created_at: string;
 }
 
+interface PaymentMethod {
+  vendor_payment_method_id: number;
+  vendor_id: number;
+  payment_provider: string;
+  provider_account_id: string;
+  account_details?: Record<string, any>;
+  is_default: boolean;
+  is_verified: boolean;
+  verified_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function BillingPage() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,15 +96,17 @@ export default function BillingPage() {
       const vendor = await apiClient.currentUser.getVendor(token || undefined);
       setVendorId(vendor.vendor_id);
 
-      // Load subscription and invoices
-      const [subsData, invoiceData, plansData] = await Promise.all([
+      // Load subscription, invoices, payment methods, and plans
+      const [subsData, invoiceData, methodsData, plansData] = await Promise.all([
         apiClient.billing.getCurrentSubscription(vendor.vendor_id, token || undefined),
         apiClient.billing.getInvoices(vendor.vendor_id, { limit: 10 }, token || undefined),
+        apiClient.billing.listPaymentMethods(vendor.vendor_id, token || undefined),
         apiClient.billing.getPlans(token || undefined),
       ]);
 
       setSubscription(subsData);
       setInvoices(invoiceData.invoices || []);
+      setPaymentMethods(methodsData.payment_methods || []);
       setPlans(plansData.plans || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load billing data';
@@ -420,28 +436,120 @@ export default function BillingPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CreditCard className="h-5 w-5 text-purple-600" />
-                    Payment Method
+                    Payment Methods
                   </CardTitle>
                   <CardDescription>
-                    Manage your payment method for automatic billing
+                    Manage your payment methods for automatic billing
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-slate-50 rounded-lg p-6 text-center">
-                    <CreditCard className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-900 font-semibold mb-2">
-                      No payment method on file
-                    </p>
-                    <p className="text-slate-600 text-sm mb-4">
-                      Add a payment method to enable automatic billing
-                    </p>
-                    <Link href="/vendor/billing/payment">
-                      <Button>
-                        <CreditCard className="h-4 w-4 mr-2" />
-                        Add Payment Method
-                      </Button>
-                    </Link>
-                  </div>
+                  {paymentMethods.length === 0 ? (
+                    <div className="bg-slate-50 rounded-lg p-6 text-center">
+                      <CreditCard className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                      <p className="text-slate-900 font-semibold mb-2">
+                        No payment method on file
+                      </p>
+                      <p className="text-slate-600 text-sm mb-4">
+                        Add a payment method to enable automatic billing
+                      </p>
+                      <Link href="/vendor/billing/payment">
+                        <Button>
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Add Payment Method
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {paymentMethods.map((method) => (
+                        <div key={method.vendor_payment_method_id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                          <div className="flex items-center gap-4 flex-1">
+                            <CreditCard className="h-8 w-8 text-purple-600" />
+                            <div className="flex-1">
+                              <p className="font-semibold text-slate-900 capitalize">
+                                {method.payment_provider}
+                                {method.is_default && (
+                                  <span className="ml-2 text-xs font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded">
+                                    DEFAULT
+                                  </span>
+                                )}
+                              </p>
+                              <p className="text-sm text-slate-600">
+                                {method.account_details?.card_last_4 ? `****${method.account_details.card_last_4}` : method.provider_account_id}
+                                {method.account_details?.card_brand && ` • ${method.account_details.card_brand}`}
+                              </p>
+                              {method.is_verified && (
+                                <p className="text-xs text-emerald-600 flex items-center gap-1 mt-1">
+                                  <CheckCircle className="h-3 w-3" />
+                                  Verified
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            {!method.is_default && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={async () => {
+                                  try {
+                                    await apiClient.billing.updatePaymentMethod(
+                                      vendorId!,
+                                      method.vendor_payment_method_id.toString(),
+                                      { is_default: true },
+                                      getAuthToken() || undefined
+                                    );
+                                    // Reload payment methods
+                                    const updated = await apiClient.billing.listPaymentMethods(
+                                      vendorId!,
+                                      getAuthToken() || undefined
+                                    );
+                                    setPaymentMethods(updated.payment_methods || []);
+                                  } catch (err) {
+                                    console.error('Failed to set default method:', err);
+                                  }
+                                }}
+                              >
+                                Set Default
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={async () => {
+                                if (confirm('Are you sure you want to delete this payment method?')) {
+                                  try {
+                                    await apiClient.billing.deletePaymentMethod(
+                                      vendorId!,
+                                      method.vendor_payment_method_id.toString(),
+                                      getAuthToken() || undefined
+                                    );
+                                    // Reload payment methods
+                                    const updated = await apiClient.billing.listPaymentMethods(
+                                      vendorId!,
+                                      getAuthToken() || undefined
+                                    );
+                                    setPaymentMethods(updated.payment_methods || []);
+                                  } catch (err) {
+                                    console.error('Failed to delete payment method:', err);
+                                  }
+                                }
+                              }}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      <Link href="/vendor/billing/payment">
+                        <Button variant="outline" className="w-full">
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Add Another Payment Method
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

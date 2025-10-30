@@ -34,9 +34,60 @@ export function LandingSocialProof() {
 			link: "https://affablelink.com/",
 		},
 		{
-			src: "/images/logos/tightstudio.png",
-			companyName: "Tight Studio",
-			link: "https://tight.studio/",
+			src: "/images/logos/affablelink.png",
+			companyName: "Affable Link",
+			link: "https://affablelink.com/",
+		},
+		{
+			src: "/images/logos/affablelink.png",
+			companyName: "Affable Link",
+			link: "https://affablelink.com/",
+		},
+		{
+			src: "/images/logos/affablelink.png",
+			companyName: "Affable Link",
+			link: "https://affablelink.com/",
+		},
+		{
+			src: "/images/logos/affablelink.png",
+			companyName: "Affable Link",
+			link: "https://affablelink.com/",
+		},
+		{
+			src: "/images/logos/affablelink.png",
+			companyName: "Affable Link",
+			link: "https://affablelink.com/",
+		},
+		// Line 2
+		{
+			src: "/images/logos/affablelink.png",
+			companyName: "Affable Link",
+			link: "https://affablelink.com/",
+		},
+		{
+			src: "/images/logos/affablelink.png",
+			companyName: "Affable Link",
+			link: "https://affablelink.com/",
+		},
+		{
+			src: "/images/logos/affablelink.png",
+			companyName: "Affable Link",
+			link: "https://affablelink.com/",
+		},
+		{
+			src: "/images/logos/affablelink.png",
+			companyName: "Affable Link",
+			link: "https://affablelink.com/",
+		},
+		{
+			src: "/images/logos/affablelink.png",
+			companyName: "Affable Link",
+			link: "https://affablelink.com/",
+		},
+		{
+			src: "/images/logos/affablelink.png",
+			companyName: "Affable Link",
+			link: "https://affablelink.com/",
 		},
 	];
 
@@ -49,9 +100,9 @@ export function LandingSocialProof() {
 						Trusted by forward-thinking teams
 					</p>
 					<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 max-w-4xl mx-auto items-center">
-						{trustedByLogos.map((logo) => (
+						{trustedByLogos.map((logo, i) => (
 							<Link
-								key={logo.companyName}
+								key={logo.companyName + i}
 								href={logo.link}
 								className="inline-block w-full" // ensures link fills the grid cell
 							>
@@ -73,7 +124,7 @@ export function LandingSocialProof() {
 				{/* Testimonials */}
 				<div className="mx-auto max-w-2xl text-center mb-12">
 					<h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl text-balance mb-4">
-						Love from our users
+						Love from our users (Mock)
 					</h2>
 					<p className="text-lg text-muted-foreground">
 						Join companies scaling their partner programs with confidence

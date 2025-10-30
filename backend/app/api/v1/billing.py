@@ -1,7 +1,9 @@
 """Billing and payment API endpoints."""
 
 import logging
-from typing import List
+from typing import List, Optional
+from datetime import datetime
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
@@ -12,6 +14,8 @@ from app.models.billing import (
     SubscriptionPlan,
     VendorSubscription,
     VendorInvoice,
+    VendorPaymentMethod,
+    PaymentProviderEnum,
 )
 from app.services.billing_service import (
     SubscriptionService,
@@ -28,7 +32,48 @@ from app.services.invoice_pdf_service import InvoicePDFService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/billing", tags=["billing"])
+router = APIRouter(tags=["billing"])
+
+
+# =====================================================
+# REQUEST SCHEMAS
+# =====================================================
+
+class SubscriptionUpdateRequest(BaseModel):
+    """Request body for updating a subscription."""
+    plan_id: Optional[int] = None
+    status: Optional[str] = None
+
+
+class VendorPaymentMethodCreate(BaseModel):
+    """Request body for creating a vendor payment method."""
+    payment_provider: str
+    provider_account_id: str
+    account_details: Optional[dict] = None
+    is_default: Optional[bool] = False
+
+
+class VendorPaymentMethodUpdate(BaseModel):
+    """Request body for updating a vendor payment method."""
+    is_default: Optional[bool] = None
+    account_details: Optional[dict] = None
+
+
+class VendorPaymentMethodResponse(BaseModel):
+    """Response model for vendor payment method."""
+    vendor_payment_method_id: int
+    vendor_id: int
+    payment_provider: str
+    provider_account_id: str
+    account_details: Optional[dict] = None
+    is_default: bool
+    is_verified: bool
+    verified_at: Optional[str] = None
+    created_at: str
+    updated_at: str
+
+    class Config:
+        from_attributes = True
 
 
 # =====================================================
@@ -112,8 +157,12 @@ def get_vendor_subscription(
     vendor_id: int,
     db: Session = Depends(get_db),
 ):
-    """Get vendor's active subscription."""
-    subscription = SubscriptionService.get_active_subscription(db, vendor_id)
+    """Get vendor's current subscription (active or paused)."""
+    # Get any non-cancelled subscription for this vendor
+    subscription = db.query(VendorSubscription).filter(
+        VendorSubscription.vendor_id == vendor_id,
+        VendorSubscription.status.in_(['active', 'paused']),
+    ).first()
 
     if not subscription:
         raise HTTPException(status_code=404, detail="No active subscription found")
@@ -128,6 +177,246 @@ def get_vendor_subscription(
         "next_billing_date": subscription.next_billing_date.isoformat(),
         "stripe_customer_id": subscription.stripe_customer_id,
     }
+
+
+@router.put("/subscriptions/{vendor_id}")
+def update_vendor_subscription(
+    vendor_id: int,
+    update_data: SubscriptionUpdateRequest,
+    db: Session = Depends(get_db),
+):
+    """Update vendor's subscription (change plan or status)."""
+    # Get any non-cancelled subscription for this vendor
+    subscription = db.query(VendorSubscription).filter(
+        VendorSubscription.vendor_id == vendor_id,
+        VendorSubscription.status.in_(['active', 'paused']),
+    ).first()
+
+    if not subscription:
+        raise HTTPException(status_code=404, detail="No active subscription found")
+
+    try:
+        if update_data.plan_id:
+            # Change subscription plan
+            plan = db.query(SubscriptionPlan).filter_by(subscription_plan_id=update_data.plan_id).first()
+            if not plan:
+                raise ValueError(f"Plan {update_data.plan_id} not found")
+            subscription.subscription_plan_id = update_data.plan_id
+
+        if update_data.status:
+            # Update subscription status
+            from app.models.billing import SubscriptionStatus
+            valid_statuses = [s.value for s in SubscriptionStatus]
+            if update_data.status not in valid_statuses:
+                raise ValueError(f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
+            subscription.status = update_data.status
+
+        db.commit()
+        return {
+            "subscription_id": subscription.vendor_subscription_id,
+            "vendor_id": subscription.vendor_id,
+            "plan_id": subscription.subscription_plan_id,
+            "status": subscription.status.value,
+            "currency": subscription.currency,
+            "start_date": subscription.start_date.isoformat(),
+            "next_billing_date": subscription.next_billing_date.isoformat(),
+            "stripe_customer_id": subscription.stripe_customer_id,
+        }
+    except ValueError as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# =====================================================
+# PAYMENT METHOD ENDPOINTS
+# =====================================================
+
+@router.get("/payment-methods/{vendor_id}")
+def list_vendor_payment_methods(
+    vendor_id: int,
+    db: Session = Depends(get_db),
+):
+    """List all payment methods for a vendor."""
+    payment_methods = db.query(VendorPaymentMethod).filter(
+        VendorPaymentMethod.vendor_id == vendor_id,
+        VendorPaymentMethod.is_deleted == False,
+    ).order_by(
+        VendorPaymentMethod.is_default.desc(),
+        VendorPaymentMethod.created_at.desc(),
+    ).all()
+
+    return {
+        "payment_methods": [
+            {
+                "vendor_payment_method_id": pm.vendor_payment_method_id,
+                "vendor_id": pm.vendor_id,
+                "payment_provider": pm.payment_provider.value,
+                "provider_account_id": pm.provider_account_id,
+                "account_details": pm.account_details,
+                "is_default": pm.is_default,
+                "is_verified": pm.is_verified,
+                "verified_at": pm.verified_at.isoformat() if pm.verified_at else None,
+                "created_at": pm.created_at.isoformat(),
+                "updated_at": pm.updated_at.isoformat(),
+            }
+            for pm in payment_methods
+        ]
+    }
+
+
+@router.post("/payment-methods/{vendor_id}")
+def add_vendor_payment_method(
+    vendor_id: int,
+    payment_method: VendorPaymentMethodCreate,
+    db: Session = Depends(get_db),
+):
+    """Add a new payment method for a vendor."""
+    try:
+        # Validate payment provider
+        valid_providers = [p.value for p in PaymentProviderEnum]
+        if payment_method.payment_provider not in valid_providers:
+            raise ValueError(
+                f"Invalid payment provider. Must be one of: {', '.join(valid_providers)}"
+            )
+
+        # If this is being set as default, unset other defaults
+        if payment_method.is_default:
+            db.query(VendorPaymentMethod).filter(
+                VendorPaymentMethod.vendor_id == vendor_id,
+                VendorPaymentMethod.is_default == True,
+                VendorPaymentMethod.is_deleted == False,
+            ).update({VendorPaymentMethod.is_default: False})
+
+        # Create new payment method
+        new_method = VendorPaymentMethod(
+            vendor_id=vendor_id,
+            payment_provider=payment_method.payment_provider,
+            provider_account_id=payment_method.provider_account_id,
+            account_details=payment_method.account_details,
+            is_default=payment_method.is_default,
+        )
+
+        db.add(new_method)
+        db.commit()
+        db.refresh(new_method)
+
+        return {
+            "vendor_payment_method_id": new_method.vendor_payment_method_id,
+            "vendor_id": new_method.vendor_id,
+            "payment_provider": new_method.payment_provider.value,
+            "provider_account_id": new_method.provider_account_id,
+            "account_details": new_method.account_details,
+            "is_default": new_method.is_default,
+            "is_verified": new_method.is_verified,
+            "verified_at": new_method.verified_at.isoformat() if new_method.verified_at else None,
+            "created_at": new_method.created_at.isoformat(),
+            "updated_at": new_method.updated_at.isoformat(),
+        }
+    except ValueError as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to add payment method: {str(e)}")
+
+
+@router.put("/payment-methods/{vendor_id}/{method_id}")
+def update_vendor_payment_method(
+    vendor_id: int,
+    method_id: int,
+    update_data: VendorPaymentMethodUpdate,
+    db: Session = Depends(get_db),
+):
+    """Update a vendor's payment method."""
+    try:
+        payment_method = db.query(VendorPaymentMethod).filter(
+            VendorPaymentMethod.vendor_payment_method_id == method_id,
+            VendorPaymentMethod.vendor_id == vendor_id,
+            VendorPaymentMethod.is_deleted == False,
+        ).first()
+
+        if not payment_method:
+            raise HTTPException(status_code=404, detail="Payment method not found")
+
+        # If setting as default, unset other defaults
+        if update_data.is_default is not None:
+            if update_data.is_default:
+                # Setting this as default - unset other defaults
+                db.query(VendorPaymentMethod).filter(
+                    VendorPaymentMethod.vendor_id == vendor_id,
+                    VendorPaymentMethod.is_default == True,
+                    VendorPaymentMethod.is_deleted == False,
+                    VendorPaymentMethod.vendor_payment_method_id != method_id,
+                ).update({VendorPaymentMethod.is_default: False})
+            payment_method.is_default = update_data.is_default
+
+        if update_data.account_details is not None:
+            payment_method.account_details = update_data.account_details
+
+        db.commit()
+        db.refresh(payment_method)
+
+        return {
+            "vendor_payment_method_id": payment_method.vendor_payment_method_id,
+            "vendor_id": payment_method.vendor_id,
+            "payment_provider": payment_method.payment_provider.value,
+            "provider_account_id": payment_method.provider_account_id,
+            "account_details": payment_method.account_details,
+            "is_default": payment_method.is_default,
+            "is_verified": payment_method.is_verified,
+            "verified_at": payment_method.verified_at.isoformat() if payment_method.verified_at else None,
+            "created_at": payment_method.created_at.isoformat(),
+            "updated_at": payment_method.updated_at.isoformat(),
+        }
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update payment method: {str(e)}")
+
+
+@router.delete("/payment-methods/{vendor_id}/{method_id}")
+def delete_vendor_payment_method(
+    vendor_id: int,
+    method_id: int,
+    db: Session = Depends(get_db),
+):
+    """Delete (soft delete) a vendor's payment method."""
+    try:
+        payment_method = db.query(VendorPaymentMethod).filter(
+            VendorPaymentMethod.vendor_payment_method_id == method_id,
+            VendorPaymentMethod.vendor_id == vendor_id,
+            VendorPaymentMethod.is_deleted == False,
+        ).first()
+
+        if not payment_method:
+            raise HTTPException(status_code=404, detail="Payment method not found")
+
+        # Soft delete
+        payment_method.is_deleted = True
+        payment_method.deleted_at = datetime.utcnow()
+
+        # If this was the default, set another as default
+        if payment_method.is_default:
+            next_default = db.query(VendorPaymentMethod).filter(
+                VendorPaymentMethod.vendor_id == vendor_id,
+                VendorPaymentMethod.is_deleted == False,
+                VendorPaymentMethod.vendor_payment_method_id != method_id,
+            ).order_by(VendorPaymentMethod.created_at.desc()).first()
+
+            if next_default:
+                next_default.is_default = True
+
+        db.commit()
+
+        return {"message": "Payment method deleted successfully"}
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete payment method: {str(e)}")
 
 
 # =====================================================

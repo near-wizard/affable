@@ -49,7 +49,9 @@ from app.models.billing import (
     GMVFee,
     GMVConversion,
     InvoiceAdjustment,
-    PaymentTransaction
+    PaymentTransaction,
+    VendorPaymentMethod,
+    PaymentProviderEnum
 )
 
 __all__ = [
@@ -110,4 +112,6 @@ __all__ = [
     "GMVConversion",
     "InvoiceAdjustment",
     "PaymentTransaction",
+    "VendorPaymentMethod",
+    "PaymentProviderEnum",
 ]

@@ -6,8 +6,10 @@ Handles campaign CRUD, partner enrollments, and approvals.
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, selectinload
+from sqlalchemy import func
 from typing import List, Optional
 from datetime import datetime
+from decimal import Decimal
 
 from app.core.database import get_db
 from app.core.deps import get_current_user, get_current_partner, get_current_vendor_user, require_vendor_role
@@ -29,7 +31,7 @@ from app.schemas.campaign import (
 )
 from app.models import (
     Campaign, CampaignVersion, CampaignPartner, Partner, VendorUser,
-    PartnerCampaignOverride
+    PartnerCampaignOverride, Click, ConversionEvent, PartnerLink
 )
 
 router = APIRouter()
@@ -465,9 +467,34 @@ def get_campaign_partners(
     # Paginate
     enrollments = query.offset((page - 1) * limit).limit(limit).all()
 
-    # Build response
-    partners = [
-        CampaignPartnerResponse(
+    # Build response with calculated stats
+    partners = []
+    for e in enrollments:
+        # Calculate stats from clicks and conversions
+        clicks_count = db.query(func.count(Click.click_id)).join(
+            PartnerLink, Click.partner_link_id == PartnerLink.partner_link_id
+        ).filter(
+            PartnerLink.campaign_partner_id == e.campaign_partner_id
+        ).scalar() or 0
+
+        conversions_data = db.query(
+            func.count(ConversionEvent.conversion_event_id).label('count'),
+            func.sum(ConversionEvent.event_value).label('total_value'),
+            func.max(ConversionEvent.occurred_at).label('last_conversion_at')
+        ).filter(
+            ConversionEvent.campaign_version_id == e.campaign_version_id,
+            ConversionEvent.partner_id == e.partner_id,
+            ConversionEvent.status.in_(['approved', 'pending'])
+        ).first()
+
+        conversions_count = conversions_data.count or 0
+        total_revenue = Decimal(str(conversions_data.total_value or 0))
+        last_conversion_at = conversions_data.last_conversion_at
+
+        # TODO: Calculate commission earned (would need commission structure)
+        total_commission = Decimal(0)
+
+        partners.append(CampaignPartnerResponse(
             campaign_partner_id=e.campaign_partner_id,
             campaign_version_id=e.campaign_version_id,
             partner_id=e.partner_id,
@@ -480,15 +507,13 @@ def get_campaign_partners(
             approved_at=e.approved_at,
             rejected_at=e.rejected_at,
             rejection_reason=e.rejection_reason,
-            total_clicks=e.total_clicks,
-            total_conversions=e.total_conversions,
-            total_revenue=e.total_revenue,
-            total_commission_earned=e.total_commission_earned,
+            total_clicks=clicks_count,
+            total_conversions=conversions_count,
+            total_revenue=float(total_revenue),
+            total_commission_earned=float(total_commission),
             last_click_at=e.last_click_at,
-            last_conversion_at=e.last_conversion_at
-        )
-        for e in enrollments
-    ]
+            last_conversion_at=last_conversion_at
+        ))
 
     return CampaignPartnerListResponse(
         data=partners,

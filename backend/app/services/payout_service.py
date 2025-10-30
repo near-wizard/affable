@@ -1,11 +1,13 @@
 """
 Payout Service
 
-Handles payout generation and processing.
+Handles payout generation and processing with support for multiple payment providers
+including Stripe Connect and manual payment methods.
 """
 
+import logging
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 from decimal import Decimal
 
@@ -14,6 +16,13 @@ from app.models import (
     PartnerPaymentMethod, PaymentProvider
 )
 from app.core.exceptions import NotFoundException, BadRequestException, ConflictException
+from app.services.payout_processor import (
+    PayoutProcessorFactory,
+    PayoutRequest,
+    PayoutStatus,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class PayoutService:
@@ -385,3 +394,263 @@ class PayoutService:
         ).scalar()
         
         return result or Decimal('0')
+
+    @staticmethod
+    def process_payout_with_provider(
+        db: Session,
+        payout_id: int,
+        processor_config: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Process a payout using the appropriate payment provider.
+
+        Handles routing to Stripe Connect for Stripe-connected partners,
+        or manual processing for other payment methods.
+
+        Args:
+            db: Database session
+            payout_id: Payout ID to process
+            processor_config: Optional custom processor configuration
+
+        Returns:
+            Dictionary with processing result
+
+        Raises:
+            NotFoundException: If payout or payment method not found
+            BadRequestException: If payout cannot be processed
+        """
+        payout = db.query(Payout).filter(
+            Payout.payout_id == payout_id,
+            Payout.is_deleted == False
+        ).first()
+
+        if not payout:
+            raise NotFoundException("Payout not found")
+
+        if payout.status != 'pending':
+            raise BadRequestException(f"Payout is already {payout.status}")
+
+        # Get payment method and provider info
+        payment_method = db.query(PartnerPaymentMethod).filter(
+            PartnerPaymentMethod.partner_payment_method_id == payout.partner_payment_method_id
+        ).first()
+
+        if not payment_method:
+            raise NotFoundException("Payment method not found")
+
+        provider = db.query(PaymentProvider).filter(
+            PaymentProvider.payment_provider_id == payout.payment_provider_id
+        ).first()
+
+        if not provider:
+            raise NotFoundException("Payment provider not found")
+
+        try:
+            # Mark as processing
+            payout.process()
+            db.commit()
+
+            # Create processor based on payment provider
+            processor_name = provider.name.lower()
+            config = processor_config or (provider.config or {})
+
+            # Ensure processor is registered (import if needed)
+            if processor_name == "stripe":
+                # Use Stripe Connect processor
+                from app.services.stripe_connect_processor import StripeConnectProcessor
+                processor_name = "stripe_connect"
+
+            processor = PayoutProcessorFactory.create_processor(processor_name, config)
+
+            # Build payout request
+            payout_request = PayoutRequest(
+                payout_id=payout_id,
+                partner_id=payout.partner_id,
+                amount=payout.amount,
+                currency=payout.currency,
+                provider_account_id=payment_method.provider_account_id,
+                description=f"Commission payout for period {payout.start_date.date()} to {payout.end_date.date()}",
+                metadata={
+                    "start_date": payout.start_date.isoformat(),
+                    "end_date": payout.end_date.isoformat(),
+                }
+            )
+
+            # Process payout with provider
+            result = processor.process_payout(payout_request)
+
+            # Update payout with result
+            if result.success:
+                payout.provider_transaction_id = result.provider_transaction_id
+                payout.provider_response = result.raw_response
+
+                # If provider returns completed status, mark as complete
+                if result.status == PayoutStatus.COMPLETED:
+                    payout.complete(result.provider_transaction_id or "")
+                    # Mark conversions as paid
+                    conversions = db.query(ConversionEvent).join(PayoutEvent).filter(
+                        PayoutEvent.payout_id == payout_id
+                    ).all()
+                    for conversion in conversions:
+                        conversion.mark_paid()
+                # Otherwise keep as processing
+
+                db.commit()
+
+                logger.info(
+                    f"Successfully processed payout {payout_id} via {processor_name}: "
+                    f"{result.provider_transaction_id}"
+                )
+
+                return {
+                    "success": True,
+                    "payout_id": payout_id,
+                    "status": payout.status,
+                    "provider_transaction_id": result.provider_transaction_id,
+                    "message": f"Payout processing initiated via {provider.display_name}"
+                }
+            else:
+                # Mark as failed
+                payout.fail(result.error_message or "Provider processing failed")
+                payout.provider_response = result.raw_response
+                db.commit()
+
+                logger.error(
+                    f"Failed to process payout {payout_id}: {result.error_message}"
+                )
+
+                return {
+                    "success": False,
+                    "payout_id": payout_id,
+                    "status": "failed",
+                    "error": result.error_message,
+                    "message": f"Failed to process payout: {result.error_message}"
+                }
+
+        except Exception as e:
+            # Mark as failed
+            payout.fail(str(e))
+            db.commit()
+
+            logger.error(f"Unexpected error processing payout {payout_id}: {str(e)}")
+
+            return {
+                "success": False,
+                "payout_id": payout_id,
+                "status": "failed",
+                "error": str(e),
+                "message": f"Unexpected error: {str(e)}"
+            }
+
+    @staticmethod
+    def process_multiple_payouts(
+        db: Session,
+        payout_ids: List[int],
+        processor_config: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Process multiple payouts in batch.
+
+        Args:
+            db: Database session
+            payout_ids: List of payout IDs to process
+            processor_config: Optional custom processor configuration
+
+        Returns:
+            Dictionary with batch processing results
+        """
+        results = {
+            "total": len(payout_ids),
+            "successful": 0,
+            "failed": 0,
+            "payouts": []
+        }
+
+        for payout_id in payout_ids:
+            try:
+                result = PayoutService.process_payout_with_provider(
+                    db, payout_id, processor_config
+                )
+                results["payouts"].append(result)
+
+                if result.get("success"):
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+
+            except Exception as e:
+                results["failed"] += 1
+                results["payouts"].append({
+                    "payout_id": payout_id,
+                    "success": False,
+                    "error": str(e)
+                })
+
+        return results
+
+    @staticmethod
+    def check_payout_status(
+        db: Session,
+        payout_id: int,
+        processor_config: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Check the current status of a payout from the payment provider.
+
+        Args:
+            db: Database session
+            payout_id: Payout ID to check
+            processor_config: Optional custom processor configuration
+
+        Returns:
+            Dictionary with payout status information
+        """
+        payout = db.query(Payout).filter(
+            Payout.payout_id == payout_id,
+            Payout.is_deleted == False
+        ).first()
+
+        if not payout:
+            raise NotFoundException("Payout not found")
+
+        if not payout.provider_transaction_id:
+            return {
+                "payout_id": payout_id,
+                "status": payout.status,
+                "message": "Payout has not been sent to provider yet"
+            }
+
+        # Get provider info
+        provider = db.query(PaymentProvider).filter(
+            PaymentProvider.payment_provider_id == payout.payment_provider_id
+        ).first()
+
+        if not provider:
+            raise NotFoundException("Payment provider not found")
+
+        try:
+            # Create processor
+            processor_name = provider.name.lower()
+            if processor_name == "stripe":
+                from app.services.stripe_connect_processor import StripeConnectProcessor
+                processor_name = "stripe_connect"
+
+            config = processor_config or (provider.config or {})
+            processor = PayoutProcessorFactory.create_processor(processor_name, config)
+
+            # Check status with provider
+            status_info = processor.retrieve_payout_status(payout.provider_transaction_id)
+
+            return {
+                "payout_id": payout_id,
+                "internal_status": payout.status,
+                "provider_status": status_info
+            }
+
+        except Exception as e:
+            logger.error(f"Error checking payout status: {str(e)}")
+            return {
+                "payout_id": payout_id,
+                "internal_status": payout.status,
+                "error": str(e)
+            }

@@ -142,21 +142,45 @@ export default function VendorPayouts() {
           </div>
 
           {/* Filters */}
-          <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="flex items-center gap-4">
-              <Filter size={20} className="text-gray-400" />
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Status</option>
-                <option value="completed">Completed</option>
-                <option value="processing">Processing</option>
-                <option value="failed">Failed</option>
-              </select>
+          {payouts.length > 0 && (
+            <div className="bg-white rounded-lg shadow p-4 mb-6">
+              <div className="flex items-center gap-4 flex-wrap">
+                <Filter size={20} className="text-gray-400" />
+                <button
+                  onClick={() => setStatusFilter('all')}
+                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                    statusFilter === 'all'
+                      ? 'bg-blue-600 text-white'
+                      : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  All ({payouts.length})
+                </button>
+                {(() => {
+                  const statuses = ['completed', 'processing', 'pending', 'failed'];
+                  const counts = {};
+                  statuses.forEach(status => {
+                    counts[status] = payouts.filter(p => p.status === status).length;
+                  });
+                  return statuses
+                    .filter(status => counts[status] > 0)
+                    .map(status => (
+                      <button
+                        key={status}
+                        onClick={() => setStatusFilter(status)}
+                        className={`px-4 py-2 rounded-lg font-medium transition ${
+                          statusFilter === status
+                            ? 'bg-blue-600 text-white'
+                            : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {status.charAt(0).toUpperCase() + status.slice(1)} ({counts[status]})
+                      </button>
+                    ));
+                })()}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* View Full History */}
           <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-8 text-center">

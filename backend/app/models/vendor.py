@@ -24,6 +24,8 @@ class Vendor(BaseModel):
     users = relationship("VendorUser", back_populates="vendor")
     campaigns = relationship("Campaign", back_populates="vendor")
     
+    payout_schedules = relationship("PayoutSchedule", back_populates="vendor")
+
     def __repr__(self):
         return f"<Vendor {self.name} ({self.email})>"
 

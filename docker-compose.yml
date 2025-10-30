@@ -11,7 +11,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-affuser}"]
+      test:
+        [
+          "CMD-SHELL",
+          "echo Checking with user ${POSTGRES_USER:-affuser} db ${POSTGRES_DB:-affdb} && pg_isready -U ${POSTGRES_USER:-affuser}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -45,7 +49,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-affuser}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-affpass}
       - POSTGRES_DB=${POSTGRES_DB:-affdb}
-      - DATABASE_URL=${DATABASE_URL:-postgresql://affuser:affpass@postgres:5432/affdb}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://affuser:affpass@aff_postgres:5432/affdb}
       - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
       - INIT_SAMPLE_DATA=true
     volumes:
@@ -61,7 +65,7 @@ services:
     #    - Populates with sample vendors, partners, campaigns, links, clicks, and conversions
     #    - Only runs if database is empty (idempotent)
     # 2. uvicorn app.main:app - Start the FastAPI development server with auto-reload
-    command: sh -c "python scripts/seed_data.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: sh -c "sleep 30 && python scripts/init_db.py && scripts/seed_data.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     networks:
       - affable-network
     restart: unless-stopped
@@ -71,7 +75,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: aff_celery
-    entrypoint: ["celery", "-A", "app.workers.celery_app", "worker", "-l", "info"]
+    entrypoint:
+      ["celery", "-A", "app.workers.celery_app", "worker", "-l", "info"]
     env_file:
       - .env.dev
     environment:

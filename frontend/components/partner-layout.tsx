@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, ChevronDown, LogOut, Settings, User } from "lucide-react"
+import { Menu, ChevronDown, LogOut, Settings, User, LayoutDashboard, Megaphone, Link as LinkIcon, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { clearAuthCredentials, getUserEmail } from "@/lib/auth-utils"
@@ -9,20 +9,22 @@ import { clearAuthCredentials, getUserEmail } from "@/lib/auth-utils"
 interface MenuItem {
   name: string
   path?: string
+  icon?: React.ReactNode
   children?: MenuItem[]
 }
 
 const links: MenuItem[] = [
-  { name: "Dashboard", path: "/partner/dashboard" },
+  { name: "Dashboard", icon: <LayoutDashboard size={18} />, path: "/partner/dashboard" },
   {
     name: "Campaigns",
+    icon: <Megaphone size={18} />,
     children: [
       { name: "Current Campaigns", path: "/partner/campaigns/current" },
       { name: "Find Campaigns", path: "/partner/campaigns/find" },
     ],
   },
-  { name: "Links", path: "/partner/links" },
-  { name: "Earnings", path: "/partner/earnings" },
+  { name: "Links", icon: <LinkIcon size={18} />, path: "/partner/links" },
+  { name: "Earnings", icon: <TrendingUp size={18} />, path: "/partner/earnings" },
 ]
 
 export default function PartnerLayout({ children }: { children: React.ReactNode }) {
@@ -103,7 +105,10 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
                       isActive ? "bg-gray-200 font-semibold" : ""
                     }`}
                   >
-                    <span>{link.name}</span>
+                    <div className="flex items-center gap-2">
+                      {link.icon}
+                      <span>{link.name}</span>
+                    </div>
                     <ChevronDown
                       size={16}
                       className={`transition-transform duration-200 ${
@@ -137,11 +142,12 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
               <Link
                 key={link.path}
                 href={link.path!}
-                className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                className={`flex items-center gap-2 p-2 rounded hover:bg-gray-100 transition-colors ${
                   isActive ? "bg-gray-200 font-semibold" : ""
                 }`}
                 onClick={() => setIsOpen(false)}
               >
+                {link.icon}
                 {link.name}
               </Link>
             )

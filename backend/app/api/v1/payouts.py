@@ -6,7 +6,7 @@ Handles payout generation and processing.
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 from app.core.database import get_db
@@ -23,6 +23,7 @@ from app.schemas.payout import (
 )
 from app.models import Partner, VendorUser, Payout, PaymentProvider, PartnerPaymentMethod
 from app.services.payout_service import PayoutService
+from app.core.exceptions import NotFoundException, BadRequestException
 
 router = APIRouter()
 
@@ -244,11 +245,11 @@ def process_payout(
 ):
     """
     Process a payout (send to payment provider).
-    
+
     Requires owner or admin role.
     """
     payout = PayoutService.process_payout(db, payout_id)
-    
+
     return PayoutResponse(
         payout_id=payout.payout_id,
         partner_id=payout.partner_id,
@@ -268,3 +269,79 @@ def process_payout(
         failed_at=payout.failed_at,
         failure_reason=payout.failure_reason
     )
+
+
+# Enhanced payout processing endpoints with multi-provider support
+
+
+@router.post("/{payout_id}/process-with-provider", response_model=Dict[str, Any])
+def process_payout_with_provider(
+    payout_id: int,
+    vendor_user: VendorUser = Depends(require_vendor_role(['owner', 'admin'])),
+    db: Session = Depends(get_db)
+):
+    """
+    Process a payout using the payment provider (Stripe Connect, manual wire, etc).
+
+    This endpoint handles intelligent routing to the appropriate payment processor:
+    - Stripe: Uses Stripe Connect to send payouts to connected accounts
+    - Manual: Creates a processing record for manual wire transfer/check
+    - PayPal: (Future) Uses PayPal Payouts API
+
+    Requires owner or admin role.
+    """
+    try:
+        result = PayoutService.process_payout_with_provider(db, payout_id)
+        return result
+    except (NotFoundException, BadRequestException) as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+
+
+@router.post("/batch-process", response_model=Dict[str, Any])
+def process_multiple_payouts(
+    payout_ids: List[int],
+    vendor_user: VendorUser = Depends(require_vendor_role(['owner'])),
+    db: Session = Depends(get_db)
+):
+    """
+    Process multiple payouts in batch.
+
+    Useful for monthly payout runs. Routes each payout to its configured provider.
+
+    Requires owner role.
+    """
+    if not payout_ids:
+        raise HTTPException(status_code=400, detail="No payout IDs provided")
+
+    if len(payout_ids) > 100:
+        raise HTTPException(status_code=400, detail="Maximum 100 payouts per batch")
+
+    result = PayoutService.process_multiple_payouts(db, payout_ids)
+    return result
+
+
+@router.get("/{payout_id}/status", response_model=Dict[str, Any])
+def check_payout_status(
+    payout_id: int,
+    vendor_user: VendorUser = Depends(require_vendor_role(['owner', 'admin'])),
+    db: Session = Depends(get_db)
+):
+    """
+    Check the current status of a payout from the payment provider.
+
+    Retrieves real-time status from:
+    - Stripe: Live payout status
+    - Manual: Processing record status
+    - PayPal: (Future) PayPal payout status
+
+    Requires owner or admin role.
+    """
+    try:
+        result = PayoutService.check_payout_status(db, payout_id)
+        return result
+    except NotFoundException as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Status check failed: {str(e)}")

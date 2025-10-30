@@ -12,6 +12,7 @@ class SubscriptionPlanEnum(str, Enum):
     """Available subscription plans."""
     BETA = "beta"
     FOUNDER = "founder"
+    BOOTSTRAP = "bootstrap"
     ACCELERATOR = "accelerator"
 
 
@@ -46,7 +47,8 @@ class SubscriptionPlan(BaseModel):
     __tablename__ = "subscription_plans"
 
     subscription_plan_id = Column(Integer, primary_key=True, index=True)
-    plan_name = Column(SQLEnum(SubscriptionPlanEnum), unique=True, nullable=False, index=True)
+    plan_name = Column(SQLEnum(SubscriptionPlanEnum), nullable=False, index=True)
+    # Note: plan_name is NOT unique anymore to allow multiple custom plans with same enum value
     display_name = Column(String(100), nullable=False)
     description = Column(Text)
 
@@ -60,8 +62,13 @@ class SubscriptionPlan(BaseModel):
     has_usage_limits = Column(Boolean, default=False)
     max_monthly_volume = Column(Numeric(12, 2), nullable=True)  # If has_usage_limits is True
 
+    # Custom plan tracking
+    is_custom = Column(Boolean, default=False)  # True for negotiated/custom plans
+    custom_for_vendor_id = Column(Integer, ForeignKey("vendors.vendor_id", ondelete="SET NULL"), nullable=True, index=True)  # If custom plan for specific vendor
+
     # Relationships
     subscriptions = relationship("VendorSubscription", back_populates="plan")
+    custom_for_vendor = relationship("Vendor", foreign_keys=[custom_for_vendor_id])
 
     def __repr__(self):
         return f"<SubscriptionPlan {self.plan_name} - ${self.base_price} + {self.gmv_percentage}%>"
@@ -391,3 +398,50 @@ class BillingReport(BaseModel):
 
     def __repr__(self):
         return f"<BillingReport {self.report_month} MRR=${self.total_mrr}>"
+
+
+class PaymentProviderEnum(str, Enum):
+    """Available payment providers for vendors."""
+    STRIPE = "stripe"
+    ACH = "ach"
+    WIRE_TRANSFER = "wire_transfer"
+    PAYPAL = "paypal"
+
+
+class VendorPaymentMethod(BaseModel):
+    """Payment method for vendors to pay their subscription invoices."""
+
+    __tablename__ = "vendor_payment_methods"
+
+    vendor_payment_method_id = Column(Integer, primary_key=True, index=True)
+    vendor_id = Column(Integer, ForeignKey("vendors.vendor_id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Payment provider
+    payment_provider = Column(SQLEnum(PaymentProviderEnum), nullable=False, index=True)
+
+    # Provider-specific account identifier
+    provider_account_id = Column(String(255), nullable=False)  # Stripe token, PayPal email, ACH account, etc.
+
+    # Provider-specific details (stored as JSON for flexibility)
+    account_details = Column(JSON, nullable=True)  # Bank name, last 4 digits, account type, etc.
+
+    # Default payment method flag (only one per vendor should be default)
+    is_default = Column(Boolean, default=False, index=True)
+
+    # Verification status
+    is_verified = Column(Boolean, default=False)
+    verified_at = Column(DateTime, nullable=True)
+
+    # Soft delete
+    is_deleted = Column(Boolean, default=False, index=True)
+    deleted_at = Column(DateTime, nullable=True)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    # Relationships
+    vendor = relationship("Vendor", foreign_keys=[vendor_id])
+
+    def __repr__(self):
+        return f"<VendorPaymentMethod vendor={self.vendor_id} provider={self.payment_provider} default={self.is_default}>"
