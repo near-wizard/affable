@@ -31,31 +31,31 @@ export function LandingNav() {
 					<div className="hidden md:flex items-center gap-8">
 						<Link
 							href="#features"
-							className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+							className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors "
 						>
 							Features
 						</Link>
 						<Link
 							href="#pricing"
-							className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+							className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors"
 						>
 							Pricing
 						</Link>
 						<Link
 							href="/marketplace"
-							className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+							className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors"
 						>
 							Marketplace
 						</Link>
 						<Link
 							href="/desktop"
-							className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+							className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors"
 						>
 							Platform
 						</Link>
 						<a
 							href="#faq"
-							className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+							className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors"
 						>
 							FAQ
 						</a>

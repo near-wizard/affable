@@ -29,12 +29,12 @@ export function LandingSocialProof() {
 
 	const trustedByLogos = [
 		{
-			src: "images/logos/affablelink.png",
+			src: "/images/logos/affablelink.png",
 			companyName: "Affable Link",
 			link: "https://affablelink.com/",
 		},
 		{
-			src: "images/logos/tightstudio.png",
+			src: "/images/logos/tightstudio.png",
 			companyName: "Tight Studio",
 			link: "https://tight.studio/",
 		},
