@@ -22,6 +22,10 @@ from app.models import (
     Click, Cookie, ConversionEvent, ConversionEventType,
     PaymentProvider, Payout, Reward, CommissionRule
 )
+from app.models.billing import (
+    SubscriptionPlan, VendorSubscription, VendorInvoice, VendorInvoiceItem,
+    GMVFee, GMVConversion, InvoiceAdjustment, PaymentTransaction
+)
 
 
 # =====================================================
@@ -278,6 +282,26 @@ def reward(db_session):
     db_session.commit()
     db_session.refresh(reward)
     return reward
+
+
+@pytest.fixture
+def conversion_event(db_session, partner, campaign_version, conversion_event_type):
+    """Create test conversion event."""
+    event = ConversionEvent(
+        conversion_event_type_id=conversion_event_type.conversion_event_type_id,
+        partner_id=partner.partner_id,
+        campaign_version_id=campaign_version.campaign_version_id,
+        attribution_type="last_click",
+        transaction_id=f"txn_{uuid.uuid4().hex[:8]}",
+        event_value=Decimal("100.00"),
+        status="pending",
+        occurred_at=datetime.utcnow(),
+        recorded_at=datetime.utcnow()
+    )
+    db_session.add(event)
+    db_session.commit()
+    db_session.refresh(event)
+    return event
 
 
 # =====================================================

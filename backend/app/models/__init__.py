@@ -37,6 +37,20 @@ from app.models.payout import (
     PayoutEvent,
     AuditLog
 )
+from app.models.billing import (
+    SubscriptionPlan,
+    SubscriptionPlanEnum,
+    BillingCycleEnum,
+    SubscriptionStatus,
+    InvoiceStatus,
+    VendorSubscription,
+    VendorInvoice,
+    VendorInvoiceItem,
+    GMVFee,
+    GMVConversion,
+    InvoiceAdjustment,
+    PaymentTransaction
+)
 
 __all__ = [
     # Base
@@ -82,4 +96,18 @@ __all__ = [
     "Payout",
     "PayoutEvent",
     "AuditLog",
+
+    # Billing
+    "SubscriptionPlan",
+    "SubscriptionPlanEnum",
+    "BillingCycleEnum",
+    "SubscriptionStatus",
+    "InvoiceStatus",
+    "VendorSubscription",
+    "VendorInvoice",
+    "VendorInvoiceItem",
+    "GMVFee",
+    "GMVConversion",
+    "InvoiceAdjustment",
+    "PaymentTransaction",
 ]
