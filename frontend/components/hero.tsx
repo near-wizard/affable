@@ -52,13 +52,13 @@ export function Hero() {
 					</p>
 
 					<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-						<Link href="/desktop">
+						<Link href="https://forms.gle/pNzSb5knWpV6eSFP7" target="_blank">
 							<Button size="lg" className="group">
 								Get Started Free
 								<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
 							</Button>
 						</Link>
-						<Link href="/desktop">
+						<Link href="/demo">
 							<Button size="lg" variant="outline">
 								View Platform
 							</Button>
