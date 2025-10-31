@@ -486,10 +486,13 @@ def get_campaign_partners(
             func.count(ConversionEvent.conversion_event_id).label('count'),
             func.sum(ConversionEvent.event_value).label('total_value'),
             func.max(ConversionEvent.occurred_at).label('last_conversion_at')
+        ).join(
+            Click, ConversionEvent.click_id == Click.click_id
+        ).join(
+            PartnerLink, Click.partner_link_id == PartnerLink.partner_link_id
         ).filter(
-            ConversionEvent.campaign_version_id == e.campaign_version_id,
-            ConversionEvent.partner_id == e.partner_id,
-            ConversionEvent.status.in_(['approved', 'pending'])
+            PartnerLink.campaign_partner_id == e.campaign_partner_id,
+            ConversionEvent.status == 'approved'
         ).first()
 
         conversions_count = conversions_data.count or 0

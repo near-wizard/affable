@@ -136,7 +136,7 @@ export default function CampaignDetailsPage() {
 										<span className="text-sm text-muted-foreground">Partners</span>
 										<Users size={16} className="text-primary" />
 									</div>
-									<p className="text-2xl font-bold text-foreground">{campaign.partner_count || 0}</p>
+									<p className="text-2xl font-bold text-foreground">{campaign.total_partners || 0}</p>
 								</div>
 								<div className="bg-card rounded-lg p-4 border border-border">
 									<div className="flex items-center justify-between mb-2">
@@ -246,13 +246,13 @@ export default function CampaignDetailsPage() {
 							</button>
 						</div>
 
-						{campaign.partner_count === 0 ? (
+						{campaign.total_partners === 0 ? (
 							<EmptyState
 								title="No partners yet"
 								description="This campaign doesn't have any partners enrolled. Invite partners to grow your reach!"
 							/>
 						) : (
-							<p className="text-muted-foreground">Partners content would load here. Total: {campaign.partner_count}</p>
+							<p className="text-muted-foreground">Partners content would load here. Total: {campaign.total_partners}</p>
 						)}
 					</div>
 				)}
@@ -268,21 +268,15 @@ export default function CampaignDetailsPage() {
 								</p>
 							</div>
 							<div className="bg-card rounded-lg p-6 border border-border">
-								<span className="text-sm text-muted-foreground">Click Through Rate</span>
+								<span className="text-sm text-muted-foreground">Total Clicks</span>
 								<p className="text-3xl font-bold text-secondary mt-2">
-									{campaign.total_clicks && campaign.impressions
-										? ((campaign.total_clicks / campaign.impressions) * 100).toFixed(2)
-										: "0"}
-									%
+									{(campaign.total_clicks || 0).toLocaleString()}
 								</p>
 							</div>
 							<div className="bg-card rounded-lg p-6 border border-border">
 								<span className="text-sm text-muted-foreground">Conversion Rate</span>
 								<p className="text-3xl font-bold text-accent mt-2">
-									{campaign.total_clicks && campaign.total_conversions
-										? ((campaign.total_conversions / campaign.total_clicks) * 100).toFixed(2)
-										: "0"}
-									%
+									{campaign.conversion_rate || 0}%
 								</p>
 							</div>
 							<div className="bg-card rounded-lg p-6 border border-border">

@@ -252,7 +252,7 @@ def get_vendor_dashboard(
 
     total_clicks = campaign_stats.total_clicks if campaign_stats else 0
     total_conversions = campaign_stats.total_conversions if campaign_stats else 0
-    total_revenue = campaign_stats.total_revenue if campaign_stats else Decimal('0')
+    total_revenue = campaign_stats.total_revenue if campaign_stats and campaign_stats.total_revenue else Decimal('0')
 
     # Get payout stats through campaign relationships
     payouts = []
