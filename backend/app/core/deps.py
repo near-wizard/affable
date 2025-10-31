@@ -10,7 +10,7 @@ from app.models.vendor import Vendor, VendorUser
 from app.core.exceptions import UnauthorizedException, ForbiddenException
 
 # Security scheme
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 
 def get_current_user(

@@ -785,3 +785,42 @@ def get_vendor_payouts(
         "limit": limit,
         "total_pages": (total + limit - 1) // limit
     }
+
+# Webhook Management Endpoints
+
+@router.get("/me/webhook-secret")
+def get_webhook_secret(
+    vendor_user: VendorUser = Depends(get_current_vendor_user),
+    db: Session = Depends(get_db)
+):
+    """Get current webhook secret for vendor."""
+    vendor = vendor_user.vendor
+
+    # Generate secret if it doesn't exist
+    if not vendor.webhook_secret:
+        import secrets
+        vendor.webhook_secret = secrets.token_urlsafe(32)
+        db.commit()
+
+    return {
+        "webhook_secret": vendor.webhook_secret,
+        "webhook_url": "https://yourdomain.com/webhooks/conversion"
+    }
+
+
+@router.post("/me/webhook-secret/regenerate")
+def regenerate_webhook_secret(
+    vendor_user: VendorUser = Depends(get_current_vendor_user),
+    db: Session = Depends(get_db)
+):
+    """Regenerate webhook secret (old secret will no longer work)."""
+    vendor = vendor_user.vendor
+
+    import secrets
+    vendor.webhook_secret = secrets.token_urlsafe(32)
+    db.commit()
+
+    return {
+        "webhook_secret": vendor.webhook_secret,
+        "message": "New webhook secret generated. Update your integration immediately."
+    }

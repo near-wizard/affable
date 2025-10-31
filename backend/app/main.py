@@ -8,7 +8,7 @@ import logging
 
 from app.config import settings
 from app.core.database import engine, Base
-from app.api.v1 import auth, partners, vendors, campaigns, links, tracking, conversions, payouts, webhooks, billing, payout_management, partner_payouts
+from app.api.v1 import auth, partners, vendors, campaigns, links, tracking, conversions, payouts, webhooks, billing, payout_management, partner_payouts, bug_reports
 
 # Configure logging
 logging.basicConfig(
@@ -92,6 +92,7 @@ app.include_router(payout_management.router, prefix=f"/{settings.API_VERSION}/pa
 app.include_router(partner_payouts.router, prefix=f"/{settings.API_VERSION}/partner-payouts", tags=["Partner Payouts"])
 app.include_router(webhooks.router, prefix=f"/{settings.API_VERSION}/webhooks", tags=["Webhooks"])
 app.include_router(billing.router, prefix=f"/{settings.API_VERSION}/billing", tags=["Billing"])
+app.include_router(bug_reports.router, prefix=f"/{settings.API_VERSION}/bug-reports", tags=["Bug Reports"])
 app.include_router(tracking.router, tags=["Tracking"])  # No prefix for short URLs
 
 # Startup event

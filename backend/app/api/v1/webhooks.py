@@ -188,3 +188,68 @@ def test_webhook():
         "message": "Webhook endpoint is working",
         "timestamp": datetime.utcnow().isoformat()
     }
+
+@router.post("/test")
+async def test_webhook_signature(
+    request: Request,
+    x_hub_signature: str = Header(None),
+    db: Session = Depends(get_db)
+):
+    """
+    Test webhook endpoint - vendors can send test payloads here
+    to verify their signature generation is correct.
+    
+    Returns success if signature is valid, error otherwise.
+    """
+    body = await request.body()
+    payload = await request.json()
+
+    # Get vendor from payload
+    vendor_id = payload.get('vendor_id')
+    if not vendor_id:
+        return {
+            "status": "failed",
+            "error": "vendor_id is required in payload"
+        }
+
+    # Verify signature
+    vendor = db.query(Vendor).filter(
+        Vendor.vendor_id == vendor_id,
+        Vendor.is_deleted == False
+    ).first()
+
+    if not vendor:
+        return {
+            "status": "failed",
+            "error": "Vendor not found"
+        }
+
+    if not vendor.webhook_secret:
+        return {
+            "status": "failed",
+            "error": "No webhook secret configured",
+            "help": "Go to Settings → Integration and generate a webhook secret"
+        }
+
+    if not x_hub_signature:
+        return {
+            "status": "failed",
+            "error": "Missing X-Hub-Signature header",
+            "help": "Include the header: X-Hub-Signature: sha256=<your-hmac-signature>"
+        }
+
+    # Verify signature
+    if not verify_hmac_signature(body, x_hub_signature, vendor.webhook_secret):
+        return {
+            "status": "failed",
+            "error": "Invalid signature",
+            "help": "Make sure you're using the correct webhook secret and signing the entire request body as-is. Don't minify or reformat the JSON."
+        }
+
+    # Signature is valid!
+    return {
+        "status": "success",
+        "message": "Webhook signature is valid! You're ready to send conversions.",
+        "received_payload": payload,
+        "timestamp": datetime.utcnow().isoformat()
+    }

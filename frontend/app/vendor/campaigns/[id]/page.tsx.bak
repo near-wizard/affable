@@ -235,46 +235,26 @@ export default function CampaignDetailsPage() {
 				)}
 
 				{activeTab === "partners" && (
-					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-						<div className="lg:col-span-2">
-							<div className="flex items-center justify-between mb-6">
-								<h2 className="text-2xl font-bold text-foreground">Campaign Partners</h2>
-								{campaign.total_partners > 0 && (
-									<button
-										onClick={() => router.push(`/vendor/campaigns/${campaignId}/partners`)}
-										className="flex items-center gap-2 px-4 py-2 border border-blueberry bg-primary/100 text-white rounded-lg hover:bg-primary/90 transition"
-									>
-										<Users size={16} />
-										Manage All Partners
-									</button>
-								)}
-							</div>
-
-							{campaign.total_partners === 0 ? (
-								<EmptyState
-									title="No partners yet"
-									description="This campaign doesn't have any partners enrolled. Invite partners to grow your reach!"
-								/>
-							) : (
-								<div className="bg-card rounded-lg p-6 border border-border">
-									<p className="text-muted-foreground">Total partners: {campaign.total_partners}</p>
-									<p className="text-sm text-muted-foreground mt-2">
-										View and manage all partners on the Partners page.
-									</p>
-								</div>
-							)}
+					<div>
+						<div className="flex items-center justify-between mb-6">
+							<h2 className="text-2xl font-bold text-foreground">Campaign Partners</h2>
+							<button
+								onClick={() => router.push(`/vendor/campaigns/${campaignId}/partners`)}
+								className="flex items-center gap-2 px-4 py-2 border border-blueberry bg-primary/100 text-white rounded-lg hover:bg-primary/90 transition"
+							>
+								<Users size={16} />
+								Manage Partners
+							</button>
 						</div>
 
-						{/* Invitation Form Sidebar */}
-						<div>
-							<PartnerInvitationForm
-								campaignId={campaignId}
-								campaignName={campaign.name}
-								onSuccess={() => {
-									// Optionally refresh campaign data here
-								}}
+						{campaign.total_partners === 0 ? (
+							<EmptyState
+								title="No partners yet"
+								description="This campaign doesn't have any partners enrolled. Invite partners to grow your reach!"
 							/>
-						</div>
+						) : (
+							<p className="text-muted-foreground">Partners content would load here. Total: {campaign.total_partners}</p>
+						)}
 					</div>
 				)}
 

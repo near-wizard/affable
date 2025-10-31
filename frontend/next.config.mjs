@@ -23,6 +23,17 @@ const nextConfig = {
       }
     ]
   },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // Proxy API requests to backend
+        {
+          source: '/v1/:path*',
+          destination: 'http://localhost:8000/v1/:path*',
+        }
+      ],
+    }
+  },
 }
 
 export default nextConfig

@@ -38,9 +38,11 @@ from app.models import (
     Campaign, CampaignVersion, CampaignPartner, Partner, VendorUser,
     PartnerCampaignOverride, Click, ConversionEvent, PartnerLink, PartnerInvitation
 )
+import asyncio
 
 router = APIRouter()
 
+from app.config import settings
 
 @router.get("", response_model=CampaignListResponse)
 def list_campaigns(
@@ -696,6 +698,43 @@ def invite_partner_to_campaign(
     db.add(invitation)
     db.commit()
     db.refresh(invitation)
+
+    # Send invitation email asynchronously (fire and forget)
+    try:
+        campaign_version = campaign.current_version
+        vendor = vendor_user.vendor
+
+        # Format commission description based on campaign type
+        if campaign_version.commission_type == "percentage":
+            commission_desc = f"{campaign_version.commission_value}% commission on each sale"
+        elif campaign_version.commission_type == "fixed":
+            commission_desc = f"${campaign_version.commission_value} per sale"
+        else:
+            commission_desc = "Tiered commission structure"
+
+        # Build invitation URL
+        invitation_url = f"{settings.FRONTEND_URL}/invitations/{invitation.partner_invitation_id}/accept"
+
+        # Send email (fire and forget with asyncio task)
+        # Import here to avoid circular imports and missing dependencies
+        from app.services.email_service import email_service
+        asyncio.create_task(
+            email_service.send_partner_invitation_email(
+                partner_email=partner.email,
+                partner_name=partner.name,
+                campaign_name=campaign_version.name,
+                vendor_name=vendor.company_name,
+                vendor_email=vendor.email,
+                commission_description=commission_desc,
+                invitation_url=invitation_url,
+                invitation_message=data.invitation_message,
+            )
+        )
+    except Exception as e:
+        # Log but don't fail the request - invitation was created successfully
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to queue invitation email for {partner.email}: {str(e)}")
 
     return PartnerInvitationResponse(
         partner_invitation_id=invitation.partner_invitation_id,

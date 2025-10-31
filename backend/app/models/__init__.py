@@ -42,6 +42,11 @@ from app.models.payout_schedule import (
     PayoutSchedule,
     PayoutScheduleExecution
 )
+from app.models.bug_report import (
+    BugReport,
+    BugReportStatus,
+    BugReportSeverity
+)
 from app.models.billing import (
     SubscriptionPlan,
     SubscriptionPlanEnum,
@@ -106,6 +111,11 @@ __all__ = [
     "AuditLog",
     "PayoutSchedule",
     "PayoutScheduleExecution",
+
+    # Bug Reports
+    "BugReport",
+    "BugReportStatus",
+    "BugReportSeverity",
 
     # Billing
     "SubscriptionPlan",

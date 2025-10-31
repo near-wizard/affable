@@ -233,7 +233,8 @@ def seed_database():
                     destination_url="https://techsaas.com",
                     default_commission_type="percentage",
                     default_commission_value=Decimal("20.00"),
-                    is_public=True
+                    is_public=True,
+                    attribution_model="last_click"
                 ),
                 CampaignVersion(
                     campaign_id=campaigns[1].campaign_id,
@@ -243,7 +244,8 @@ def seed_database():
                     destination_url="https://eduplatform.com",
                     default_commission_type="percentage",
                     default_commission_value=Decimal("15.00"),
-                    is_public=True
+                    is_public=True,
+                    attribution_model="linear"
                 ),
                 CampaignVersion(
                     campaign_id=campaigns[2].campaign_id,
@@ -253,7 +255,8 @@ def seed_database():
                     destination_url="https://fitnessgear.com",
                     default_commission_type="percentage",
                     default_commission_value=Decimal("10.00"),
-                    is_public=True
+                    is_public=True,
+                    attribution_model="time_decay"
                 ),
                 CampaignVersion(
                     campaign_id=campaigns[3].campaign_id,
@@ -263,7 +266,8 @@ def seed_database():
                     destination_url="https://cloudpro.io",
                     default_commission_type="percentage",
                     default_commission_value=Decimal("15.00"),
-                    is_public=True
+                    is_public=True,
+                    attribution_model="first_click"
                 ),
             ]
             db.add_all(campaign_versions)

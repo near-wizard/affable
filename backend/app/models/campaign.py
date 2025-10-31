@@ -43,6 +43,7 @@ class CampaignVersion(BaseModel):
     max_partners = Column(Integer)
     terms_url = Column(Text)
     promotional_guidelines = Column(Text)
+    attribution_model = Column(String(50), default="last_click", nullable=False)  # last_click, first_click, linear, time_decay
     
     # Relationships
     campaign = relationship("Campaign", back_populates="versions", foreign_keys=[campaign_id])

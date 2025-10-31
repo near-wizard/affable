@@ -24,6 +24,8 @@ import {
 	useCreateCampaignVersion,
 } from "@/hooks/use-api";
 import { ErrorBoundary, EmptyState } from "@/components/loading-skeleton";
+import { AttributionModelSelect } from "@/components/attribution-model-select";
+import { ConversionValiditySelect } from "@/components/conversion-validity-select";
 import type { Campaign } from "@/types/api";
 
 export type CampaignStatus = "active" | "paused" | "draft" | "archived";
@@ -407,6 +409,9 @@ export function CreateCampaignModal({
 		approvalRequired: false,
 		isPublic: true,
 		tiers: [] as Tier[],
+		attributionModel: "last_click",
+		conversionValidityType: "days",
+		conversionValidityValue: 30,
 	});
 
 	const {
@@ -433,6 +438,12 @@ export function CreateCampaignModal({
 					cookie_duration_days: formData.cookieDuration,
 					approval_required: formData.approvalRequired,
 					is_public: formData.isPublic,
+					attribution_model: formData.attributionModel,
+					conversion_validity_type: formData.conversionValidityType,
+					conversion_validity_value:
+						formData.conversionValidityType === "lifetime"
+							? null
+							: formData.conversionValidityValue,
 					...(formData.commissionType === "tiered" && {
 						tiers: formData.tiers.map((tier, idx) => ({
 							label: `Tier ${idx + 1}`,
@@ -709,6 +720,28 @@ export function CreateCampaignModal({
 						</div>
 					)}
 
+					{/* Attribution Model Selection */}
+					<AttributionModelSelect
+						value={formData.attributionModel}
+						onChange={(value) =>
+							setFormData({ ...formData, attributionModel: value })
+						}
+						showDescription={true}
+					/>
+
+					{/* Conversion Validity Period */}
+					<ConversionValiditySelect
+						validityType={formData.conversionValidityType}
+						validityValue={formData.conversionValidityValue}
+						onValidityTypeChange={(type) =>
+							setFormData({ ...formData, conversionValidityType: type })
+						}
+						onValidityValueChange={(value) =>
+							setFormData({ ...formData, conversionValidityValue: value })
+						}
+						showDescription={true}
+					/>
+
 					{/* Other fields */}
 					<div>
 						<label className="block text-sm font-medium text-foreground mb-2">
@@ -821,6 +854,9 @@ export function EditCampaignModal({
 		approvalRequired: false,
 		isPublic: true,
 		tiers: [] as Tier[],
+		attributionModel: "last_click",
+		conversionValidityType: "days",
+		conversionValidityValue: 30,
 	});
 
 	// Pre-populate form when campaign loads
@@ -843,6 +879,9 @@ export function EditCampaignModal({
 					rewardType: tier.reward_type as "flat" | "percentage",
 					rewardValue: tier.reward_value,
 				})),
+				attributionModel: version.attribution_model || "last_click",
+				conversionValidityType: version.conversion_validity_type || "days",
+				conversionValidityValue: version.conversion_validity_value || 30,
 			});
 		}
 	}, [campaign]);
@@ -863,6 +902,12 @@ export function EditCampaignModal({
 				cookie_duration_days: formData.cookieDuration,
 				approval_required: formData.approvalRequired,
 				is_public: formData.isPublic,
+				attribution_model: formData.attributionModel,
+				conversion_validity_type: formData.conversionValidityType,
+				conversion_validity_value:
+					formData.conversionValidityType === "lifetime"
+						? null
+						: formData.conversionValidityValue,
 				...(formData.commissionType === "tiered" && {
 					tiers: formData.tiers.map((tier, idx) => ({
 						label: `Tier ${idx + 1}`,
@@ -1155,6 +1200,28 @@ export function EditCampaignModal({
 							</div>
 						</div>
 					)}
+
+					{/* Attribution Model Selection */}
+					<AttributionModelSelect
+						value={formData.attributionModel}
+						onChange={(value) =>
+							setFormData({ ...formData, attributionModel: value })
+						}
+						showDescription={true}
+					/>
+
+					{/* Conversion Validity Period */}
+					<ConversionValiditySelect
+						validityType={formData.conversionValidityType}
+						validityValue={formData.conversionValidityValue}
+						onValidityTypeChange={(type) =>
+							setFormData({ ...formData, conversionValidityType: type })
+						}
+						onValidityValueChange={(value) =>
+							setFormData({ ...formData, conversionValidityValue: value })
+						}
+						showDescription={true}
+					/>
 
 					{/* Other fields */}
 					<div>

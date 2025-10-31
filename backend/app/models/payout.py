@@ -38,6 +38,9 @@ class PartnerPaymentMethod(BaseModel):
     is_default = Column(Boolean, default=False)
     is_verified = Column(Boolean, default=False)
     verified_at = Column(DateTime)
+    stripe_account_id = Column(String(255))  # Stripe Connect account ID
+    connected_at = Column(DateTime)  # When Stripe account was connected
+    is_active = Column(Boolean, default=True)  # Deactivated if disconnected
     
     # Relationships
     partner = relationship("Partner", back_populates="payment_methods")
@@ -73,6 +76,8 @@ class Payout(BaseModel):
     completed_at = Column(DateTime)
     failed_at = Column(DateTime)
     failure_reason = Column(Text)
+    platform_fee = Column(Numeric(10, 2), default=0)  # Fee deducted from payout
+    net_payout_amount = Column(Numeric(10, 2))  # Amount after fee deduction
     
     # Relationships
     partner = relationship("Partner", back_populates="payouts")

@@ -63,7 +63,20 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     SMTP_FROM: str = "noreply@affiliate-platform.com"
-    
+
+    # Resend Email Service
+    RESEND_API_KEY: str = ""
+    RESEND_FROM_EMAIL: str = "noreply@affiliate-platform.com"
+    SITE_ADMIN_EMAIL: str = "admin@affiliate-platform.com"
+
+    # Stripe Connect
+    STRIPE_CONNECT_CLIENT_ID: str = ""
+    STRIPE_CONNECT_REDIRECT_URI: str = "http://localhost:3000/auth/stripe-callback"
+
+    # Stripe (Payment Processing)
+    STRIPE_API_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+
     # Pagination
     DEFAULT_PAGE_SIZE: int = 20
     MAX_PAGE_SIZE: int = 100
