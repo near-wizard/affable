@@ -40,7 +40,7 @@ export function Qualifier() {
 				<div className="mx-auto max-w-2xl text-center">
 					<h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl text-balance">
 						Do you qualify for our{" "}
-						<Link href="#">
+						<Link href="https://forms.gle/pNzSb5knWpV6eSFP7">
 							<span className="text-primary font-bold underline">
 								Early Access
 							</span>
