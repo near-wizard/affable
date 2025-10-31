@@ -85,7 +85,7 @@ export default function VendorDashboard() {
   // Calculate conversion rate
   const conversionRate = stats.total_clicks > 0
     ? ((stats.total_conversions / stats.total_clicks) * 100).toFixed(2)
-    : 0;
+    : '0.00';
 
   // Generate complete date range with all dates, filling in missing data with zeros
   const performanceData = (() => {

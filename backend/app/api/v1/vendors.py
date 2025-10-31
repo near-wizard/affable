@@ -131,31 +131,47 @@ def get_vendor_dashboard(
             CampaignPartner.applied_at <= end_date_obj
         )
 
-        # Count total partners
+        # Count total partners - count approved partners without date filter (they're currently approved)
         total_partners = db.query(func.count(CampaignPartner.partner_id.distinct())).filter(
             CampaignPartner.campaign_version_id.in_(campaign_version_ids),
             CampaignPartner.is_deleted == False,
-            CampaignPartner.status == 'approved',
-            CampaignPartner.applied_at >= start_date_obj,
-            CampaignPartner.applied_at <= end_date_obj
+            CampaignPartner.status == 'approved'
         )
         if partner_id:
             total_partners = total_partners.filter(CampaignPartner.partner_id == partner_id)
         total_partners = total_partners.scalar() or 0
 
-        # Get conversion and revenue stats
-        campaign_stats_query = db.query(
-            func.sum(CampaignPartner.total_clicks).label('total_clicks'),
-            func.sum(CampaignPartner.total_conversions).label('total_conversions'),
-            func.sum(CampaignPartner.total_revenue).label('total_revenue')
+        # Get conversion and revenue stats from actual Click and ConversionEvent tables
+        click_stats_query = db.query(
+            func.count(Click.click_id).label('total_clicks'),
+            func.count(ConversionEvent.conversion_event_id).label('total_conversions'),
+            func.sum(ConversionEvent.event_value).label('total_revenue')
+        ).outerjoin(
+            ConversionEvent, and_(
+                Click.click_id == ConversionEvent.click_id,
+                ConversionEvent.status == 'approved'
+            )
+        ).join(
+            PartnerLink, Click.partner_link_id == PartnerLink.partner_link_id
+        ).join(
+            CampaignPartner, PartnerLink.campaign_partner_id == CampaignPartner.campaign_partner_id
         ).filter(
             CampaignPartner.campaign_version_id.in_(campaign_version_ids),
-            CampaignPartner.is_deleted == False
+            Click.is_deleted == False
         )
-        if partner_id:
-            campaign_stats_query = campaign_stats_query.filter(CampaignPartner.partner_id == partner_id)
 
-        campaign_stats = campaign_stats_query.first()
+        # Apply date filters if provided
+        if start_date_obj or end_date_obj:
+            click_stats_query = click_stats_query.filter(
+                func.date(Click.clicked_at) >= start_date_obj,
+                func.date(Click.clicked_at) <= end_date_obj
+            )
+
+        # Apply partner filter if provided
+        if partner_id:
+            click_stats_query = click_stats_query.filter(CampaignPartner.partner_id == partner_id)
+
+        campaign_stats = click_stats_query.first()
 
         # Get pending partner applications
         pending_query = db.query(func.count(CampaignPartner.partner_id)).filter(
@@ -274,6 +290,13 @@ def get_vendor_dashboard(
             Campaign.vendor_id == vendor_user.vendor_id,
             Payout.is_deleted == False
         )
+
+        # Apply date filters to payouts (based on conversion date)
+        if start_date_obj or end_date_obj:
+            payout_query = payout_query.filter(
+                func.date(ConversionEvent.created_at) >= start_date_obj,
+                func.date(ConversionEvent.created_at) <= end_date_obj
+            )
 
         # Apply filters
         if partner_id:

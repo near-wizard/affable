@@ -410,8 +410,8 @@ export function CreateCampaignModal({
 		isPublic: true,
 		tiers: [] as Tier[],
 		attributionModel: "last_click",
-		conversionValidityType: "days",
-		conversionValidityValue: 30,
+		conversionValidityType: "years",
+		conversionValidityValue: 1,
 	});
 
 	const {
@@ -524,6 +524,22 @@ export function CreateCampaignModal({
 							</div>
 						</div>
 					)}
+
+					{/* Info message about Stripe requirement */}
+					<div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+						<AlertCircle
+							size={20}
+							className="text-blue-600 flex-shrink-0 mt-0.5"
+						/>
+						<div>
+							<h3 className="font-medium text-blue-900">
+								Campaign Status
+							</h3>
+							<p className="text-sm text-blue-700 mt-1">
+								New campaigns start in <strong>draft</strong> status until you connect your Stripe account. Once connected and if you don't have active recurring payments, campaigns will be <strong>active</strong> and you can invite partners.
+							</p>
+						</div>
+					</div>
 
 					{/* Basic fields */}
 					<div>
@@ -855,8 +871,8 @@ export function EditCampaignModal({
 		isPublic: true,
 		tiers: [] as Tier[],
 		attributionModel: "last_click",
-		conversionValidityType: "days",
-		conversionValidityValue: 30,
+		conversionValidityType: "years",
+		conversionValidityValue: 1,
 	});
 
 	// Pre-populate form when campaign loads

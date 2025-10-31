@@ -144,13 +144,40 @@ def create_campaign(
 ):
     """
     Create a new campaign.
-    
+
     Requires owner or admin role.
+    Vendors can create campaigns but they will be in 'draft' status until Stripe is connected
+    and there are no active recurring payment plans > $0.
     """
+    from app.models import VendorSubscription, SubscriptionPlan
+    from app.models.billing import SubscriptionStatus
+
+    # Check if vendor has Stripe connected and no active recurring payments
+    subscription = db.query(VendorSubscription).filter(
+        VendorSubscription.vendor_id == vendor_user.vendor_id,
+        VendorSubscription.is_deleted == False
+    ).first()
+
+    # Determine campaign status based on Stripe connection and active payments
+    campaign_status = 'active'  # Default to active
+
+    if not subscription or not subscription.stripe_customer_id:
+        # No Stripe connection - start as draft
+        campaign_status = 'draft'
+    elif subscription.status in [SubscriptionStatus.ACTIVE, SubscriptionStatus.PAST_DUE]:
+        # Has active subscription - check if plan has recurring cost > 0
+        plan = db.query(SubscriptionPlan).filter(
+            SubscriptionPlan.subscription_plan_id == subscription.subscription_plan_id
+        ).first()
+
+        if plan and plan.base_price > 0 and plan.billing_cycle in ['monthly', 'annual']:
+            # Has active recurring payment > 0 - start as draft
+            campaign_status = 'draft'
+
     # Create campaign
     campaign = Campaign(
         vendor_id=vendor_user.vendor_id,
-        status='active'
+        status=campaign_status
     )
     
     db.add(campaign)
@@ -657,6 +684,33 @@ def invite_partner_to_campaign(
 
     if not partner:
         raise HTTPException(status_code=404, detail="Partner not found")
+
+    # Check if vendor has Stripe connected and no active recurring payments
+    # Partners cannot be invited until Stripe is connected and no active recurring payments > $0
+    from app.models import VendorSubscription, SubscriptionPlan
+    from app.models.billing import SubscriptionStatus
+
+    subscription = db.query(VendorSubscription).filter(
+        VendorSubscription.vendor_id == vendor_user.vendor_id,
+        VendorSubscription.is_deleted == False
+    ).first()
+
+    if not subscription or not subscription.stripe_customer_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Stripe connection required to invite partners. Please connect your Stripe account first."
+        )
+
+    if subscription.status in [SubscriptionStatus.ACTIVE, SubscriptionStatus.PAST_DUE]:
+        plan = db.query(SubscriptionPlan).filter(
+            SubscriptionPlan.subscription_plan_id == subscription.subscription_plan_id
+        ).first()
+
+        if plan and plan.base_price > 0 and plan.billing_cycle in ['monthly', 'annual']:
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot invite partners while an active recurring payment plan is in place. Please upgrade your subscription or contact support."
+            )
 
     # Check if invitation already exists and is pending
     existing_invitation = db.query(PartnerInvitation).filter(

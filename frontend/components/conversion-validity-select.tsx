@@ -12,6 +12,12 @@ interface ConversionValiditySelectProps {
 }
 
 const VALIDITY_TYPES = {
+  one_time: {
+    name: 'One Time',
+    description: 'Partner receives commission only once for this conversion.',
+    examples: ['Single purchase', 'One-time transaction'],
+    icon: '🎯',
+  },
   days: {
     name: 'Days',
     description: 'Partner receives commission for a specific number of days after conversion.',
@@ -95,7 +101,7 @@ export function ConversionValiditySelect({
           </select>
         </div>
 
-        {validityType !== 'lifetime' && (
+        {validityType !== 'lifetime' && validityType !== 'one_time' && (
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-2">
               Duration
@@ -124,9 +130,14 @@ export function ConversionValiditySelect({
               ))}
             </ul>
           </div>
-          {validityType !== 'lifetime' && (
+          {validityType !== 'lifetime' && validityType !== 'one_time' && (
             <div className="pt-2 border-t border-amber-200 text-xs text-amber-700 font-medium">
               Currently: {validityValue} {validityType === 'days' ? 'day(s)' : validityType === 'months' ? 'month(s)' : 'year(s)'}
+            </div>
+          )}
+          {validityType === 'one_time' && (
+            <div className="pt-2 border-t border-amber-200 text-xs text-amber-700 font-medium">
+              Partner earns commission once per conversion
             </div>
           )}
           {validityType === 'lifetime' && (
