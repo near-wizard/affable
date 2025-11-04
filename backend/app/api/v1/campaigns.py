@@ -333,6 +333,10 @@ def get_campaign(
         vendor_id=campaign.vendor_id,
         status=campaign.status,
         current_version=campaign.current_version,
+        # Flatten commission fields from current_version
+        commission_type=campaign.current_version.default_commission_type if campaign.current_version else None,
+        commission_value=campaign.current_version.default_commission_value if campaign.current_version else None,
+        destination_url=campaign.current_version.destination_url if campaign.current_version else None,
         created_at=campaign.created_at,
         updated_at=campaign.updated_at,
         total_partners=stats.total_partners or 0,

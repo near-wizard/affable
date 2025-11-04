@@ -63,20 +63,26 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   const [expandedMenu, setExpandedMenu] = useState<string | null>("Dashboard") // default expand Dashboard
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [showCompletionScreen, setShowCompletionScreen] = useState(false)
+  const [completionScreenDismissed, setCompletionScreenDismissed] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const { onboarding } = useVendorOnboarding()
 
   useEffect(() => {
     setUserEmail(getUserEmail())
+    // Load dismissal state from localStorage on mount
+    const dismissed = localStorage.getItem('completion-screen-dismissed')
+    if (dismissed) {
+      setCompletionScreenDismissed(true)
+    }
   }, [])
 
-  // Show completion screen when all onboarding steps are complete
+  // Show completion screen when all onboarding steps are complete (only if not previously dismissed)
   useEffect(() => {
-    if (onboarding?.status === "completed" && !showCompletionScreen) {
+    if (onboarding?.status === "completed" && !showCompletionScreen && !completionScreenDismissed) {
       setShowCompletionScreen(true)
     }
-  }, [onboarding?.status, showCompletionScreen])
+  }, [onboarding?.status, showCompletionScreen, completionScreenDismissed])
 
   const isMenuActive = (menu: MenuItem): boolean => {
     if (menu.path) return pathname === menu.path
@@ -296,7 +302,11 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
       {/* Completion Screen Modal */}
       {showCompletionScreen && (
         <OnboardingCompletionScreen
-          onClose={() => setShowCompletionScreen(false)}
+          onClose={() => {
+            setShowCompletionScreen(false)
+            setCompletionScreenDismissed(true)
+            localStorage.setItem('completion-screen-dismissed', 'true')
+          }}
         />
       )}
     </div>

@@ -121,6 +121,11 @@ class CampaignSummary(BaseModel):
 
 class CampaignDetailResponse(CampaignResponse):
     """Detailed campaign response with stats."""
+    # Flattened commission fields from current_version
+    commission_type: Optional[str] = None
+    commission_value: Optional[Decimal] = None
+    destination_url: Optional[str] = None
+    # Stats
     total_partners: int = 0
     approved_partners: int = 0
     pending_partners: int = 0

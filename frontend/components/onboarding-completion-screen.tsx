@@ -128,6 +128,8 @@ export function OnboardingCompletionScreen({
           <Button
             variant="outline"
             onClick={() => {
+              // Mark completion screen as permanently dismissed
+              localStorage.setItem('completion-screen-dismissed', 'true');
               router.push("/vendor/dashboard");
               onClose?.();
             }}
@@ -136,7 +138,11 @@ export function OnboardingCompletionScreen({
             Go to Dashboard
           </Button>
           <Button
-            onClick={() => onClose?.()}
+            onClick={() => {
+              // Mark completion screen as permanently dismissed
+              localStorage.setItem('completion-screen-dismissed', 'true');
+              onClose?.();
+            }}
             className="flex-1"
           >
             Close

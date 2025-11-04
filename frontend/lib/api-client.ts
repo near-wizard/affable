@@ -292,6 +292,64 @@ export const apiClient = {
         token,
       });
     },
+
+
+    /**
+     * Invite a partner to a campaign (vendor)
+     */
+    invitePartner: async (campaignId: string, data: {
+      partner_id: number;
+      invitation_message?: string;
+    }, token?: string) => {
+      return apiRequest(`/v1/campaigns/${campaignId}/partners/invite`, {
+        method: 'POST',
+        body: data,
+        token,
+      });
+    },
+
+    /**
+     * Approve partner for campaign (vendor)
+     */
+    approvePartner: async (campaignId: string, partnerId: number, token?: string) => {
+      return apiRequest(`/v1/campaigns/${campaignId}/partners/${partnerId}/approve`, {
+        method: 'POST',
+        token,
+      });
+    },
+
+    /**
+     * Reject partner for campaign (vendor)
+     */
+    rejectPartner: async (campaignId: string, partnerId: number, data?: { rejection_reason?: string }, token?: string) => {
+      return apiRequest(`/v1/campaigns/${campaignId}/partners/${partnerId}/reject`, {
+        method: 'POST',
+        body: data || {},
+        token,
+      });
+    },
+
+    /**
+     * Set partner commission override (vendor)
+     */
+    setPartnerCommissionOverride: async (campaignId: string, partnerId: number, data: {
+      commission_type: 'percentage' | 'flat';
+      commission_value: number;
+      notes?: string;
+    }, token?: string) => {
+      return apiRequest(`/v1/campaigns/${campaignId}/partners/${partnerId}/commission-override`, {
+        method: 'POST',
+        body: data,
+        token,
+      });
+    },
+
+    /**
+     * Get invitation details (for accepting invitations)
+     */
+    getInvitation: async (invitationId: string | number) => {
+      return apiRequest(`/v1/campaigns/invitations/${invitationId}`);
+    },
   },
 
   // ===== PARTNERS (for vendors looking for affiliates) =====

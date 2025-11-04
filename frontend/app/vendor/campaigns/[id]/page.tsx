@@ -18,7 +18,7 @@ import {
 	HelpCircle,
 } from "lucide-react";
 import Confetti from "react-confetti";
-import { useCampaignDetail } from "@/hooks/use-api";
+import { useCampaignDetail, useCampaignPartners } from "@/hooks/use-api";
 import {
 	GridSkeleton,
 	ErrorBoundary,
@@ -27,6 +27,7 @@ import {
 import { useCurrentVendor } from "@/hooks/use-api";
 import { useVendorOnboarding } from "@/hooks/use-vendor-onboarding";
 import { PartnerInvitationForm } from "@/components/partner-invitation-form";
+import { CampaignPartnersTable } from "@/components/campaign-partners-table";
 
 export default function CampaignDetailsPage() {
 	const params = useParams();
@@ -44,11 +45,18 @@ export default function CampaignDetailsPage() {
 	const [showTooltip, setShowTooltip] = useState(false);
 	const [confettiActive, setConfettiActive] = useState(false);
 	const [launching, setLaunching] = useState(false);
+	const [refetchPartnersKey, setRefetchPartnersKey] = useState(0);
 
 	// Fetch campaign details
 	const { data: campaign, loading: campaignLoading, error: campaignError } = useCampaignDetail(campaignId);
+	const { data: partnersResponse, loading: partnersLoading } = useCampaignPartners(campaignId, {
+		page: 1,
+		limit: 100,
+	}, refetchPartnersKey);
 	const { data: vendor } = useCurrentVendor();
 	const { markStepComplete } = useVendorOnboarding();
+
+	const partners = partnersResponse?.data || [];
 
 	// Fetch campaign requirements
 	useEffect(() => {
@@ -242,7 +250,13 @@ export default function CampaignDetailsPage() {
 									<div>
 										<span className="text-sm text-muted-foreground">Commission Type</span>
 										<p className="text-lg font-semibold text-foreground mt-1">
-											{campaign.commission_type === "percentage" ? "Percentage" : "Flat Rate"}
+											{campaign.commission_type === "percentage"
+												? "Percentage"
+												: campaign.commission_type === "flat"
+												? "Flat Rate"
+												: campaign.commission_type === "tiered"
+												? "Tiered"
+												: "Unknown"}
 										</p>
 									</div>
 									<div>
@@ -250,8 +264,10 @@ export default function CampaignDetailsPage() {
 										<p className="text-lg font-semibold text-primary mt-1">{commissionDisplay}</p>
 									</div>
 									<div>
-										<span className="text-sm text-muted-foreground">Category</span>
-										<p className="text-lg font-semibold text-foreground mt-1">{campaign.category || "General"}</p>
+										<span className="text-sm text-muted-foreground">Cookie Duration</span>
+										<p className="text-lg font-semibold text-foreground mt-1">
+											{campaign.cookie_duration_days ? `${campaign.cookie_duration_days} days` : "-"}
+										</p>
 									</div>
 									<div>
 										<span className="text-sm text-muted-foreground">Created</span>
@@ -395,45 +411,59 @@ export default function CampaignDetailsPage() {
 				)}
 
 				{activeTab === "partners" && (
-					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-						<div className="lg:col-span-2">
-							<div className="flex items-center justify-between mb-6">
-								<h2 className="text-2xl font-bold text-foreground">Campaign Partners</h2>
-								{campaign.total_partners > 0 && (
-									<button
-										onClick={() => router.push(`/vendor/campaigns/${campaignId}/partners`)}
-										className="flex items-center gap-2 px-4 py-2 border border-blueberry bg-primary/100 text-white rounded-lg hover:bg-primary/90 transition"
-									>
-										<Users size={16} />
-										Manage All Partners
-									</button>
+					<div className="space-y-6">
+						{/* Title */}
+						<h2 className="text-2xl font-bold text-foreground">Campaign Partners</h2>
+
+						{/* Stats and Table (left) + Invite Form (right) */}
+						<div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+							{/* Stats Cards and Table */}
+							<div className="lg:col-span-4 space-y-6">
+								{/* Stats Cards */}
+								<div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+									<div className="bg-card rounded-lg p-3 border border-border">
+										<span className="text-xs text-muted-foreground">Total Partners</span>
+										<p className="text-xl font-bold text-foreground mt-1">{partners.length}</p>
+									</div>
+									<div className="bg-card rounded-lg p-3 border border-border">
+										<span className="text-xs text-muted-foreground">Approved Partners</span>
+										<p className="text-xl font-bold text-green-600 mt-1">{partners.filter((p) => p.status === "approved").length}</p>
+									</div>
+									<div className="bg-card rounded-lg p-3 border border-border">
+										<span className="text-xs text-muted-foreground">Total Commissions</span>
+										<p className="text-xl font-bold text-primary mt-1">${partners.reduce((sum, p) => sum + (Number(p.total_commission_earned) || 0), 0).toFixed(2)}</p>
+									</div>
+									<div className="bg-card rounded-lg p-3 border border-border">
+										<span className="text-xs text-muted-foreground">Conversion Rate</span>
+										<p className="text-xl font-bold text-accent mt-1">{partners.length > 0 ? ((partners.filter((p) => p.total_conversions && p.total_conversions > 0).length / partners.length) * 100).toFixed(1) : "0"}%</p>
+									</div>
+								</div>
+
+								{/* Table */}
+								{partnersLoading ? (
+									<GridSkeleton columns={6} items={5} />
+								) : (
+									<CampaignPartnersTable
+										campaignId={campaignId}
+										partners={partners}
+										campaign={campaign}
+										isLoading={partnersLoading}
+										onRefetch={() => setRefetchPartnersKey(prev => prev + 1)}
+									/>
 								)}
 							</div>
 
-							{campaign.total_partners === 0 ? (
-								<EmptyState
-									title="No partners yet"
-									description="This campaign doesn't have any partners enrolled. Invite partners to grow your reach!"
+							{/* Invitation Form Sidebar */}
+							<div className="h-fit">
+								<PartnerInvitationForm
+									campaignId={campaignId}
+									campaignName={campaign.name}
+									onSuccess={() => {
+										// Refresh partners list after invitation sent
+										setRefetchPartnersKey(prev => prev + 1);
+									}}
 								/>
-							) : (
-								<div className="bg-card rounded-lg p-6 border border-border">
-									<p className="text-muted-foreground">Total partners: {campaign.total_partners}</p>
-									<p className="text-sm text-muted-foreground mt-2">
-										View and manage all partners on the Partners page.
-									</p>
-								</div>
-							)}
-						</div>
-
-						{/* Invitation Form Sidebar */}
-						<div>
-							<PartnerInvitationForm
-								campaignId={campaignId}
-								campaignName={campaign.name}
-								onSuccess={() => {
-									// Optionally refresh campaign data here
-								}}
-							/>
+							</div>
 						</div>
 					</div>
 				)}
