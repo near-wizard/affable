@@ -131,55 +131,36 @@ export function startConsoleMonitoring(): ConsoleLog[] {
 }
 
 /**
- * Monitor network requests using Performance API and fetch interception
+ * Monitor network requests using Performance API
+ * Note: We don't intercept fetch directly as it can cause issues
+ * Instead, we use PerformanceObserver to monitor resource timing
  */
 export function startNetworkMonitoring(): NetworkRequest[] {
   const requests: NetworkRequest[] = [];
 
-  // Intercept fetch requests
-  const originalFetch = window.fetch;
-
-  window.fetch = function (...args: any[]) {
-    const startTime = performance.now();
-    const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || 'unknown';
-    const init = typeof args[0] === 'string' ? args[1] : args[0];
-    const method = init?.method || 'GET';
-
-    return originalFetch.apply(window, args)
-      .then((response) => {
-        const duration = performance.now() - startTime;
-        const clonedResponse = response.clone();
-
-        // Extract response data
-        const responseText = clonedResponse.text().then((text) => {
-          requests.push({
-            url,
-            method,
-            status: response.status,
-            statusText: response.statusText,
-            headers: Object.fromEntries(init?.headers instanceof Headers ? init.headers.entries() : []),
-            responseHeaders: Object.fromEntries(response.headers.entries()),
-            response: text.substring(0, 500), // Limit response size
-            duration,
-            timestamp: new Date().toISOString(),
-          });
-
-          return clonedResponse;
-        });
-
-        return response;
-      })
-      .catch((error) => {
-        const duration = performance.now() - startTime;
-        requests.push({
-          url,
-          method,
-          duration,
-          timestamp: new Date().toISOString(),
-        });
-        throw error;
+  // Use PerformanceObserver to monitor resource timing (if available)
+  if (typeof PerformanceObserver !== 'undefined') {
+    try {
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (entry.initiatorType === 'fetch' || entry.initiatorType === 'xmlhttprequest') {
+            requests.push({
+              url: entry.name,
+              method: 'GET', // PerformanceObserver doesn't expose method
+              status: undefined,
+              statusText: undefined,
+              duration: entry.duration,
+              timestamp: new Date(entry.startTime).toISOString(),
+            });
+          }
+        }
       });
-  } as any;
+      observer.observe({ entryTypes: ['resource'] });
+    } catch (error) {
+      // PerformanceObserver not supported or failed to initialize
+      console.warn('PerformanceObserver not available for network monitoring');
+    }
+  }
 
   return requests;
 }

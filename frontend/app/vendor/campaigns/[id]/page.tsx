@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
 	ArrowLeft,
 	Edit,
@@ -14,7 +14,10 @@ import {
 	CheckCircle,
 	Clock,
 	AlertCircle,
+	Zap,
+	HelpCircle,
 } from "lucide-react";
+import Confetti from "react-confetti";
 import { useCampaignDetail } from "@/hooks/use-api";
 import {
 	GridSkeleton,
@@ -22,6 +25,7 @@ import {
 	EmptyState,
 } from "@/components/loading-skeleton";
 import { useCurrentVendor } from "@/hooks/use-api";
+import { useVendorOnboarding } from "@/hooks/use-vendor-onboarding";
 import { PartnerInvitationForm } from "@/components/partner-invitation-form";
 
 export default function CampaignDetailsPage() {
@@ -29,10 +33,84 @@ export default function CampaignDetailsPage() {
 	const router = useRouter();
 	const campaignId = params.id as string;
 	const [activeTab, setActiveTab] = useState<"overview" | "partners" | "analytics">("overview");
+	const [requirements, setRequirements] = useState<{
+		campaign_id: string;
+		stripe_connected: boolean;
+		payment_valid: boolean;
+		can_launch: boolean;
+		missing_requirements: string[];
+	} | null>(null);
+	const [loadingRequirements, setLoadingRequirements] = useState(false);
+	const [showTooltip, setShowTooltip] = useState(false);
+	const [confettiActive, setConfettiActive] = useState(false);
+	const [launching, setLaunching] = useState(false);
 
 	// Fetch campaign details
 	const { data: campaign, loading: campaignLoading, error: campaignError } = useCampaignDetail(campaignId);
 	const { data: vendor } = useCurrentVendor();
+	const { markStepComplete } = useVendorOnboarding();
+
+	// Fetch campaign requirements
+	useEffect(() => {
+		const fetchRequirements = async () => {
+			if (!campaignId) return;
+
+			setLoadingRequirements(true);
+			try {
+				const response = await fetch(`/api/v1/campaigns/${campaignId}/requirements`);
+				if (response.ok) {
+					const data = await response.json();
+					setRequirements(data);
+				}
+			} catch (error) {
+				console.error("Failed to fetch requirements:", error);
+			} finally {
+				setLoadingRequirements(false);
+			}
+		};
+
+		fetchRequirements();
+	}, [campaignId]);
+
+	const handleLaunchCampaign = async () => {
+		if (!requirements?.can_launch) return;
+
+		setLaunching(true);
+		try {
+			const response = await fetch(`/api/v1/campaigns/${campaignId}`, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ status: "active" }),
+			});
+
+			if (response.ok) {
+				// Trigger confetti
+				setConfettiActive(true);
+				setTimeout(() => {
+					setConfettiActive(false);
+				}, 3000);
+
+				// Auto-complete onboarding step
+				try {
+					await markStepComplete('campaign_launched');
+					console.log('Campaign launched step marked complete');
+				} catch (error) {
+					console.error('Failed to mark campaign_launched step:', error);
+				}
+
+				// Reload the page after a short delay to allow onboarding update
+				setTimeout(() => {
+					window.location.reload();
+				}, 500);
+			}
+		} catch (error) {
+			console.error("Failed to launch campaign:", error);
+		} finally {
+			setLaunching(false);
+		}
+	};
 
 	if (campaignError) {
 		return <ErrorBoundary error={campaignError.message} />;
@@ -67,6 +145,8 @@ export default function CampaignDetailsPage() {
 
 	return (
 		<div className="min-h-screen bg-background">
+			{confettiActive && <Confetti numberOfPieces={300 + Math.random() * 300} />}
+
 			{/* Header */}
 			<div className="bg-background border-b border-border shadow-sm">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -209,26 +289,106 @@ export default function CampaignDetailsPage() {
 							{/* Status Info */}
 							<div className="bg-card rounded-lg p-6 border border-border">
 								<h3 className="font-bold text-foreground mb-4">Campaign Status</h3>
-								<div className="space-y-3">
-									<div className="flex items-center gap-2">
-										{campaign.status === "active" ? (
-											<>
+
+								{loadingRequirements ? (
+									<div className="text-sm text-muted-foreground">Loading requirements...</div>
+								) : requirements ? (
+									<div className="space-y-4">
+										{/* Requirements Checklist */}
+										<div className="space-y-2">
+											<div className="flex items-center gap-2 text-sm">
+												{requirements.stripe_connected ? (
+													<>
+														<CheckCircle size={16} className="text-green-600" />
+														<span className="text-foreground">Stripe Account Connected</span>
+													</>
+												) : (
+													<>
+														<AlertCircle size={16} className="text-red-600" />
+														<span className="text-foreground">Stripe Account Connected</span>
+													</>
+												)}
+											</div>
+											<div className="flex items-center gap-2 text-sm">
+												{requirements.payment_valid ? (
+													<>
+														<CheckCircle size={16} className="text-green-600" />
+														<span className="text-foreground">Payment Verified</span>
+													</>
+												) : (
+													<>
+														<AlertCircle size={16} className="text-red-600" />
+														<span className="text-foreground">Payment Verified</span>
+													</>
+												)}
+											</div>
+										</div>
+
+										{/* Launch Button for Draft Campaigns */}
+										{campaign.status === "draft" && (
+											<div className="relative">
+												<button
+													onClick={handleLaunchCampaign}
+													onMouseEnter={() => !requirements.can_launch && setShowTooltip(true)}
+													onMouseLeave={() => setShowTooltip(false)}
+													disabled={!requirements.can_launch || launching}
+													className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition ${
+														requirements.can_launch && !launching
+															? "bg-green-600 text-white hover:bg-green-700"
+															: "bg-gray-300 text-gray-500 cursor-not-allowed"
+													}`}
+												>
+													<Zap size={16} />
+													{launching ? "Launching..." : "Launch Campaign"}
+												</button>
+
+												{/* Tooltip */}
+												{showTooltip && !requirements.can_launch && requirements.missing_requirements.length > 0 && (
+													<div className="absolute bottom-full mb-2 left-0 right-0 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg z-10">
+														<div className="flex items-start gap-2 mb-1">
+															<HelpCircle size={14} className="mt-0.5 flex-shrink-0" />
+															<span className="font-semibold">Missing Requirements:</span>
+														</div>
+														<ul className="list-disc list-inside space-y-1 ml-5">
+															{requirements.missing_requirements.map((req, index) => (
+																<li key={index}>{req}</li>
+															))}
+														</ul>
+													</div>
+												)}
+											</div>
+										)}
+
+										{/* Active Campaign Message */}
+										{campaign.status === "active" && (
+											<div className="flex items-center gap-2">
 												<CheckCircle size={18} className="text-green-600" />
 												<span className="text-sm text-foreground">Campaign is active</span>
-											</>
-										) : campaign.status === "paused" ? (
-											<>
-												<Clock size={18} className="text-yellow-600" />
-												<span className="text-sm text-foreground">Campaign is paused</span>
-											</>
-										) : (
-											<>
-												<AlertCircle size={18} className="text-red-600" />
-												<span className="text-sm text-foreground">Campaign is {campaign.status}</span>
-											</>
+											</div>
 										)}
 									</div>
-								</div>
+								) : (
+									<div className="space-y-3">
+										<div className="flex items-center gap-2">
+											{campaign.status === "active" ? (
+												<>
+													<CheckCircle size={18} className="text-green-600" />
+													<span className="text-sm text-foreground">Campaign is active</span>
+												</>
+											) : campaign.status === "paused" ? (
+												<>
+													<Clock size={18} className="text-yellow-600" />
+													<span className="text-sm text-foreground">Campaign is paused</span>
+												</>
+											) : (
+												<>
+													<AlertCircle size={18} className="text-red-600" />
+													<span className="text-sm text-foreground">Campaign is {campaign.status}</span>
+												</>
+											)}
+										</div>
+									</div>
+								)}
 							</div>
 						</div>
 					</div>

@@ -30,6 +30,7 @@ import {
   Info,
   ArrowLeft,
 } from 'lucide-react';
+import { useVendorOnboarding } from '@/hooks/use-vendor-onboarding';
 
 interface PaymentMethodFormData {
   cardholderName: string;
@@ -50,6 +51,8 @@ export default function PaymentPage() {
 
   const cardElementRef = useRef<HTMLDivElement>(null);
   const cardInstanceRef = useRef<any>(null);
+
+  const { markStepComplete } = useVendorOnboarding();
 
   useEffect(() => {
     initializePaymentForm();
@@ -143,6 +146,9 @@ export default function PaymentPage() {
           setupResult.setupIntent.payment_method as string,
           token || undefined
         );
+
+        // Auto-complete onboarding step
+        await markStepComplete('stripe_verified').catch(console.error);
 
         setSuccess(true);
         setTimeout(() => {

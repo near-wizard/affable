@@ -26,6 +26,7 @@ import {
 import { ErrorBoundary, EmptyState } from "@/components/loading-skeleton";
 import { AttributionModelSelect } from "@/components/attribution-model-select";
 import { ConversionValiditySelect } from "@/components/conversion-validity-select";
+import { useVendorOnboarding } from "@/hooks/use-vendor-onboarding";
 import type { Campaign } from "@/types/api";
 
 export type CampaignStatus = "active" | "paused" | "draft" | "archived";
@@ -48,6 +49,9 @@ export default function VendorCampaigns() {
 		loading: vendorLoading,
 		error: vendorError,
 	} = useCurrentVendor();
+
+	// Get onboarding functions
+	const { markStepComplete } = useVendorOnboarding();
 
 	// Fetch vendor's campaigns
 	const {
@@ -82,6 +86,16 @@ export default function VendorCampaigns() {
 				campaignId: campaign.campaign_id,
 				data: { status: newStatus },
 			});
+
+			// If campaign is being launched (changed to active), mark onboarding step complete
+			if (newStatus === "active") {
+				try {
+					await markStepComplete('campaign_launched');
+					console.log('Campaign launched step marked complete');
+				} catch (error) {
+					console.error('Failed to mark campaign_launched step:', error);
+				}
+			}
 
 			// Refresh the campaigns list
 			setRefetchCounter((prev) => prev + 1);
@@ -344,6 +358,7 @@ export default function VendorCampaigns() {
 				<CreateCampaignModal
 					onClose={() => setShowCreateModal(false)}
 					onSuccess={handleCampaignCreated}
+					totalCampaigns={campaignsResponse?.total || 0}
 				/>
 			)}
 
@@ -395,22 +410,24 @@ type Tier = {
 export function CreateCampaignModal({
 	onClose,
 	onSuccess,
+	totalCampaigns,
 }: {
 	onClose: () => void;
 	onSuccess?: () => void;
+	totalCampaigns?: number;
 }) {
 	const [formData, setFormData] = useState({
-		name: "",
+		name: `Campaign-${(totalCampaigns || 0) + 1}`,
 		description: "",
 		destinationUrl: "",
 		commissionType: "percentage" as CommissionType,
-		commissionValue: "",
+		commissionValue: "15",
 		cookieDuration: 30,
 		approvalRequired: false,
 		isPublic: true,
 		tiers: [] as Tier[],
 		attributionModel: "last_click",
-		conversionValidityType: "years",
+		conversionValidityType: "yearly",
 		conversionValidityValue: 1,
 	});
 
@@ -419,6 +436,8 @@ export function CreateCampaignModal({
 		loading: isCreating,
 		error: createError,
 	} = useCreateCampaign();
+
+	const { markStepComplete } = useVendorOnboarding();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -457,6 +476,9 @@ export function CreateCampaignModal({
 			};
 
 			await createCampaign(payload);
+
+			// Auto-complete onboarding step
+			await markStepComplete('campaign_created').catch(console.error);
 
 			// Success - call the onSuccess callback and close modal
 			onSuccess?.();
@@ -871,7 +893,7 @@ export function EditCampaignModal({
 		isPublic: true,
 		tiers: [] as Tier[],
 		attributionModel: "last_click",
-		conversionValidityType: "years",
+		conversionValidityType: "yearly",
 		conversionValidityValue: 1,
 	});
 

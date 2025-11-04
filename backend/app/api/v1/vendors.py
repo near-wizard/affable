@@ -847,3 +847,192 @@ def regenerate_webhook_secret(
         "webhook_secret": vendor.webhook_secret,
         "message": "New webhook secret generated. Update your integration immediately."
     }
+
+# ============================================================================
+# Onboarding Endpoints
+# ============================================================================
+
+
+@router.get("/me/onboarding", response_model=dict)
+def get_vendor_onboarding(
+    vendor_user: VendorUser = Depends(get_current_vendor_user),
+    db: Session = Depends(get_db)
+):
+    """Get vendor onboarding progress."""
+    from app.models.vendor import VendorOnboarding
+
+    vendor_id = vendor_user.vendor_id
+
+    # Check if vendor has any campaigns
+    has_campaigns = db.query(Campaign).filter(
+        Campaign.vendor_id == vendor_id,
+        Campaign.is_deleted == False
+    ).count() > 0
+
+    # Check if vendor has any active campaigns
+    has_active_campaigns = db.query(Campaign).filter(
+        Campaign.vendor_id == vendor_id,
+        Campaign.is_deleted == False,
+        Campaign.status == 'active'
+    ).count() > 0
+
+    # Try to get existing onboarding record
+    onboarding = db.query(VendorOnboarding).filter(
+        VendorOnboarding.vendor_id == vendor_id
+    ).first()
+
+    # If no onboarding record exists and vendor is new, create it
+    if not onboarding and not has_campaigns:
+        onboarding = VendorOnboarding(
+            vendor_id=vendor_id,
+            status='not_started',
+            completed_steps=[],
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
+        db.add(onboarding)
+        db.commit()
+        db.refresh(onboarding)
+    elif not onboarding:
+        # If vendor has campaigns but no onboarding record, they've already completed onboarding
+        return {
+            "vendor_id": vendor_id,
+            "status": "completed",
+            "completed_steps": ["stripe_verified", "campaign_created", "campaign_launched", "partners_invited"],
+            "dismissed_at": None,
+            "completed_at": None,
+            "progress_percentage": 100
+        }
+
+    # Auto-mark campaign_created if vendor has campaigns but step not yet marked
+    steps_modified = False
+    if has_campaigns and 'campaign_created' not in onboarding.completed_steps:
+        # Reassign the list to trigger SQLAlchemy's change detection
+        onboarding.completed_steps = onboarding.completed_steps + ['campaign_created']
+        onboarding.updated_at = datetime.utcnow()
+        if onboarding.status == 'not_started':
+            onboarding.status = 'in_progress'
+        steps_modified = True
+
+    # Auto-mark campaign_launched if vendor has active campaigns but step not yet marked
+    if has_active_campaigns and 'campaign_launched' not in onboarding.completed_steps:
+        # Reassign the list to trigger SQLAlchemy's change detection
+        onboarding.completed_steps = onboarding.completed_steps + ['campaign_launched']
+        onboarding.updated_at = datetime.utcnow()
+        if onboarding.status == 'not_started':
+            onboarding.status = 'in_progress'
+        # Check if all steps are completed
+        if len(onboarding.completed_steps) == 4:
+            onboarding.status = 'completed'
+            onboarding.completed_at = datetime.utcnow()
+        steps_modified = True
+
+    if steps_modified:
+        db.commit()
+        db.refresh(onboarding)
+
+    # Calculate progress percentage
+    progress_percentage = (len(onboarding.completed_steps) / 4) * 100
+
+    return {
+        "vendor_id": vendor_id,
+        "status": onboarding.status,
+        "completed_steps": onboarding.completed_steps or [],
+        "dismissed_at": onboarding.dismissed_at,
+        "completed_at": onboarding.completed_at,
+        "progress_percentage": progress_percentage
+    }
+
+
+@router.put("/me/onboarding/step/{step_name}", response_model=dict)
+def mark_onboarding_step_complete(
+    step_name: str,
+    vendor_user: VendorUser = Depends(get_current_vendor_user),
+    db: Session = Depends(get_db)
+):
+    """Mark an onboarding step as complete."""
+    from app.models.vendor import VendorOnboarding
+
+    vendor_id = vendor_user.vendor_id
+
+    valid_steps = ['stripe_verified', 'campaign_created', 'campaign_launched', 'partners_invited']
+    if step_name not in valid_steps:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid step name. Must be one of: {', '.join(valid_steps)}"
+        )
+
+    onboarding = db.query(VendorOnboarding).filter(
+        VendorOnboarding.vendor_id == vendor_id
+    ).first()
+
+    if not onboarding:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Onboarding record not found"
+        )
+
+    # Add step if not already completed
+    if step_name not in onboarding.completed_steps:
+        # Reassign the list to trigger SQLAlchemy's change detection
+        onboarding.completed_steps = onboarding.completed_steps + [step_name]
+        onboarding.updated_at = datetime.utcnow()
+
+        # Check if all steps are completed
+        if len(onboarding.completed_steps) == 4:
+            onboarding.status = 'completed'
+            onboarding.completed_at = datetime.utcnow()
+        elif onboarding.status == 'not_started':
+            onboarding.status = 'in_progress'
+
+        db.commit()
+        db.refresh(onboarding)
+
+    # Calculate progress percentage
+    progress_percentage = (len(onboarding.completed_steps) / 4) * 100
+
+    return {
+        "vendor_id": vendor_id,
+        "status": onboarding.status,
+        "completed_steps": onboarding.completed_steps or [],
+        "dismissed_at": onboarding.dismissed_at,
+        "completed_at": onboarding.completed_at,
+        "progress_percentage": progress_percentage
+    }
+
+
+@router.put("/me/onboarding/dismiss", response_model=dict)
+def dismiss_onboarding(
+    vendor_user: VendorUser = Depends(get_current_vendor_user),
+    db: Session = Depends(get_db)
+):
+    """Dismiss the onboarding checklist."""
+    from app.models.vendor import VendorOnboarding
+
+    vendor_id = vendor_user.vendor_id
+
+    onboarding = db.query(VendorOnboarding).filter(
+        VendorOnboarding.vendor_id == vendor_id
+    ).first()
+
+    if not onboarding:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Onboarding record not found"
+        )
+
+    onboarding.dismissed_at = datetime.utcnow()
+    onboarding.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(onboarding)
+
+    progress_percentage = (len(onboarding.completed_steps) / 4) * 100
+
+    return {
+        "vendor_id": vendor_id,
+        "status": onboarding.status,
+        "completed_steps": onboarding.completed_steps or [],
+        "dismissed_at": onboarding.dismissed_at,
+        "completed_at": onboarding.completed_at,
+        "progress_percentage": progress_percentage
+    }

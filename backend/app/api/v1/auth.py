@@ -87,17 +87,18 @@ def register_vendor(
     vendor = AuthService.register_vendor(db, data)
 
     # Generate tokens for immediate login
-    from app.core.security import create_tokens
+    from app.core.security import create_access_token, create_refresh_token
     vendor_user = db.query(VendorUser).filter_by(vendor_id=vendor.vendor_id).first()
-    tokens = create_tokens(vendor_user.vendor_user_id, "vendor")
+    access_token = create_access_token({"sub": str(vendor_user.vendor_user_id), "user_type": "vendor_user"})
+    refresh_token = create_refresh_token({"sub": str(vendor_user.vendor_user_id), "user_type": "vendor_user"})
 
     return AuthResponse(
         message="Vendor registered successfully. You are now logged in.",
         user_type="vendor",
         user_id=vendor.vendor_id,
         email=vendor.email,
-        access_token=tokens["access_token"],
-        refresh_token=tokens.get("refresh_token")
+        access_token=access_token,
+        refresh_token=refresh_token
     )
 
 

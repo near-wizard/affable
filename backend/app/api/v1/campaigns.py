@@ -152,6 +152,68 @@ def create_campaign(
     from app.models import VendorSubscription, SubscriptionPlan
     from app.models.billing import SubscriptionStatus
 
+    # Validation 1: Campaign name validation
+    campaign_name = data.version.name
+    if not campaign_name or not campaign_name.strip() or len(campaign_name.strip()) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "success": False,
+                "message": "Campaign creation failed",
+                "reason": "Invalid campaign name",
+                "details": ["Campaign name must be at least 2 characters long"]
+            }
+        )
+
+    # Validation 2: Destination URL validation
+    if not data.version.destination_url or not data.version.destination_url.strip():
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "success": False,
+                "message": "Campaign creation failed",
+                "reason": "Missing required field",
+                "details": ["Destination URL is required"]
+            }
+        )
+
+    # Validation 3: Commission configuration validation
+    validation_errors = []
+    commission_type = data.version.default_commission_type
+    default_commission_value = data.version.default_commission_value
+    tiers = data.version.tiers
+
+    # Check if commission_type is valid
+    if commission_type not in ['percentage', 'flat', 'tiered']:
+        validation_errors.append("Commission type must be 'percentage', 'flat', or 'tiered'")
+
+    # Validate based on commission type
+    if commission_type == 'percentage':
+        if default_commission_value is None:
+            validation_errors.append("Commission value required for percentage type")
+        elif not (0 <= default_commission_value <= 100):
+            validation_errors.append("Percentage commission must be between 0 and 100")
+    elif commission_type == 'flat':
+        if default_commission_value is None:
+            validation_errors.append("Commission value required for flat type")
+        elif default_commission_value < 0:
+            validation_errors.append("Flat commission cannot be negative")
+    elif commission_type == 'tiered':
+        if not tiers or len(tiers) == 0:
+            validation_errors.append("At least one tier required for tiered commission")
+
+    # If there are validation errors, raise exception
+    if validation_errors:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "success": False,
+                "message": "Campaign creation failed",
+                "reason": "Invalid commission configuration",
+                "details": validation_errors
+            }
+        )
+
     # Check if vendor has Stripe connected and no active recurring payments
     subscription = db.query(VendorSubscription).filter(
         VendorSubscription.vendor_id == vendor_user.vendor_id,

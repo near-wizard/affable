@@ -2,6 +2,7 @@
 
 import { Mail, Send, AlertCircle, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
+import { useVendorOnboarding } from '@/hooks/use-vendor-onboarding';
 
 interface PartnerInvitationFormProps {
   campaignId: string | number;
@@ -19,6 +20,7 @@ export function PartnerInvitationForm({
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<null | 'success' | 'error'>(null);
   const [statusMessage, setStatusMessage] = useState('');
+  const { markStepComplete } = useVendorOnboarding();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +58,9 @@ export function PartnerInvitationForm({
       setStatusMessage(`Invitation sent to ${email}`);
       setEmail('');
       setMessage('');
+
+      // Auto-complete onboarding step
+      await markStepComplete('partners_invited').catch(console.error);
 
       // Call onSuccess callback after 2 seconds
       setTimeout(() => {

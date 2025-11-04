@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, JSON
 from sqlalchemy.orm import relationship
 
 from app.models.base import BaseModel
@@ -6,9 +6,9 @@ from app.models.base import BaseModel
 
 class Vendor(BaseModel):
     """Vendor (Advertiser/Merchant) model."""
-    
+
     __tablename__ = "vendors"
-    
+
     vendor_id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
@@ -19,11 +19,11 @@ class Vendor(BaseModel):
     api_key = Column(String(255), unique=True, index=True)
     webhook_secret = Column(String(255))
     webhook_url = Column(Text)
-    
+
     # Relationships
     users = relationship("VendorUser", back_populates="vendor")
     campaigns = relationship("Campaign", back_populates="vendor")
-    
+
     payout_schedules = relationship("PayoutSchedule", back_populates="vendor")
 
     def __repr__(self):
@@ -32,9 +32,9 @@ class Vendor(BaseModel):
 
 class VendorUser(BaseModel):
     """Vendor team member model."""
-    
+
     __tablename__ = "vendor_users"
-    
+
     vendor_user_id = Column(Integer, primary_key=True, index=True)
     vendor_id = Column(Integer, ForeignKey("vendors.vendor_id", ondelete="CASCADE"), nullable=False, index=True)
     email = Column(String(255), nullable=False)
@@ -48,14 +48,14 @@ class VendorUser(BaseModel):
     last_login_at = Column(DateTime)
     oauth_provider = Column(String(50))
     oauth_provider_id = Column(String(255))
-    
+
     # Relationships
     vendor = relationship("Vendor", back_populates="users")
     inviter = relationship("VendorUser", remote_side=[vendor_user_id])
-    
+
     def __repr__(self):
         return f"<VendorUser {self.name} ({self.email}) - {self.role}>"
-    
+
     def has_permission(self, action: str) -> bool:
         """Check if user has permission for an action."""
         permissions = {
@@ -64,6 +64,27 @@ class VendorUser(BaseModel):
             'manager': ['approve_partners', 'approve_conversions', 'view_reports'],
             'member': ['view_reports']
         }
-        
+
         role_permissions = permissions.get(self.role, [])
         return 'all' in role_permissions or action in role_permissions
+
+
+class VendorOnboarding(BaseModel):
+    """Vendor onboarding progress tracking model."""
+
+    __tablename__ = "vendor_onboarding"
+
+    vendor_onboarding_id = Column(Integer, primary_key=True, index=True)
+    vendor_id = Column(Integer, ForeignKey("vendors.vendor_id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+    status = Column(String(50), default='not_started', nullable=False)  # not_started, in_progress, completed
+    completed_steps = Column(JSON, default=list, nullable=False)  # ['stripe_verified', 'campaign_created', 'campaign_launched', 'partners_invited']
+    dismissed_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
+
+    # Relationships
+    vendor = relationship("Vendor", backref="onboarding")
+
+    def __repr__(self):
+        return f"<VendorOnboarding {self.vendor_id} - {self.status} ({len(self.completed_steps)}/4 steps)>"

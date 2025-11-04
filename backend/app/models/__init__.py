@@ -5,7 +5,7 @@ This module exports all SQLAlchemy ORM models.
 """
 
 from app.models.base import BaseModel, TimestampMixin, SoftDeleteMixin, GUID
-from app.models.vendor import Vendor, VendorUser
+from app.models.vendor import Vendor, VendorUser, VendorOnboarding
 from app.models.partner import Partner, PartnerType
 from app.models.campaign import (
     Campaign,
@@ -75,6 +75,7 @@ __all__ = [
     "Vendor",
     "VendorUser",
     
+    "VendorOnboarding",
     # Partner
     "Partner",
     "PartnerType",

@@ -11,6 +11,8 @@ from typing import Optional
 from datetime import datetime, timedelta
 import uuid
 import logging
+import requests
+from urllib.parse import urlparse
 
 from app.core.database import get_db
 from app.models import PartnerLink, Click, Cookie, CampaignPartner, CampaignVersion
@@ -23,6 +25,108 @@ router = APIRouter()
 # Constants
 COOKIE_NAME = "tprm"
 DEFAULT_COOKIE_DAYS = 30
+REDIRECT_TIMEOUT = 5  # seconds
+
+
+def resolve_redirect_url(url: str) -> str:
+    """
+    Resolve destination URL with fallback from HTTPS to HTTP.
+
+    Attempts to verify the URL exists using HTTPS first. If the request fails,
+    logs a warning and attempts with HTTP. This handles cases where destination
+    servers don't support HTTPS.
+
+    Args:
+        url: The destination URL (full_url from PartnerLink)
+
+    Returns:
+        The working URL (either HTTPS or HTTP version)
+
+    Raises:
+        ValueError: If neither HTTPS nor HTTP URL is reachable
+    """
+    parsed = urlparse(url)
+
+    # If URL doesn't have a scheme, assume it's malformed
+    if not parsed.scheme:
+        logger.error(f"Invalid URL format (no scheme): {url}")
+        raise ValueError(f"Invalid URL: missing scheme")
+
+    # If already HTTP, return as-is
+    if parsed.scheme == "http":
+        return url
+
+    # Try HTTPS first
+    if parsed.scheme == "https":
+        try:
+            # Use HEAD request with short timeout to verify URL accessibility
+            response = requests.head(
+                url,
+                timeout=REDIRECT_TIMEOUT,
+                allow_redirects=True,
+                verify=True
+            )
+            # Consider 2xx and 3xx as valid
+            if 200 <= response.status_code < 400:
+                logger.debug(f"HTTPS URL verified: {url}")
+                return url
+            else:
+                # Server responded but with error - still try fallback
+                logger.warning(
+                    f"HTTPS URL returned status {response.status_code}: {url}. "
+                    f"Attempting HTTP fallback."
+                )
+        except requests.exceptions.SSLError as e:
+            logger.warning(
+                f"HTTPS SSL error for {url}: {str(e)}. "
+                f"Attempting HTTP fallback."
+            )
+        except requests.exceptions.Timeout:
+            logger.warning(
+                f"HTTPS request timeout for {url}. "
+                f"Attempting HTTP fallback."
+            )
+        except requests.exceptions.ConnectionError as e:
+            logger.warning(
+                f"HTTPS connection error for {url}: {str(e)}. "
+                f"Attempting HTTP fallback."
+            )
+        except requests.exceptions.RequestException as e:
+            logger.warning(
+                f"HTTPS request failed for {url}: {str(e)}. "
+                f"Attempting HTTP fallback."
+            )
+
+        # Try HTTP fallback
+        http_url = url.replace("https://", "http://", 1)
+        try:
+            response = requests.head(
+                http_url,
+                timeout=REDIRECT_TIMEOUT,
+                allow_redirects=True,
+                verify=False
+            )
+            if 200 <= response.status_code < 400:
+                logger.info(f"HTTP fallback succeeded for {url}")
+                return http_url
+            else:
+                logger.warning(
+                    f"HTTP fallback also returned status {response.status_code}: {http_url}"
+                )
+                # Still return HTTP as it at least responded
+                return http_url
+        except requests.exceptions.RequestException as e:
+            logger.error(
+                f"Both HTTPS and HTTP failed for {url}. "
+                f"HTTPS error and HTTP error: {str(e)}"
+            )
+            # Return original URL and let redirect response handle it
+            # FastAPI will still redirect, but may fail on destination
+            logger.warning(f"Returning original URL despite verification failure: {url}")
+            return url
+
+    # For other schemes, return as-is
+    return url
 
 
 @router.get("/r/{short_code}")
@@ -133,9 +237,16 @@ def redirect_link(
     # 5. Create or update cookie
     cookie_duration = campaign_version.cookie_duration_days or DEFAULT_COOKIE_DAYS
     expires_at = datetime.utcnow() + timedelta(days=cookie_duration)
-    
+
+    # Resolve destination URL with HTTPS->HTTP fallback
+    try:
+        destination_url = resolve_redirect_url(link.full_url)
+    except ValueError as e:
+        logger.error(f"Invalid URL in link {short_code}: {link.full_url}")
+        raise HTTPException(status_code=500, detail="Invalid destination URL")
+
     # Prepare redirect response
-    response = RedirectResponse(url=link.full_url, status_code=302)
+    response = RedirectResponse(url=destination_url, status_code=302)
     
     if not cookie_obj:
         # Create new cookie

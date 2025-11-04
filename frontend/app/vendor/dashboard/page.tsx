@@ -5,6 +5,8 @@ import { TrendingUp, Users, MousePointerClick, DollarSign, Activity } from 'luci
 import Link from 'next/link';
 import { useVendorDashboard, useVendorCampaigns, useAvailablePartners } from '@/hooks/use-api';
 import { ErrorBoundary } from '@/components/loading-skeleton';
+import { InlineHint } from '@/components/onboarding-hint';
+import { useVendorOnboarding } from '@/hooks/use-vendor-onboarding';
 
 export default function VendorDashboard() {
   // Filter state - set default dates to last 7 days
@@ -296,6 +298,9 @@ export default function VendorDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* First-Time User Hint */}
+        <FirstTimeUserHint />
+
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
@@ -453,6 +458,21 @@ export default function VendorDashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+function FirstTimeUserHint() {
+  const { isFirstTimeUser } = useVendorOnboarding();
+
+  if (!isFirstTimeUser) return null;
+
+  return (
+    <InlineHint
+      title="Ready to Create Your First Campaign?"
+      description="Create your first marketing campaign to start earning from partners."
+      variant="info"
+      hintId="dashboard_first_campaign"
+    />
   );
 }
 

@@ -18,21 +18,15 @@ const VALIDITY_TYPES = {
     examples: ['Single purchase', 'One-time transaction'],
     icon: '🎯',
   },
-  days: {
-    name: 'Days',
-    description: 'Partner receives commission for a specific number of days after conversion.',
-    examples: ['7 days', '30 days', '90 days'],
-    icon: '📅',
-  },
-  months: {
-    name: 'Months',
-    description: 'Partner receives commission for a specific number of months after conversion.',
-    examples: ['1 month', '3 months', '12 months'],
+  monthly: {
+    name: 'Monthly',
+    description: 'Partner receives commission for a specified number of months after conversion.',
+    examples: ['2 months', '6 months', '12 months'],
     icon: '📆',
   },
-  years: {
-    name: 'Years',
-    description: 'Partner receives commission for a specific number of years after conversion.',
+  yearly: {
+    name: 'Yearly',
+    description: 'Partner receives commission for a specified number of years after conversion.',
     examples: ['1 year', '2 years', '5 years'],
     icon: '📊',
   },
@@ -132,7 +126,7 @@ export function ConversionValiditySelect({
           </div>
           {validityType !== 'lifetime' && validityType !== 'one_time' && (
             <div className="pt-2 border-t border-amber-200 text-xs text-amber-700 font-medium">
-              Currently: {validityValue} {validityType === 'days' ? 'day(s)' : validityType === 'months' ? 'month(s)' : 'year(s)'}
+              Currently: {validityValue} {validityType === 'monthly' ? 'month(s)' : 'year(s)'}
             </div>
           )}
           {validityType === 'one_time' && (
